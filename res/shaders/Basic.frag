@@ -11,6 +11,8 @@ uniform vec3 cam_pos;
 
 void main()
 {   
+
+
 	vec3 n = normalize(o_normal);
 	vec3 frag_pos = normalize(cam_pos - o_position);
 	

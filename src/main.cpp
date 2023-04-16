@@ -1,24 +1,22 @@
-/** 
- * Copyright (C) 2018 Tomasz Ga³aj
- **/
-
-// First-party includes
-#include "scene/Scene.h"
-
 
 #define ASSIMP_USE_HUNTER
+// First-party includes
+//#include "scene/Scene.h"
+#include "rendering/openGL.h"
 
-#include <iostream>
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
 
-#define  GLM_FORCE_RADIANS
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-
-#include "rendering/Shader.h"
-#include "rendering/Texture.h"
-#include "rendering/Model.h"
+//
+//#include <iostream>
+//#include <glad/glad.h>
+//#include <GLFW/glfw3.h>
+//
+//#define  GLM_FORCE_RADIANS
+//#include <glm/glm.hpp>
+//#include <glm/gtc/matrix_transform.hpp>
+//
+//#include "rendering/Shader.h"
+//#include "rendering/Texture.h"
+//#include "rendering/Model.h"
 
 GLFWwindow* window;
 const int WINDOW_WIDTH  = 1024;
@@ -80,6 +78,9 @@ int init()
         return -1;
     }
 
+
+
+
     /* Set the viewport */
     glClearColor(0.6784f, 0.8f, 1.0f, 1.0f);
     glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
@@ -97,9 +98,10 @@ int loadContent()
     shader = new Shader("Basic.vert", "Basic.frag");
     shader->apply();
 
-    shader->setUniformMatrix4fv("world",        world_matrix);
+    shader->setUniformMatrix4fv("world", world_matrix);
     shader->setUniformMatrix3fv("normalMatrix", glm::inverse(glm::transpose(glm::mat3(world_matrix))));
-    shader->setUniformMatrix4fv("viewProj",     projection_matrix * view_matrix);
+    shader->setUniformMatrix4fv("viewProj", projection_matrix * view_matrix);
+
 
     shader->setUniform3fv("cam_pos", cam_position);
 
@@ -151,8 +153,11 @@ void update()
 
 int main(void)
 {
+    openGL graphicalEngine;
+    //graphicalEngine.initialize();
 
     Scene scene;
+    //scene.initialize();
 
     if (!init())
         return -1;

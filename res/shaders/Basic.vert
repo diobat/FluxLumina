@@ -11,6 +11,8 @@ out vec2 o_texcoord;
 uniform mat4 world;
 uniform mat4 viewProj;
 uniform mat3 normalMatrix;
+
+//uniform mat4 MVP;
 	
 void main()
 {
@@ -19,4 +21,6 @@ void main()
     o_texcoord = texcoord.xy;
 	
     gl_Position = viewProj * world * vec4(position, 1.0f);
+
+	//gl_Position = MVP * vec4(position, 1.0f);
 }
