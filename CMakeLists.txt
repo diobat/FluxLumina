@@ -74,7 +74,7 @@ target_link_libraries(${PROJECT_NAME} ${LIBS})
 
 
 #set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-#source_group(TREE ${CMAKE_SOURCE_DIR} "" ${HEADER_FILES} ${SOURCE_FILES})
+source_group(TREE ${CMAKE_SOURCE_DIR} FILES ${HEADER_FILES} ${SOURCE_FILES})
 
 # Create virtual folders to make it look nicer in VS
 #if(MSVC_IDE)
