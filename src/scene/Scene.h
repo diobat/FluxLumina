@@ -18,11 +18,11 @@ public:
 
 	Scene();
 
-	void initialize();
+	int initialize();
 	void addModel(const Model& modelToAdd);
 	void removeMesh();
 
-	const std::vector<Model>& getAllModels();
+	std::vector<Model>& getAllModels();
 
 private:
 

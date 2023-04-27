@@ -8,11 +8,18 @@ Scene::Scene()
 
 }
 
-void Scene::initialize()
+int Scene::initialize()
 {
 
 	Model model("res/models/alliance.obj");
 	addModel(std::move(model));
+
+	Texture texture;
+	texture.load("res/models/alliance.png");
+	texture.bind();
+
+
+	return 1;
 }
 
 
@@ -26,7 +33,8 @@ void Scene::removeMesh()
 
 }
 
-const std::vector<Model>& Scene::getAllModels()
+std::vector<Model>& Scene::getAllModels()
 {
 	return _models;
 }
+

@@ -4,7 +4,9 @@ Camera::Camera() :
 	_position(0.0f, 0.0f, 0.0f),
 	_rotation(0.0f, 0.0f),
 	_nearPlane(1.0f),
-	_farPlane(1000.0f)
+	_farPlane(1000.0f),
+	_height(768),
+	_width(1024)
 {
 	// Model matrix is the identity
 	_modelM = glm::mat4(1.0f);
@@ -14,6 +16,7 @@ Camera::Camera() :
 
 	// Up Vector is always the same
 	_up = { 0.0f, 1.0f, 0.0f };
+
 }
 
 glm::mat4 Camera::recalculateMVP()
@@ -44,4 +47,13 @@ void Camera::updatePosition(const std::array<float, 3>& positionDelta)
 void Camera::updateRotation(const std::array<float, 2>& rotationDelta)
 {
 	//_rotation += rotationDelta;
+}
+
+
+void Camera::resizeCameraPlane(const float& width, const float& height)
+{
+	_width = width;
+	_height = height;
+
+	_projM = glm::perspective(_fov, _width / _height, _nearPlane, _farPlane);
 }

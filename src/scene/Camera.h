@@ -17,6 +17,9 @@ public:
 	void updatePosition(const std::array<float, 3>& positionDelta);
 	void updateRotation(const std::array<float, 2>& rotationDelta);
 
+	void resizeCameraPlane(const float& width, const float& height);
+
+
 private:
 
 	glm::vec3 _position, _direction;

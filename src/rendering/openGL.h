@@ -27,7 +27,9 @@ class openGL : public GraphicalEngine
 {
 public:
 
-	void initialize();
+	openGL();
+
+	int initialize();
 
 	void renderFrame();
 
@@ -35,6 +37,8 @@ public:
 
 
 private:
+
+	GLFWwindow* _window;
 
 	std::shared_ptr<Scene> _scene;
 	std::shared_ptr<Camera> _camera;
