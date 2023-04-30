@@ -19,6 +19,8 @@ int Scene::initialize()
 	texture.bind();
 
 
+
+
 	return 1;
 }
 
@@ -38,3 +40,7 @@ std::vector<Model>& Scene::getAllModels()
 	return _models;
 }
 
+std::vector<Texture>& Scene::getAllTextures()
+{
+	return _textures;
+}

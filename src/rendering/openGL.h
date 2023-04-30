@@ -6,8 +6,8 @@
 
 // GLFW incldues
 //#define ASSIMP_USE_HUNTER
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
+//#include <glad/glad.h>
+//#include <GLFW/glfw3.h>
 
 // GLM - Math is a gateway science
 #define  GLM_FORCE_RADIANS
@@ -27,21 +27,24 @@ class openGL : public GraphicalEngine
 {
 public:
 
-	openGL();
+	openGL(Scene& scene);
 
 	int initialize();
 
 	void renderFrame();
 
-	void resizeWindow(GLFWwindow* window, int width, int height);
+	//void resizeWindow(GLFWwindow* window, int width, int height);
 
 
 private:
 
-	GLFWwindow* _window;
+	//GLFWwindow* _window;
+	Scene& _scene;
+	//std::shared_ptr<Scene> _scene;
 
-	std::shared_ptr<Scene> _scene;
 	std::shared_ptr<Camera> _camera;
 	std::vector<Shader> _shaderPrograms;
+	std::vector<Texture> _textures;
+
 
 };
