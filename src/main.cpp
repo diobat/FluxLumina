@@ -161,6 +161,7 @@ int main(void)
 
 
     Scene scene;
+    scene.initialize();
     openGL graphics(scene);
 
     graphics.initialize();

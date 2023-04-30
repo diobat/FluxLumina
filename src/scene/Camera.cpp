@@ -1,10 +1,10 @@
 #include "Camera.h"
 
 Camera::Camera() :
-	_position(0.0f, 0.0f, 10.2f),
-	_rotation(0.0f, -3.14f),
+	_position(0.0f, 0.0f, 1.0f),
+	_rotation(glm::pi<float>()/2.0f, 0.0f),
 	_direction(0.0f, 0.0f, -1.0f),
-	_nearPlane(1.0f),
+	_nearPlane(0.1f),
 	_farPlane(1000.0f),
 	_height(768),
 	_width(1024),
@@ -27,7 +27,7 @@ glm::mat4 Camera::recalculateMVP()
 	_direction = glm::vec3{
 		std::cos(_rotation.x) * std::cos(_rotation.y),
 		std::sin(_rotation.y),
-		std::sin(_rotation.x) * std::cos(_rotation.x)
+		-std::sin(_rotation.x) * std::cos(_rotation.y)
 	};
 
 	_cameraRight = glm::normalize(glm::cross(_up, _direction));
@@ -37,8 +37,8 @@ glm::mat4 Camera::recalculateMVP()
 		_position + _direction,
 		_up
 	);
-
-	_MVP = _projM * _viewM *_modelM;
+	
+	_MVP = glm::transpose(_projM * _viewM *_modelM);
 	
 	return _MVP;
 }

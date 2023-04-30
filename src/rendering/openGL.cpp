@@ -78,10 +78,10 @@ void openGL::renderFrame()
 
     // Camera
     _shaderPrograms[0].setUniformMatrix4fv("MVP", _camera->recalculateMVP());
-    std::cout << "a" << std::endl;
 
     // Textures & Models
     _textures[0].bind();
+
     for (auto model : _scene.getAllModels())
     {
         model.Draw();
