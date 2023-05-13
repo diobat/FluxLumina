@@ -8,9 +8,20 @@
 #include <array>
 
 //Debug includes
-#define GLM_ENABLE_EXPERIMENTAL
-#include "glm/gtx/string_cast.hpp"
+//#define GLM_ENABLE_EXPERIMENTAL
+//#include "glm/gtx/string_cast.hpp"
 #include <iostream>
+
+enum class relativeDirections : unsigned int
+{
+	FORWARD,
+	BACKWARD,
+	LEFT,
+	RIGHT,
+	UP,
+	DOWN
+};
+
 
 class Camera
 {
@@ -24,6 +35,7 @@ public:
 
 	void resizeCameraPlane(const float& width, const float& height);
 
+	void move(relativeDirections d);
 
 private:
 
@@ -34,4 +46,6 @@ private:
 	glm::vec3 _cameraRight, _up;
 
 	float _fov, _width, _height, _nearPlane, _farPlane;
+
+	float _translationSpeed, _rotationSpeed;
 };

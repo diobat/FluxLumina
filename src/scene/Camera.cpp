@@ -8,7 +8,9 @@ Camera::Camera() :
 	_farPlane(1000.0f),
 	_height(768),
 	_width(1024),
-	_fov(90.0f)
+	_fov(90.0f),
+	_translationSpeed(0.20f),
+	_rotationSpeed(1.0f)
 {
 	// Model matrix is the identity
 	_modelM = glm::mat4(1.0f);
@@ -60,4 +62,35 @@ void Camera::resizeCameraPlane(const float& width, const float& height)
 	_height = height;
 
 	_projM = glm::perspective(_fov, _width / _height, _nearPlane, _farPlane);
+}
+
+void Camera::move(relativeDirections d)
+{
+
+	switch (d)
+	{
+		case relativeDirections::FORWARD:
+			_position += _direction * _translationSpeed;
+			break;
+		case relativeDirections::BACKWARD:
+			_position -= _direction * _translationSpeed;
+			break;
+		case relativeDirections::LEFT: 
+			_position -= +_cameraRight * _translationSpeed;
+			break;
+		case relativeDirections::RIGHT:
+			_position += +_cameraRight * _translationSpeed;
+			break;
+		case relativeDirections::UP:
+			_position += _up * _translationSpeed;
+			break;
+		case relativeDirections::DOWN:
+			_position -= _up * _translationSpeed;
+			break;
+
+		default:
+			break;
+
+	}
+
 }
