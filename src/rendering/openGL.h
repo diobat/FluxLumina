@@ -14,8 +14,7 @@
 // First party includes
 #include "rendering/GraphicalEngine.h"
 #include "rendering/Shader.h"
-#include "scene/Scene.h"
-#include "user_input/glfwKeyboardScanner.h"
+#include "user_input/glfwUserInputScanner.h"
 
 class openGL : public GraphicalEngine
 {

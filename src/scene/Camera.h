@@ -3,6 +3,7 @@
 // Don't to math, kids
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 // STD includes
 #include <array>
@@ -36,6 +37,7 @@ public:
 	void resizeCameraPlane(const float& width, const float& height);
 
 	void move(relativeDirections d);
+	void rotate(const std::array<float, 2>& angleDelta);
 
 private:
 

@@ -25,8 +25,8 @@ GLFWwindow* openGL::getWindowPtr()
 int openGL::initialize()
 {
 
-    int WINDOW_WIDTH = 1024;
-    int WINDOW_HEIGHT = 768;
+    int WINDOW_WIDTH = 2048;
+    int WINDOW_HEIGHT = 1536;
 
     /* Initialize the library */
     if (!glfwInit())
@@ -77,8 +77,7 @@ int openGL::initialize()
     // End window resize code
 
 
-    // User Input handler
-    _userInput = std::make_shared<UserInput::glfwKeyboardScanner>(_window);
+
 
     // Select shader program to use
     Shader shader("Basic.vert", "Basic.frag");

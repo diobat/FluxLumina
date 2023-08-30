@@ -2,31 +2,30 @@
 
 // STD library includes
 #include <memory>
+#include <map>
 
 // GLFW incldues
 #include "rendering/GLFW_Wrapper.h"
 
 // First-party includes
 #include "scene/Scene.h"
-
-
+#include "util/tickHandler.h"
 
 namespace UserInput
 {
 
-	class glfwKeyboardScanner
+	class glfwKeyboardScanner : public Utils::Ticker::Handler
 	{
 	public:
 		glfwKeyboardScanner(GLFWwindow* window);
-
-		//void bindToInput();
+		void tickCallback();
 		void bindToScene(std::shared_ptr<Scene> scene);
-		//void callback(int key, int scancode, int action, int mods);
+		void readInputs();
 
 	private:
 		GLFWwindow* _window;
+		std::shared_ptr<Scene> _scene;
 	};
-
 }
 
 
