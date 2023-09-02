@@ -1,18 +1,26 @@
 #include "Scene.h"
 
 
-Scene::Scene()
+Scene::Scene():
+	activeCameraID(0)
 {
-
-
 
 }
 
-void Scene::initialize()
+int Scene::initialize()
 {
-
+	// Import Model
 	Model model("res/models/alliance.obj");
 	addModel(std::move(model));
+
+	// Import texture
+	Texture texture;
+	texture.load("res/models/alliance.png");
+	texture.bind();
+
+	// Add camera
+	_cameras.push_back(Camera());
+	return 1;
 }
 
 
@@ -26,7 +34,22 @@ void Scene::removeMesh()
 
 }
 
-const std::vector<Model>& Scene::getAllModels()
+std::vector<Model>& Scene::getAllModels()
 {
 	return _models;
+}
+
+std::vector<Texture>& Scene::getAllTextures()
+{
+	return _textures;
+}
+
+std::vector<Camera>& Scene::getAllCameras()
+{
+	return _cameras;
+}
+
+Camera& Scene::getActiveCamera()
+{
+	return _cameras[activeCameraID];
 }

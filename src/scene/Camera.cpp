@@ -21,25 +21,28 @@ Camera::Camera() :
 
 	// Up Vector is always the same
 	_up = { 0.0f, 1.0f, 0.0f };
+
 }
 
 glm::mat4 Camera::recalculateMVP()
 {
-	_direction = {
-		cos(_rotation[0]) * cos(_rotation[1]),
-		sin(_rotation[1]),
-		sin(_rotation[0]) * cos(_rotation[1])
+
+	_direction = glm::vec3{
+		std::cos(_rotation.x) * std::cos(_rotation.y),
+		std::sin(_rotation.y),
+		-std::sin(_rotation.x) * std::cos(_rotation.y)
 	};
 
-	_cameraRight = glm::normalize(glm::cross(_up, _direction));
+	_cameraRight = glm::normalize(glm::cross(_direction, _up));
 
 	_viewM = glm::lookAt(
 		_position,
 		_position + _direction,
 		_up
 	);
-
-	_MVP = _modelM * _viewM * _projM;
+	
+	_MVP = (_projM * _viewM *_modelM);
+	
 	return _MVP;
 }
 

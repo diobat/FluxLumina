@@ -2,8 +2,6 @@
 
 layout(location = 0) out vec4 fragColor;
 
-layout(binding = 0) uniform sampler2D tex_sampler;
-uniform vec3 cam_pos;
 
 
 
