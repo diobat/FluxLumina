@@ -1,22 +1,30 @@
 #include "user_input/glfwUserInputScanner.h"
 
-
-
 //Because openGL runs in C code it has no idea what classes and this-> are.
 //Its much more convoluted to implement callbacks as non-member functions but 
-//I have little choice. The alternative is a mess
+//I have little choice. 
 namespace UserInput
 {
+	bool debugMode = false;
+
 	GLFWwindow* renderWindow;
 	std::shared_ptr<Scene> boundScene;
 	std::map<int, bool> keyMap;
 	bool captureMouse = true;
+
+	std::array<double, 2> lastMousePos = {0.0, 0.0};
 
 	void resetCursorPos()
 	{
 		int width, height;
 		glfwGetWindowSize(renderWindow, &width, &height);
 		glfwSetCursorPos(renderWindow, width / 2, height / 2);
+		glfwSetCursorPos(renderWindow, lastMousePos[0], lastMousePos[1]);
+	}
+
+	void setLastMousePosToCurrent()
+	{
+		glfwGetCursorPos(renderWindow, &lastMousePos[0], &lastMousePos[1]);
 	}
 
 	void toggleMouseMode()
@@ -26,8 +34,8 @@ namespace UserInput
 
 		if (captureMouse)
 		{
-			resetCursorPos();
 			glfwSetInputMode(renderWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+			setLastMousePosToCurrent();
 		}
 		else
 		{
@@ -48,14 +56,25 @@ namespace UserInput
 
 	void mouseCallback(GLFWwindow* window, double xpos, double ypos)
 	{
-		if (!captureMouse)
+		if (!captureMouse)	// We only capture input if the setting in toggled
 		{
 			return;
 		}
-		std::cout << "Horizontal: " << xpos << std::endl;
-		std::cout << "Vertical: " << ypos << std::endl;
+
+		float xPos_delta = xpos - lastMousePos[0];
+		float yPos_delta = ypos - lastMousePos[1];
+
+		if(debugMode)
+		{
+			std::cout << "Horizontal: " << xPos_delta << std::endl;
+			std::cout << "Vertical: " << yPos_delta << std::endl;
+		}
+
+		// Get and update the camera
 		Camera& cam = boundScene->getActiveCamera();
-		cam.updateRotation(std::array<float, 2>{static_cast<float>(xpos), static_cast<float>(ypos)});
+		cam.addRotationDelta(std::array<float, 2>{static_cast<float>(xPos_delta), static_cast<float>(yPos_delta)});
+
+		lastMousePos = {xpos, ypos};
 	}
 }
 
@@ -71,6 +90,7 @@ glfwKeyboardScanner::glfwKeyboardScanner(GLFWwindow* window) :
 	// Mouse callbacks
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glfwSetCursorPosCallback(window, mouseCallback);
+	resetCursorPos();
 }
 
 void glfwKeyboardScanner::tickCallback()
@@ -118,38 +138,3 @@ void glfwKeyboardScanner::readInputs()
 
 	}
 }
-
-
-//void glfwKeyboardScanner::updateCamera()
-//{
-//	Camera& cam = boundScene->getActiveCamera();
-//	for (std::pair<const int, bool>& pair : keyMap)
-//	{
-//		if (pair.second)
-//		{
-//			switch (pair.first)
-//			{
-//			case GLFW_KEY_W:
-//				cam.move(relativeDirections::FORWARD);
-//				break;
-//			case GLFW_KEY_A:
-//				cam.move(relativeDirections::LEFT);
-//				break;
-//			case GLFW_KEY_S:
-//				cam.move(relativeDirections::BACKWARD);
-//				break;
-//			case GLFW_KEY_D:
-//				cam.move(relativeDirections::RIGHT);
-//				break;
-//			case GLFW_KEY_Q:
-//				cam.move(relativeDirections::UP);
-//				break;
-//			case GLFW_KEY_E:
-//				cam.move(relativeDirections::DOWN);
-//				break;
-//
-//				break;
-//			}
-//		}
-//	}
-//}

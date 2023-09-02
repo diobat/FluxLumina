@@ -31,8 +31,9 @@ public:
 
 	glm::mat4 recalculateMVP();
 
-	void updatePosition(const std::array<float, 3>& positionDelta);
-	void updateRotation(const std::array<float, 2>& rotationDelta);
+	void setPosition(const std::array<float, 3>& position);
+	void setRotation(const std::array<float, 2>& rotation);
+	void addRotationDelta(const std::array<float, 2>& rotationDelta);
 
 	void resizeCameraPlane(const float& width, const float& height);
 
@@ -43,12 +44,17 @@ private:
 	bool _debugMode;
 
 	glm::vec3 _position, _direction;
-	glm::vec2 _rotation;	// {Horizontal, Vertical}
+
+	glm::vec2 _rotation;	// {Horizontal, Vertical} in radians
+	glm::vec2 _rotation_safety_bars;
+	void truncateRotation();
 
 	glm::mat4 _MVP, _modelM, _viewM, _projM;
-	glm::vec3 _cameraRight, _up;
+	glm::vec3 _cameraRight, _cameraUp, _up;
 
-	float _fov, _width, _height, _nearPlane, _farPlane;
+	float _fov;
+	float _width, _height;
+	float _nearPlane, _farPlane;
 
 	float _translationSpeed, _rotationSpeed;
 };

@@ -1,9 +1,9 @@
 #include "Camera.h"
 
-Camera::Camera() :
-	_debugMode(false),
+Camera::Camera() : 
+	_debugMode(true),
 	_position(0.0f, 0.0f, 1.0f),
-	_rotation(glm::pi<float>()/2.0f, 0.0f),
+	_rotation(glm::pi<float>() / 2.0f, 0.0f),
 	_direction(0.0f, 0.0f, -1.0f),
 	_nearPlane(0.1f),
 	_farPlane(1000.0f),
@@ -11,7 +11,8 @@ Camera::Camera() :
 	_width(1024),
 	_fov(70.0f),
 	_translationSpeed(0.20f),
-	_rotationSpeed(0.001f)
+	_rotationSpeed(0.001f),
+	_rotation_safety_bars(-glm::pi<float>() / 2.2f, glm::pi<float>() / 2.2f)
 {
 	// Model matrix is the identity
 	_modelM = glm::mat4(1.0f);
@@ -34,6 +35,7 @@ glm::mat4 Camera::recalculateMVP()
 	};
 
 	_cameraRight = glm::normalize(glm::cross(_direction, _up));
+	_cameraUp = glm::normalize (glm::cross(_cameraRight, _direction));
 
 	_viewM = glm::lookAt(
 		_position,
@@ -46,15 +48,15 @@ glm::mat4 Camera::recalculateMVP()
 	return _MVP;
 }
 
-void Camera::updatePosition(const std::array<float, 3>& positionDelta)
+void Camera::setPosition(const std::array<float, 3>& position)
 {
-	//_position += positionDelta;
+	_position = glm::vec3(position[0], position[1], position[2]);
 }
 
-void Camera::updateRotation(const std::array<float, 2>& rotationDelta)
+void Camera::setRotation(const std::array<float, 2>& rotation)
 {
 
-	std::array<float, 2> rotation_adjusted_for_speed{ std::remainderf((-rotationDelta[0] * _rotationSpeed), glm::two_pi<float>()) , std::remainder((-rotationDelta[1] * _rotationSpeed), glm::two_pi<float>()) };
+	std::array<float, 2> rotation_adjusted_for_speed{ std::remainderf((-rotation[0] * _rotationSpeed), glm::two_pi<float>()) , std::remainder((-rotation[1] * _rotationSpeed), glm::two_pi<float>()) };
 
 	if(_debugMode)
 	{
@@ -62,7 +64,19 @@ void Camera::updateRotation(const std::array<float, 2>& rotationDelta)
 	}
 
 	_rotation = glm::make_vec2(rotation_adjusted_for_speed.data());
+}
 
+void Camera::addRotationDelta(const std::array<float, 2>& rotationDelta)
+{
+	glm::vec2 speed_adjusted_rotation = {-rotationDelta[0] * _rotationSpeed, -rotationDelta[1] * _rotationSpeed};
+	_rotation += speed_adjusted_rotation;
+
+	if(_debugMode)
+	{
+		std::cout << "Horizontal: " << _rotation[0] << "    Vertical: " << _rotation[1] << std::endl;
+	}
+
+	truncateRotation();
 }
 
 void Camera::resizeCameraPlane(const float& width, const float& height)
@@ -91,10 +105,10 @@ void Camera::move(relativeDirections d)
 			_position += +_cameraRight * _translationSpeed;
 			break;
 		case relativeDirections::UP:
-			_position += _up * _translationSpeed;
+			_position += _cameraUp * _translationSpeed;
 			break;
 		case relativeDirections::DOWN:
-			_position -= _up * _translationSpeed;
+			_position -= _cameraUp * _translationSpeed;
 			break;
 
 		default:
@@ -107,4 +121,12 @@ void Camera::move(relativeDirections d)
 void Camera::rotate(const std::array<float, 2>& angleDelta)
 {
 	_rotation += glm::make_vec2(angleDelta.data());
+}
+
+
+void Camera::truncateRotation()
+{
+	// We only really care about truncating the Vertical Rotation
+	_rotation[1] = std::max(_rotation[1], _rotation_safety_bars[0]);
+	_rotation[1] = std::min(_rotation[1], _rotation_safety_bars[1]);
 }
