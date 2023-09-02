@@ -18,6 +18,7 @@ public:
 	void updateRotation(const std::array<float, 2>& rotationDelta);
 
 private:
+	bool _debugMode;
 
 	glm::vec3 _position, _direction;
 	glm::vec2 _rotation;	// {Horizontal, Vertical}
