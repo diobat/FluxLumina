@@ -44,6 +44,9 @@ namespace UserInput
 		{
 			toggleMouseMode();
 		}
+
+		if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+			glfwSetWindowShouldClose(window, GL_TRUE);
 	}
 
 	void mouseCallback(GLFWwindow* window, double xpos, double ypos)
