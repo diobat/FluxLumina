@@ -4,7 +4,7 @@
 #include <memory>
 #include <map>
 
-// GLFW incldues
+// GLFW includes
 #include "rendering/GLFW_Wrapper.h"
 
 // First-party includes

@@ -76,9 +76,6 @@ int openGL::initialize()
     glfwSetWindowSizeCallback(_window, func);
     // End window resize code
 
-
-
-
     // Select shader program to use
     Shader shader("Basic.vert", "Basic.frag");
     _shaderPrograms.push_back(shader);
@@ -99,19 +96,16 @@ void openGL::renderFrame()
     // Shader
     _shaderPrograms[0].apply();
 
-
     // Camera
-    _shaderPrograms[0].setUniformMatrix4fv("MVP", _scene->getActiveCamera().recalculateMVP());
+    _shaderPrograms[0].setUniformMatrix4fv("MVP", _scene->getActiveCamera()->recalculateMVP());
 
     // Textures & Models
     _textures[0].bind();
 
     for (auto model : _scene->getAllModels())
     {
-        model.Draw();
+        model->getModel()->Draw();
     }
-
-
 
 }
 
@@ -123,4 +117,30 @@ void openGL::resizeWindow(GLFWwindow* window, int width, int height)
     {
         _camera->resizeCameraPlane(width, height);
     }
+}
+
+// void openGL::callback(E_EventType event, std::any *object)
+// {
+
+//     switch(event)
+//     {
+//         case ModelAdded:
+
+//         break;
+//         case ModelRemoved:
+
+//         break;
+//     }
+
+// }
+
+void openGL::registerObject(SceneObject &object)
+{
+
+
+}
+
+void openGL::unregisterObject(SceneObject &object)
+{
+
 }

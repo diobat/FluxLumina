@@ -2,36 +2,38 @@
 
 //	STD includes
 #include <vector>
+#include <memory>
 
 //	First Party includes
-#include "Camera.h"
-// #include "rendering/texture.h"
-// #include "rendering/model.h"
+#include "scene\Camera.h"
+#include "scene\ModelObject.h"
+#include "scene\LightSource.h"
+#include "util\listenerPattern.h"
 
-#include "sceneObject.h"
-
-class Scene
+class Scene// : public I_Publisher
 {
 public:
 
 	Scene();
 
 	int initialize();
-	void addModel(const Model& modelToAdd);
+	void addModel(std::shared_ptr<ModelObject> modelToAdd);
 	void removeMesh();
 
-	std::vector<Model>& getAllModels();
-	std::vector<Texture>& getAllTextures();
-	std::vector<Camera>& getAllCameras();
-	Camera& getActiveCamera();
+	std::vector<std::shared_ptr<Camera>> &getAllCameras();
+	std::vector<std::shared_ptr<ModelObject>> &getAllModels();
+
+	std::shared_ptr<Camera> &getActiveCamera();
+
+	// void BindListener(I_Listener *listener);
+	// void UnbindListener(I_Listener *listener);
+	// void notify(E_EventType event = E_EventType::NoEvent, std::any *object = nullptr);
 
 private:
 
 	unsigned int activeCameraID;
 	
-	std::vector<SceneObject> _objects;
-
-	std::vector<Camera> _cameras;
-	std::vector<Model> _models;		// should be a member of SceneObject
-	std::vector<Texture> _textures; // should be a member of SceneObject
+	std::vector<std::shared_ptr<Camera>> _cameras;
+	std::vector<std::shared_ptr<ModelObject>> _models;
+	std::vector<std::shared_ptr<LightSource>> _lights;
 };

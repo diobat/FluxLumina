@@ -9,22 +9,23 @@ Scene::Scene():
 
 int Scene::initialize()
 {
-	// Import Model
-	Model model("res/models/alliance.obj");
-	addModel(std::move(model));
 
-	// Import texture
-	Texture texture;
-	texture.load("res/models/alliance.png");
-	texture.bind();
+
+	// Import Model
+
+	std::string model = "res/models/alliance.obj";
+	std::string texture = "res/models/alliance.png";
+	std::shared_ptr<ModelObject> model_object = std::make_shared<ModelObject>(model, texture);
+	model_object->setCoordinates({5.0f, 5.0f, 0.0f});
+	//addModel(std::move(model_object));
+	addModel(std::make_shared<ModelObject>(model, texture));
 
 	// Add camera
-	_cameras.push_back(Camera());
+	_cameras.push_back(std::make_shared<Camera>());
 	return 1;
 }
 
-
-void Scene::addModel(const Model& modelToAdd)
+void Scene::addModel(std::shared_ptr<ModelObject> modelToAdd)
 {
 	_models.push_back(modelToAdd);
 }
@@ -34,22 +35,35 @@ void Scene::removeMesh()
 
 }
 
-std::vector<Model>& Scene::getAllModels()
+std::vector<std::shared_ptr<ModelObject>> &Scene::getAllModels()
 {
 	return _models;
 }
 
-std::vector<Texture>& Scene::getAllTextures()
-{
-	return _textures;
-}
-
-std::vector<Camera>& Scene::getAllCameras()
+std::vector<std::shared_ptr<Camera>> &Scene::getAllCameras()
 {
 	return _cameras;
 }
 
-Camera& Scene::getActiveCamera()
+std::shared_ptr<Camera> &Scene::getActiveCamera()
 {
 	return _cameras[activeCameraID];
 }
+
+// void Scene::BindListener(I_Listener* listener)
+// {
+// 	_boundListeners.push_back(listener);
+// }
+
+// void Scene::UnbindListener(I_Listener *listener)
+// {
+// 	remove(_boundListeners.begin(), _boundListeners.end(), listener);
+// }
+
+// void Scene::notify(E_EventType event, std::any* object)
+// {
+// 	for (auto listener : _boundListeners)
+// 	{
+// 		listener->callback(event, object);
+// 	}
+// }
