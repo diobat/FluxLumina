@@ -1,14 +1,12 @@
-#include "sceneObject.h"
+#include "scene/SceneObject.h"
 
-
-void SceneObject::setModel(const std::string& modelPath)
+void SceneObject::setCoordinates(const std::array<float, 3>& coords)
 {
-    _model = std::make_unique<Model>(modelPath);
+    _coordinates = coords;
 }
 
-void SceneObject::setTexture(const std::string& texturePath)
+std::array<float, 3>& SceneObject::getCoordinates()
 {
-    Texture newTexture;
-    newTexture.load(texturePath);
-    _texture = std::make_unique<Texture>(newTexture);
+    return _coordinates;
 }
+

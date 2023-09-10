@@ -71,7 +71,7 @@ namespace UserInput
 		}
 
 		// Get and update the camera
-		Camera& cam = boundScene->getActiveCamera();
+		Camera& cam = *boundScene->getActiveCamera();
 		cam.addRotationDelta(std::array<float, 2>{static_cast<float>(xPos_delta), static_cast<float>(yPos_delta)});
 
 		lastMousePos = {xpos, ypos};
@@ -109,26 +109,26 @@ void glfwKeyboardScanner::readInputs()
 	{
 		if (key.second != GLFW_RELEASE)
 		{
-			Camera& cam = boundScene->getActiveCamera();
+			std::shared_ptr<Camera>& cam = boundScene->getActiveCamera();
 			switch (key.first)
 			{ 
 				case GLFW_KEY_W:
-					cam.move(relativeDirections::FORWARD);
+					cam->move(relativeDirections::FORWARD);
 					break;
 				case GLFW_KEY_A:
-					cam.move(relativeDirections::LEFT);
+					cam->move(relativeDirections::LEFT);
 					break;
 				case GLFW_KEY_S:
-					cam.move(relativeDirections::BACKWARD);
+					cam->move(relativeDirections::BACKWARD);
 					break;
 				case GLFW_KEY_D:
-					cam.move(relativeDirections::RIGHT);
+					cam->move(relativeDirections::RIGHT);
 					break;
 				case GLFW_KEY_Q:
-					cam.move(relativeDirections::UP);
+					cam->move(relativeDirections::UP);
 					break;
 				case GLFW_KEY_E:
-					cam.move(relativeDirections::DOWN);
+					cam->move(relativeDirections::DOWN);
 					break;
 			}
 

@@ -14,9 +14,11 @@
 // First party includes
 #include "rendering/GraphicalEngine.h"
 #include "rendering/Shader.h"
+#include "rendering/texture.h"
 #include "user_input/glfwUserInputScanner.h"
+#include "util\listenerPattern.h"
 
-class openGL : public GraphicalEngine
+class openGL : public GraphicalEngine//, public I_Listener
 {
 public:
 
@@ -26,14 +28,21 @@ public:
 	int initialize();
 
 	void bindScene(std::shared_ptr<Scene> scene);
-
 	void renderFrame();
-
 	void resizeWindow(GLFWwindow* window, int width, int height);
 
 	GLFWwindow* getWindowPtr();
 
+	// Listener overrides
+	// void callback(E_EventType event = E_EventType::NoEvent, std::any *object = nullptr);
+
+	// GraphicalEngine overrides
+	void registerObject(SceneObject &object);
+	void unregisterObject(SceneObject &object);
+
 private:
+	void drawSingleModel();
+
 
 	GLFWwindow* _window;
 	std::shared_ptr<Scene> _scene;

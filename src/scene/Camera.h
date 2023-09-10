@@ -9,9 +9,10 @@
 #include <array>
 
 //Debug includes
-//#define GLM_ENABLE_EXPERIMENTAL
-//#include "glm/gtx/string_cast.hpp"
 #include <iostream>
+
+// First-party includes
+#include <scene/sceneObject.h>
 
 enum class relativeDirections : unsigned int
 {
@@ -23,8 +24,7 @@ enum class relativeDirections : unsigned int
 	DOWN
 };
 
-
-class Camera
+class Camera : public SceneObject
 {
 public:
 	Camera();
