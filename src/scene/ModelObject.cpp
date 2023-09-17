@@ -1,36 +1,28 @@
 #include "ModelObject.h"
 
-ModelObject::ModelObject(const char *modelPath, const char *texturePath)
+
+ModelObject::ModelObject()  :
+    _model(std::make_shared<Model>())
 {
-    std::string model = modelPath;
-    std::string texture = texturePath;
-    ModelObject(model, texture);
+
 }
 
-ModelObject::ModelObject(std::string modelPath, std::string texturePath)
+void ModelObject::setModel(const std::shared_ptr<Model> &model)
 {
-    _model = std::make_unique<Model>(modelPath);
-
-    Texture newTexture;
-    newTexture.load(texturePath);
-    _texture = std::make_unique<Texture>(std::move(newTexture));
+    _model = model;
 }
 
-
-
-void ModelObject::setModel(const std::string &modelPath)
+void ModelObject::setTexture(const std::shared_ptr<Texture> &texture)
 {
-    _model = std::make_unique<Model>(modelPath);
+    _texture = texture;
 }
 
-void ModelObject::setTexture(const std::string &texturePath)
-{
-    Texture newTexture;
-    newTexture.load(texturePath);
-    _texture = std::make_unique<Texture>(newTexture);
-}
-
-std::unique_ptr<Model>& ModelObject::getModel()
+std::shared_ptr<Model> ModelObject::getModel()
 {
     return _model;
+}
+
+std::shared_ptr<Texture> ModelObject::getTexture()
+{
+    return _texture;
 }

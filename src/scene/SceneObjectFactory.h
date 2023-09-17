@@ -9,7 +9,12 @@
 #include "scene/LightSource.h"
 
 
-
+//Third-party includes
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
 
 /*
     This is the class that manages the proper creation and release of resources for rendered objects
@@ -19,12 +24,18 @@
 class SceneObjectFactory
 {
 public:
+    SceneObjectFactory(Scene* scene = nullptr, GraphicalEngine* engine = nullptr);
 
     void bindScene(Scene* scene);
     void bindEngine(GraphicalEngine* engine);
     //void create(SCENE_OBJECT object);
 
-    void create_Model(const std::string& model, const std::string& texture);
+    ModelObject &create_Model(const std::string &modelPath, const std::string &texturePath = "");
+    void load_Model(Model& model, std::string const &path);
+    void processNode(Model& model, aiNode* node, const aiScene* scene);
+    Mesh processMesh(Model& model, aiMesh* mesh, const aiScene* scene);
+    
+
     void create_LightSource();
     void create_Camera();
 

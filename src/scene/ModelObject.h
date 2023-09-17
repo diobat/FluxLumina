@@ -12,15 +12,14 @@ class ModelObject : public SceneObject
 {
 public:
 
-    ModelObject(const char *modelPath, const char * texturePath);
-    ModelObject(std::string modelPath, std::string texturePath);
+    ModelObject();
 
-    void setModel(const std::string& modelPath);
-    void setTexture(const std::string& texturePath);
-
-    std::unique_ptr<Model>& getModel();
+    void setModel(const std::shared_ptr<Model> &model);
+    std::shared_ptr<Model> getModel();
+    void setTexture(const std::shared_ptr<Texture> &texture);
+    std::shared_ptr<Texture> getTexture();
 
 private:
-    std::unique_ptr<Model> _model;
-    std::unique_ptr<Texture> _texture;
+    std::shared_ptr<Model> _model;
+    std::shared_ptr<Texture> _texture;
 };

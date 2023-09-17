@@ -6,7 +6,7 @@ class SceneObject
 {
 public:
 
-    void setCoordinates(const std::array<float, 3>& coords);
+    void setPosition(const std::array<float, 3>& coords);
     std::array<float, 3>& getCoordinates();
 
     void kill();

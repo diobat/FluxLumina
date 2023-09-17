@@ -3,7 +3,7 @@
 // First-party includes
 #include "rendering/GLFW_Wrapper.h"
 #include "rendering/openGL.h"
-#include "util/tickHandlerManager.h"
+#include "scene/SceneObjectFactory.h"
 #include "util/tickHandler.h"
 
 #include <memory>
@@ -38,14 +38,23 @@ void update(openGL& graphicalEngine, std::shared_ptr<UserInput::glfwKeyboardScan
 
 int main(void)
 {
-    
-    openGL graphicalEngine;
-    graphicalEngine.initialize();
-
     // Scene initialization
     std::shared_ptr<Scene> scene = std::make_shared<Scene>();
-    scene->initialize();
+
+    openGL graphicalEngine;
+    graphicalEngine.initialize();
     graphicalEngine.bindScene(scene);
+
+    // Init object factory
+    SceneObjectFactory factory;
+    factory.bindScene(&(*scene));
+    factory.bindEngine(&graphicalEngine);
+    factory.create_Model("res/models/origin_cube.obj");
+    ModelObject &statue = factory.create_Model("res/models/alliance.obj", "res/models/alliance.png");
+    statue.setPosition({0.0f, 0.0f, -5.0f});
+
+
+    factory.create_Camera();
 
     // User Input handler
     std::shared_ptr<UserInput::glfwKeyboardScanner> userInput = std::make_shared<UserInput::glfwKeyboardScanner>(graphicalEngine.getWindowPtr());

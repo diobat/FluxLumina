@@ -5,7 +5,6 @@ openGL::openGL()
 
 }
 
-
 openGL::~openGL()
 {
     glfwTerminate();
@@ -104,10 +103,13 @@ void openGL::renderFrame()
 
     for (auto model : _scene->getAllModels())
     {
-        model->getModel()->Draw();
+        for (auto meshes : model->getModel()->meshes )
+        {
+            renderMesh(meshes);
+        }
     }
-
 }
+
 
 void openGL::resizeWindow(GLFWwindow* window, int width, int height)
 {
@@ -119,28 +121,41 @@ void openGL::resizeWindow(GLFWwindow* window, int width, int height)
     }
 }
 
-// void openGL::callback(E_EventType event, std::any *object)
-// {
-
-//     switch(event)
-//     {
-//         case ModelAdded:
-
-//         break;
-//         case ModelRemoved:
-
-//         break;
-//     }
-
-// }
-
-void openGL::registerObject(SceneObject &object)
+void openGL::initializeMesh(Mesh& mesh)
 {
+    // create buffers/arrays
+    glGenVertexArrays(1, &mesh.VAO);
+    glGenBuffers(1, &mesh.VBO);
+    glGenBuffers(1, &mesh.EBO);
 
+    glBindVertexArray(mesh.VAO);
+    // load data into vertex buffers
+    glBindBuffer(GL_ARRAY_BUFFER, mesh.VBO);
+    // A great thing about structs is that their memory layout is sequential for all its items.
+    // The effect is that we can simply pass a pointer to the struct and it translates perfectly to a glm::vec3/2 array which
+    // again translates to 3/2 floats which translates to a byte array.
+    glBufferData(GL_ARRAY_BUFFER, mesh.vertices.size() * sizeof(Vertex), &mesh.vertices[0], GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh.indices.size() * sizeof(unsigned int), &mesh.indices[0], GL_STATIC_DRAW);
 
+    // set the vertex attribute pointers
+    // vertex Positions
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)0);
+    // vertex normals
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, Normal));
+    // vertex texture coords
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, TexCoords));
+
+    glBindVertexArray(0);
 }
 
-void openGL::unregisterObject(SceneObject &object)
+void openGL::renderMesh(Mesh& mesh)
 {
-
+    // draw mesh
+    glBindVertexArray(mesh.VAO);
+    glDrawElements(GL_TRIANGLES, mesh.indices.size(), GL_UNSIGNED_INT, 0);
+    glBindVertexArray(0);
 }

@@ -1,7 +1,7 @@
 #include "Camera.h"
 
 Camera::Camera() : 
-	_debugMode(true),
+	_debugMode(false),
 	_position(0.0f, 0.0f, 1.0f),
 	_rotation(glm::pi<float>() / 2.0f, 0.0f),
 	_direction(0.0f, 0.0f, -1.0f),

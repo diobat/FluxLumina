@@ -1,15 +1,14 @@
 #pragma once
 
 #include "scene\SceneObject.h"
+#include "rendering\mesh.h"
 
 class GraphicalEngine
 {
 public:
 	GraphicalEngine();
-
-	virtual void registerObject(SceneObject& object) = 0;
-	virtual void unregisterObject(SceneObject& object) = 0;
-
+	
+	virtual void initializeMesh(Mesh &mesh) = 0;
 };
 
 
