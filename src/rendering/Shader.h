@@ -1,5 +1,5 @@
 /** 
- * Copyright (C) 2018 Tomasz Ga³aj
+ * Copyright (C) 2018 Tomasz Gaï¿½aj
  **/
 
 #pragma once

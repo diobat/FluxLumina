@@ -3,8 +3,6 @@
 layout(location = 0) out vec4 fragColor;
 
 
-uniform mat4 transform;
-
 void main()
 {   
 	float ambientWeight = 1.0;

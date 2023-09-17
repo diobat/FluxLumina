@@ -4,11 +4,8 @@
 #include "rendering/GLFW_Wrapper.h"
 #include "rendering/openGL.h"
 #include "scene/SceneObjectFactory.h"
-#include "util/tickHandler.h"
 
 #include <memory>
-
-
 
 void update(openGL& graphicalEngine, std::shared_ptr<UserInput::glfwKeyboardScanner>& userInput)
 {
@@ -46,15 +43,15 @@ int main(void)
     graphicalEngine.bindScene(scene);
 
     // Init object factory
-    SceneObjectFactory factory;
-    factory.bindScene(&(*scene));
-    factory.bindEngine(&graphicalEngine);
-    factory.create_Model("res/models/origin_cube.obj");
+    SceneObjectFactory factory(&(*scene), &graphicalEngine);
+
+    factory.create_Camera();
+
     ModelObject &statue = factory.create_Model("res/models/alliance.obj", "res/models/alliance.png");
     statue.setPosition({0.0f, 0.0f, -5.0f});
 
 
-    factory.create_Camera();
+
 
     // User Input handler
     std::shared_ptr<UserInput::glfwKeyboardScanner> userInput = std::make_shared<UserInput::glfwKeyboardScanner>(graphicalEngine.getWindowPtr());

@@ -7,7 +7,8 @@ SceneObjectFactory::SceneObjectFactory(Scene* scene, GraphicalEngine* engine)
 
     if(scene != nullptr)
     {
-        create_Model("res/models/origin_cube.obj");
+        ModelObject& cube = create_Model("res/models/origin_cube.obj");
+        cube.setScale(0.3f);
     }
 }
 

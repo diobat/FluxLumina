@@ -9,12 +9,11 @@
 
 // First-party includes
 #include "scene/Scene.h"
-#include "util/tickHandler.h"
 
 namespace UserInput
 {
 
-	class glfwKeyboardScanner : public Utils::Ticker::Handler
+	class glfwKeyboardScanner
 	{
 	public:
 		glfwKeyboardScanner(GLFWwindow* window);

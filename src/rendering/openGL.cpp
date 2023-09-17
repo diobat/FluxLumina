@@ -80,9 +80,9 @@ int openGL::initialize()
     _shaderPrograms.push_back(shader);
     _shaderPrograms[0].apply();
 
-    Texture newTexture;
-    newTexture.load("res/models/alliance.png");
-    _textures.push_back(newTexture);
+    // Texture newTexture;
+    // newTexture.load("res/models/alliance.png");
+    // _textures.push_back(newTexture);
 
 
     return 1;
@@ -99,14 +99,11 @@ void openGL::renderFrame()
     _shaderPrograms[0].setUniformMatrix4fv("MVP", _scene->getActiveCamera()->recalculateMVP());
 
     // Textures & Models
-    _textures[0].bind();
+    //_textures[0].bind();
 
     for (auto model : _scene->getAllModels())
     {
-        for (auto meshes : model->getModel()->meshes )
-        {
-            renderMesh(meshes);
-        }
+        renderModel(*model);
     }
 }
 
@@ -152,10 +149,23 @@ void openGL::initializeMesh(Mesh& mesh)
     glBindVertexArray(0);
 }
 
-void openGL::renderMesh(Mesh& mesh)
+void openGL::renderModel(ModelObject& model)
 {
-    // draw mesh
-    glBindVertexArray(mesh.VAO);
-    glDrawElements(GL_TRIANGLES, mesh.indices.size(), GL_UNSIGNED_INT, 0);
-    glBindVertexArray(0);
+    auto xyz_array = model.getPosition();
+    glm::vec3 coordinates(xyz_array[0], xyz_array[1], xyz_array[2]);
+    glm::mat4 transform = glm::mat4(1.0f);
+    transform = glm::translate(transform, coordinates);                 // translate it down so it's at the center of the scene
+    transform = glm::scale(transform, glm::vec3(model.getScale()));     // it's a bit too big for our scene, so scale it down
+
+    _shaderPrograms[0].setUniformMatrix4fv("transform", transform);
+
+
+    for ( auto& one_mesh : model.getModel()->meshes)
+    {
+        // draw mesh
+        glBindVertexArray(one_mesh.VAO);
+        glDrawElements(GL_TRIANGLES, one_mesh.indices.size(), GL_UNSIGNED_INT, 0);
+        glBindVertexArray(0);
+    }
+
 }
