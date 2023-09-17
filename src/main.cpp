@@ -48,19 +48,15 @@ int main(void)
     factory.create_Camera();
 
     ModelObject &statue = factory.create_Model("res/models/alliance.obj", "res/models/alliance.png");
-    statue.setPosition({0.0f, 0.0f, -5.0f});
+    statue.setPosition({0.0f, 0.0f, -2.5f});
 
-
-
-
+    ModelObject &statue2 = factory.create_Model("res/models/alliance.obj", "res/models/alliance.png");
+    statue2.setPosition({0.0f, 0.0f, 2.5f});
+    
     // User Input handler
     std::shared_ptr<UserInput::glfwKeyboardScanner> userInput = std::make_shared<UserInput::glfwKeyboardScanner>(graphicalEngine.getWindowPtr());
-
-
     update(graphicalEngine, userInput);
 
     glfwTerminate();
-
-
     return 0;
 }

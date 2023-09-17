@@ -145,6 +145,10 @@ void openGL::initializeMesh(Mesh& mesh)
     // vertex texture coords
     glEnableVertexAttribArray(2);
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, TexCoords));
+    // vertex color info
+    glEnableVertexAttribArray(3);
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, Color));
+
 
     glBindVertexArray(0);
 }
@@ -158,6 +162,7 @@ void openGL::renderModel(ModelObject& model)
     transform = glm::scale(transform, glm::vec3(model.getScale()));     // it's a bit too big for our scene, so scale it down
 
     _shaderPrograms[0].setUniformMatrix4fv("transform", transform);
+
 
 
     for ( auto& one_mesh : model.getModel()->meshes)

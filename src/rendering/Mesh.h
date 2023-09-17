@@ -18,6 +18,8 @@ struct Vertex
     glm::vec3 Normal;
     // texCoords
     glm::vec2 TexCoords;
+    // Color
+    glm::vec3 Color;
 };
 
 class Mesh

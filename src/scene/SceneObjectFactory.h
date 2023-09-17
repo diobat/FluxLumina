@@ -8,6 +8,8 @@
 #include "scene/Camera.h"
 #include "scene/LightSource.h"
 
+// STD library includes
+#include <iostream>
 
 //Third-party includes
 #include <glm/glm.hpp>

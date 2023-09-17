@@ -85,16 +85,19 @@ Mesh SceneObjectFactory::processMesh(Model &model, aiMesh *mesh, const aiScene *
     {
         Vertex vertex;
         glm::vec3 vector; // we declare a placeholder vector since assimp uses its own vector class that doesn't directly convert to glm's vec3 class so we transfer the data to this placeholder glm::vec3 first.
-                          // positions
+        
+        // positions
         vector.x = mesh->mVertices[i].x;
         vector.y = mesh->mVertices[i].y;
         vector.z = mesh->mVertices[i].z;
         vertex.Position = vector;
+        
         // normals
         vector.x = mesh->mNormals[i].x;
         vector.y = mesh->mNormals[i].y;
         vector.z = mesh->mNormals[i].z;
         vertex.Normal = vector;
+        
         // texture coordinates
         if (mesh->mTextureCoords[0]) // does the mesh contain texture coordinates?
         {
@@ -106,7 +109,27 @@ Mesh SceneObjectFactory::processMesh(Model &model, aiMesh *mesh, const aiScene *
             vertex.TexCoords = vec;
         }
         else
+        {
             vertex.TexCoords = glm::vec2(0.0f, 0.0f);
+        }
+        
+        // colors
+        aiColor4D diffuse;
+        aiMaterial* mtl = scene->mMaterials[mesh->mMaterialIndex];
+
+        if(AI_SUCCESS == aiGetMaterialColor(mtl, AI_MATKEY_COLOR_DIFFUSE, &diffuse))
+        {
+            vector.x = diffuse.r;
+            vector.y = diffuse.g;
+            vector.z = diffuse.b;
+        }
+        else
+        {
+            vector.x = 1.0f;
+            vector.y = 1.0f;
+            vector.z = 1.0f;
+        }
+        vertex.Color = vector;
 
         vertices.push_back(vertex);
     }
