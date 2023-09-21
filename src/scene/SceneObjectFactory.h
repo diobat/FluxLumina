@@ -37,7 +37,6 @@ public:
     void processNode(Model& model, aiNode* node, const aiScene* scene);
     Mesh processMesh(Model& model, aiMesh* mesh, const aiScene* scene);
     
-
     void create_LightSource();
     void create_Camera();
 

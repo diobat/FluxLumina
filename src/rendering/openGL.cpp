@@ -107,7 +107,6 @@ void openGL::renderFrame()
     }
 }
 
-
 void openGL::resizeWindow(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
@@ -149,7 +148,6 @@ void openGL::initializeMesh(Mesh& mesh)
     glEnableVertexAttribArray(3);
     glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, Color));
 
-
     glBindVertexArray(0);
 }
 
@@ -157,13 +155,17 @@ void openGL::renderModel(ModelObject& model)
 {
     auto xyz_array = model.getPosition();
     glm::vec3 coordinates(xyz_array[0], xyz_array[1], xyz_array[2]);
-    glm::mat4 transform = glm::mat4(1.0f);
-    transform = glm::translate(transform, coordinates);                 // translate it down so it's at the center of the scene
-    transform = glm::scale(transform, glm::vec3(model.getScale()));     // it's a bit too big for our scene, so scale it down
 
-    _shaderPrograms[0].setUniformMatrix4fv("transform", transform);
-
-
+    glm::mat4 modelMatrix = glm::mat4(1.0f);
+    //Apply translation to the model matrix
+    modelMatrix = glm::translate(modelMatrix, coordinates);             
+    // Apply scale to the model matrix
+    modelMatrix = glm::scale(modelMatrix, glm::vec3(model.getScale())); 
+    // Apply rotation to the model matrix
+    glm::fquat std_quat = model.getRotation();
+    modelMatrix = modelMatrix * glm::mat4_cast(std_quat);
+    
+    _shaderPrograms[0].setUniformMatrix4fv("transform", modelMatrix);
 
     for ( auto& one_mesh : model.getModel()->meshes)
     {

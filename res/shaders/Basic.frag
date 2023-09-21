@@ -1,11 +1,9 @@
 #version 430
 
-// Input Layout Locations
-//layout(location = 3) in vec3 objectColor;
-
-
-// Output Layout Locations
+// Inputs from the vertex shader
 in vec3 objectColor;
+
+// Outputs
 out vec4 fragColor;
 
 

@@ -16,8 +16,6 @@ out vec3 objectColor;
 
 void main()
 {
-	// gl_Position = MVP * transform * vec4(position, 1.0f);
-
 	objectColor = objectColor_in;
 	gl_Position = MVP * transform * vec4(position, 1.0f);
 }

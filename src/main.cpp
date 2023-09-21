@@ -49,10 +49,12 @@ int main(void)
 
     ModelObject &statue = factory.create_Model("res/models/alliance.obj", "res/models/alliance.png");
     statue.setPosition({0.0f, 0.0f, -2.5f});
+    statue.rotate(200.0f, 180.0f, 0.0f);
 
     ModelObject &statue2 = factory.create_Model("res/models/alliance.obj", "res/models/alliance.png");
     statue2.setPosition({0.0f, 0.0f, 2.5f});
-    
+    statue2.rotate(0.0f, 45.0f, 45.0f);
+
     // User Input handler
     std::shared_ptr<UserInput::glfwKeyboardScanner> userInput = std::make_shared<UserInput::glfwKeyboardScanner>(graphicalEngine.getWindowPtr());
     update(graphicalEngine, userInput);

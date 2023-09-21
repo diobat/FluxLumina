@@ -30,7 +30,11 @@ namespace UserInput
 	void toggleMouseMode()
 	{
 		captureMouse = !captureMouse;
-		std::cout << "Mouse mode toggled: " << captureMouse << std::endl;
+
+		if(debugMode)
+		{
+			std::cout << "Mouse mode toggled: " << captureMouse << std::endl;
+		}
 
 		if (captureMouse)
 		{
