@@ -36,7 +36,7 @@ public:
     void load_ModelMeshes(Model& model, std::string const &path);
     void processNode(Model& model, aiNode* node, const aiScene* scene);
     Mesh processMesh(Model& model, aiMesh* mesh, const aiScene* scene);
-    std::vector<Texture> loadMaterialTextures(Model &model, aiMaterial *mat, aiTextureType type, std::string Typename);
+    std::vector<Texture> loadMaterialTextures(Model &model, aiMaterial *mat, aiTextureType type);
 
     void create_LightSource();
     void create_Camera();

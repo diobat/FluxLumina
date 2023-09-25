@@ -166,16 +166,15 @@ void openGL::initializeTexture(Texture& texture)
     //glTexStorage2D(GL_TEXTURE_2D, 2 /* mip map levels */, GL_RGB8, texture._width, texture._height);
     glTexImage2D(GL_TEXTURE_2D, 0, texture._colorChannels, texture._width, texture._height, 0, texture._colorChannels, GL_UNSIGNED_BYTE, texture._pixels);
     glGenerateMipmap(GL_TEXTURE_2D);
-
-
-
 }
 
 void openGL::bindTextures(Mesh& mesh, E_TexureType index)
 {
 
+    _shaderPrograms[0].setUniform1i("sampleFromTexture", 0);
     for (int i = 0; i < mesh.textures.size(); i++)
     {
+        _shaderPrograms[0].setUniform1i("sampleFromTexture", 1);
         glActiveTexture(GL_TEXTURE0 + i);
         glBindTexture(GL_TEXTURE_2D, mesh.textures[i]._id);
     }
@@ -205,6 +204,7 @@ void openGL::renderModel(ModelObject& model)
         glBindVertexArray(one_mesh.VAO);
         glDrawElements(GL_TRIANGLES, one_mesh.indices.size(), GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
+        glBindTexture(GL_TEXTURE_2D, 0);    // Unbind texture
     }
 
 }

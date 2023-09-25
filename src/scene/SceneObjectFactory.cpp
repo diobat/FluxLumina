@@ -6,6 +6,9 @@
 
 namespace
 {
+
+    std::vector<Texture> loadedTextures;
+
     Texture TextureFromFile(const char *path, const std::string &directory, bool gamma = false)
     {
         std::string filename = std::string(path);
@@ -16,7 +19,40 @@ namespace
         return texture;
     }
 
-    void TextureData_Free(Texture &texture)
+    void setTextureData(Texture &texture, aiTextureType type)
+    {
+
+        // Set texture parameters
+        if (texture._components == 1)
+            texture._colorChannels = GL_RED;
+        else if (texture._components == 3)
+            texture._colorChannels = GL_RGB;
+        else if (texture._components == 4)
+            texture._colorChannels = GL_RGBA;
+
+        switch(type)
+        {
+            case aiTextureType_DIFFUSE:
+                texture._type = E_TexureType::DIFFUSE;
+                break;
+            case aiTextureType_SPECULAR:
+                texture._type = E_TexureType::SPECULAR;
+                break;
+            case aiTextureType_NORMALS:
+                texture._type = E_TexureType::NORMAL;
+                break;
+            case aiTextureType_HEIGHT:
+                texture._type = E_TexureType::HEIGHT;
+                break;
+            default:
+                texture._type = E_TexureType::DIFFUSE;
+                break;
+        }
+
+        texture.use_linear = true;
+    }
+
+        void TextureData_Free(Texture &texture)
     {
         stbi_image_free(texture._pixels);
     }
@@ -176,16 +212,16 @@ Mesh SceneObjectFactory::processMesh(Model &model, aiMesh *mesh, const aiScene *
     if(mesh->mMaterialIndex >= 0)
     {
         aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
-        std::vector<Texture> diffuseMaps = loadMaterialTextures(model, material, aiTextureType_DIFFUSE, "texture_diffuse");
+        std::vector<Texture> diffuseMaps = loadMaterialTextures(model, material, aiTextureType_DIFFUSE);
         textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
-        std::vector<Texture> specularMaps = loadMaterialTextures(model, material, aiTextureType_SPECULAR, "texture_specular");
+        std::vector<Texture> specularMaps = loadMaterialTextures(model, material, aiTextureType_SPECULAR);
         textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
     }
     // return a mesh object created from the extracted mesh data
     return Mesh(vertices, indices, textures);
 }
 
-std::vector<Texture> SceneObjectFactory::loadMaterialTextures(Model& model, aiMaterial* mat, aiTextureType type, std::string Typename)
+std::vector<Texture> SceneObjectFactory::loadMaterialTextures(Model &model, aiMaterial *mat, aiTextureType type)
 {
     std::vector<Texture> materialTextures;
 
@@ -193,28 +229,36 @@ std::vector<Texture> SceneObjectFactory::loadMaterialTextures(Model& model, aiMa
     {
         aiString str;
         mat->GetTexture(type, i, &str);
+        bool isPreviouslyLoaded = false;
 
-        Texture texture = TextureFromFile(str.C_Str(), model.directory);
-
-        if (texture._components == 1)
-            texture._colorChannels = GL_RED;
-        else if (texture._components == 3)
-            texture._colorChannels = GL_RGB;
-        else if (texture._components == 4)
-            texture._colorChannels = GL_RGBA;
-
-        texture.use_linear = true;
-
-        materialTextures.push_back(texture);
+        for(unsigned int k = 0; k < loadedTextures.size(); k++)
+        {
+            if(std::strcmp(loadedTextures[k]._path.data(), str.C_Str()) == 0)
+            {
+                materialTextures.push_back(loadedTextures[k]);
+                isPreviouslyLoaded = true;
+                break;
+            }
+        }
+        if(!isPreviouslyLoaded)
+        {
+            Texture texture = TextureFromFile(str.C_Str(), model.directory);
+            setTextureData(texture, type);
+            materialTextures.push_back(texture);
+            loadedTextures.push_back(texture);
+        }
+        
     }
 
     return materialTextures;
 }
 
 
+
+
 void SceneObjectFactory::create_LightSource()
 {
-
+    
 }
 
 void SceneObjectFactory::create_Camera()

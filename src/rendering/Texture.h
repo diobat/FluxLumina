@@ -20,20 +20,14 @@ public:
     Texture();
     ~Texture();
     
-    void bind(int index = 0) const
-    {
-        if(_id != 0)
-        {
-            glActiveTexture(GL_TEXTURE0 + index);
-            glBindTexture(GL_TEXTURE_2D, _id);
-        }
-    }
+    GLuint _id;
+    E_TexureType _type;
+    std::string _path;
+    int _width, _height, _components;
 
-    
     GLenum _colorChannels;
     bool use_linear;
-    int _width, _height, _components;
     bool is_loaded = false;
-    GLuint _id;
+
     unsigned char * _pixels = nullptr;
 };
