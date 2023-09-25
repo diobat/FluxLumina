@@ -34,6 +34,8 @@ public:
 	GLFWwindow* getWindowPtr();
 
 	void initializeMesh(Mesh& mesh);
+	void initializeTexture(Texture& texture);
+	void bindTextures(Mesh &texture, E_TexureType type);
 	void renderModel(ModelObject &model);
 
 private:
@@ -45,6 +47,5 @@ private:
 
 	std::shared_ptr<Camera> _camera;
 	std::vector<Shader> _shaderPrograms;
-	std::vector<Texture> _textures;
 
 };

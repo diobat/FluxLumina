@@ -33,10 +33,11 @@ public:
     //void create(SCENE_OBJECT object);
 
     ModelObject &create_Model(const std::string &modelPath, const std::string &texturePath = "");
-    void load_Model(Model& model, std::string const &path);
+    void load_ModelMeshes(Model& model, std::string const &path);
     void processNode(Model& model, aiNode* node, const aiScene* scene);
     Mesh processMesh(Model& model, aiMesh* mesh, const aiScene* scene);
-    
+    std::vector<Texture> loadMaterialTextures(Model &model, aiMaterial *mat, aiTextureType type, std::string Typename);
+
     void create_LightSource();
     void create_Camera();
 

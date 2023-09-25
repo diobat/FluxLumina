@@ -26,9 +26,8 @@ class Model
 {
 public:
     /*  Model Data */
-    std::vector<Mesh> meshes;
     std::string directory;
-
+    std::vector<Mesh> meshes;
 };
 
 #endif

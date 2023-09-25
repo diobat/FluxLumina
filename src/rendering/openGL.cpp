@@ -151,6 +151,36 @@ void openGL::initializeMesh(Mesh& mesh)
     glBindVertexArray(0);
 }
 
+void openGL::initializeTexture(Texture& texture)
+{
+    // load and create a texture
+    glGenTextures(1, &texture._id);
+    glBindTexture(GL_TEXTURE_2D, texture._id);
+    // set the texture wrapping parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    // set texture filtering parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+
+    //glTexStorage2D(GL_TEXTURE_2D, 2 /* mip map levels */, GL_RGB8, texture._width, texture._height);
+    glTexImage2D(GL_TEXTURE_2D, 0, texture._colorChannels, texture._width, texture._height, 0, texture._colorChannels, GL_UNSIGNED_BYTE, texture._pixels);
+    glGenerateMipmap(GL_TEXTURE_2D);
+
+
+
+}
+
+void openGL::bindTextures(Mesh& mesh, E_TexureType index)
+{
+
+    for (int i = 0; i < mesh.textures.size(); i++)
+    {
+        glActiveTexture(GL_TEXTURE0 + i);
+        glBindTexture(GL_TEXTURE_2D, mesh.textures[i]._id);
+    }
+}
+
 void openGL::renderModel(ModelObject& model)
 {
     auto xyz_array = model.getPosition();
@@ -169,6 +199,8 @@ void openGL::renderModel(ModelObject& model)
 
     for ( auto& one_mesh : model.getModel()->meshes)
     {
+        bindTextures(one_mesh, DIFFUSE);
+
         // draw mesh
         glBindVertexArray(one_mesh.VAO);
         glDrawElements(GL_TRIANGLES, one_mesh.indices.size(), GL_UNSIGNED_INT, 0);

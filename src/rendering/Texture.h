@@ -6,25 +6,34 @@
 #include <string>
 #include <glad/glad.h>
 
+enum E_TexureType
+{
+    DIFFUSE,
+    SPECULAR,
+    NORMAL,
+    HEIGHT
+};
+
 class Texture
 {
 public:
     Texture();
     ~Texture();
-
-    bool load(const std::string & file_name);
     
     void bind(int index = 0) const
     {
-        if(to_id != 0)
+        if(_id != 0)
         {
             glActiveTexture(GL_TEXTURE0 + index);
-            glBindTexture(GL_TEXTURE_2D, to_id);
+            glBindTexture(GL_TEXTURE_2D, _id);
         }
     }
 
+    
+    GLenum _colorChannels;
     bool use_linear;
-
-private:
-    GLuint to_id;
+    int _width, _height, _components;
+    bool is_loaded = false;
+    GLuint _id;
+    unsigned char * _pixels = nullptr;
 };

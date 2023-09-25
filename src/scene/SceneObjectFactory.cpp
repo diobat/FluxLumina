@@ -1,5 +1,27 @@
 #include "scene/SceneObjectFactory.h"
 
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
+
+
+namespace
+{
+    Texture TextureFromFile(const char *path, const std::string &directory, bool gamma = false)
+    {
+        std::string filename = std::string(path);
+        filename = ROOT_DIR + directory + '/' + filename;
+        Texture texture;
+        texture._pixels = stbi_load(filename.c_str(), &texture._width, &texture._height, &texture._components, 0);
+
+        return texture;
+    }
+
+    void TextureData_Free(Texture &texture)
+    {
+        stbi_image_free(texture._pixels);
+    }
+}
+
 SceneObjectFactory::SceneObjectFactory(Scene* scene, GraphicalEngine* engine)
 {
     _boundScene = scene;
@@ -27,18 +49,24 @@ ModelObject &SceneObjectFactory::create_Model(const std::string &modelPath, cons
     std::shared_ptr<ModelObject> model_object = std::make_shared<ModelObject>();
     Model& model = (*model_object->getModel());
 
-    load_Model(model, modelPath);
-
+    load_ModelMeshes(model, modelPath);
     for (auto &one_mesh : model.meshes)
     {
         _boundEngine->initializeMesh(one_mesh);
+
+        for(auto& one_texture : one_mesh.textures)
+        {
+            _boundEngine->initializeTexture(one_texture);
+            TextureData_Free(one_texture);
+        }
     }
+
 
     _boundScene->addModel(model_object);
     return *model_object;
 }
 
-void SceneObjectFactory::load_Model(Model& model, const std::string& path)
+void SceneObjectFactory::load_ModelMeshes(Model& model, const std::string& path)
 {
     // read file via ASSIMP
     Assimp::Importer importer;
@@ -52,8 +80,9 @@ void SceneObjectFactory::load_Model(Model& model, const std::string& path)
     // retrieve the directory path of the filepath
     model.directory = path.substr(0, path.find_last_of('/'));
 
-    // process ASSIMP's root node recursively
+    // process ASSIMP's root node recursively to build the meshes
     processNode(model, scene->mRootNode, scene);
+
 }
 
 // processes a node in a recursive fashion. Processes each individual mesh located at the node and repeats this process on its children nodes (if any).
@@ -79,6 +108,7 @@ Mesh SceneObjectFactory::processMesh(Model &model, aiMesh *mesh, const aiScene *
     // data to fill
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
+    std::vector<Texture> textures;
 
     // Walk through each of the mesh's vertices
     for (unsigned int i = 0; i < mesh->mNumVertices; i++)
@@ -142,9 +172,45 @@ Mesh SceneObjectFactory::processMesh(Model &model, aiMesh *mesh, const aiScene *
             indices.push_back(face.mIndices[j]);
     }
 
+    // process materials
+    if(mesh->mMaterialIndex >= 0)
+    {
+        aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
+        std::vector<Texture> diffuseMaps = loadMaterialTextures(model, material, aiTextureType_DIFFUSE, "texture_diffuse");
+        textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
+        std::vector<Texture> specularMaps = loadMaterialTextures(model, material, aiTextureType_SPECULAR, "texture_specular");
+        textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+    }
     // return a mesh object created from the extracted mesh data
-    return Mesh(vertices, indices);
+    return Mesh(vertices, indices, textures);
 }
+
+std::vector<Texture> SceneObjectFactory::loadMaterialTextures(Model& model, aiMaterial* mat, aiTextureType type, std::string Typename)
+{
+    std::vector<Texture> materialTextures;
+
+    for(unsigned int i = 0; i < mat->GetTextureCount(type); i++)
+    {
+        aiString str;
+        mat->GetTexture(type, i, &str);
+
+        Texture texture = TextureFromFile(str.C_Str(), model.directory);
+
+        if (texture._components == 1)
+            texture._colorChannels = GL_RED;
+        else if (texture._components == 3)
+            texture._colorChannels = GL_RGB;
+        else if (texture._components == 4)
+            texture._colorChannels = GL_RGBA;
+
+        texture.use_linear = true;
+
+        materialTextures.push_back(texture);
+    }
+
+    return materialTextures;
+}
+
 
 void SceneObjectFactory::create_LightSource()
 {

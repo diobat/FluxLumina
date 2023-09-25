@@ -1,14 +1,9 @@
-﻿/**
-* Code taken from www.learnopengl.com
-* Slightly modified by Tomasz Gałaj 2018
-**/
-
-#ifndef MESH_H
-#define MESH_H
+﻿#pragma once
 
 #include <glad/glad.h> // holds all OpenGL type declarations
 #include <glm/glm.hpp>
 #include <vector>
+#include <rendering/texture.h>
 
 struct Vertex
 {
@@ -28,15 +23,16 @@ public:
     /*  Mesh Data  */
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
+    std::vector<Texture> textures;
     unsigned int VAO, VBO, EBO;
 
     /*  Functions  */
     // constructor
-    Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices)
+    Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures)
     {
         this->vertices = vertices;
         this->indices = indices;
+        this->textures = textures;
     }
 
 };
-#endif
