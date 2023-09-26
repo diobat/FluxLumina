@@ -1,22 +1,6 @@
 #include "util/Rotation.h"
 
-namespace
-{
-    namespace
-    {
-        const float M_PI = 3.14159265358979323846f;
-        const float DEG_TO_RAD = M_PI / 180.0f;
-
-    }
-
-    void normalizeVector(float &x, float &y, float &z)
-    {
-        float length = sqrt(x * x + y * y + z * z);
-        x /= length;
-        y /= length;
-        z /= length;
-    }
-}
+#include <util/Arithmetic.h>
 
 
 Rotation::Rotation()

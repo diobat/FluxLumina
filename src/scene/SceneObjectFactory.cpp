@@ -9,12 +9,18 @@ namespace
 
     std::vector<Texture> loadedTextures;
 
+    bool flipUVsOnLoad = false;
+
     Texture TextureFromFile(const char *path, const std::string &directory, bool gamma = false)
     {
         std::string filename = std::string(path);
         filename = ROOT_DIR + directory + '/' + filename;
+
+        stbi_set_flip_vertically_on_load(flipUVsOnLoad);
+
         Texture texture;
         texture._pixels = stbi_load(filename.c_str(), &texture._width, &texture._height, &texture._components, 0);
+        texture._path = path;
 
         return texture;
     }
@@ -49,10 +55,10 @@ namespace
                 break;
         }
 
-        texture.use_linear = true;
+        texture._useLinear = true;
     }
 
-        void TextureData_Free(Texture &texture)
+    void TextureData_Free(Texture &texture)
     {
         stbi_image_free(texture._pixels);
     }
@@ -80,25 +86,32 @@ void SceneObjectFactory::bindEngine(GraphicalEngine *engine)
     _boundEngine = engine;
 }
 
-ModelObject &SceneObjectFactory::create_Model(const std::string &modelPath, const std::string &texturePath)
+ModelObject &SceneObjectFactory::create_Model(const std::string &modelPath, bool flipUVs)
 {
     std::shared_ptr<ModelObject> model_object = std::make_shared<ModelObject>();
     Model& model = (*model_object->getModel());
+
+    flipUVsOnLoad = flipUVs;
 
     load_ModelMeshes(model, modelPath);
     for (auto &one_mesh : model.meshes)
     {
         _boundEngine->initializeMesh(one_mesh);
 
-        for(auto& one_texture : one_mesh.textures)
-        {
-            _boundEngine->initializeTexture(one_texture);
-            TextureData_Free(one_texture);
-        }
+        // for(auto& one_texture : one_mesh.textures)
+        // {
+        //     if (!one_texture._isLoaded)
+        //     {
+        //         _boundEngine->initializeTexture(one_texture);
+        //         one_texture._isLoaded = true;
+        //     }
+            
+        //     //TextureData_Free(one_texture);
+        // }
     }
 
-
     _boundScene->addModel(model_object);
+
     return *model_object;
 }
 
@@ -145,6 +158,7 @@ Mesh SceneObjectFactory::processMesh(Model &model, aiMesh *mesh, const aiScene *
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
     std::vector<Texture> textures;
+
 
     // Walk through each of the mesh's vertices
     for (unsigned int i = 0; i < mesh->mNumVertices; i++)
@@ -233,6 +247,7 @@ std::vector<Texture> SceneObjectFactory::loadMaterialTextures(Model &model, aiMa
 
         for(unsigned int k = 0; k < loadedTextures.size(); k++)
         {
+
             if(std::strcmp(loadedTextures[k]._path.data(), str.C_Str()) == 0)
             {
                 materialTextures.push_back(loadedTextures[k]);
@@ -240,15 +255,20 @@ std::vector<Texture> SceneObjectFactory::loadMaterialTextures(Model &model, aiMa
                 break;
             }
         }
+
         if(!isPreviouslyLoaded)
         {
             Texture texture = TextureFromFile(str.C_Str(), model.directory);
             setTextureData(texture, type);
+
+            _boundEngine->initializeTexture(texture);
             materialTextures.push_back(texture);
             loadedTextures.push_back(texture);
+           
         }
         
     }
+
 
     return materialTextures;
 }

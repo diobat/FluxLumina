@@ -1,0 +1,5 @@
+During texture import data is moved around too much. ideally the stbi_load function should already place the data on its intended final destination.
+
+Shift quaternion rotation calculations from glm to boost
+
+The transform in the vertex shader is just the model matrix from MVP that should be optimized

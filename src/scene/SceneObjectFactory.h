@@ -32,7 +32,7 @@ public:
     void bindEngine(GraphicalEngine* engine);
     //void create(SCENE_OBJECT object);
 
-    ModelObject &create_Model(const std::string &modelPath, const std::string &texturePath = "");
+    ModelObject &create_Model(const std::string &modelPath, bool flipUVs = false);
     void load_ModelMeshes(Model& model, std::string const &path);
     void processNode(Model& model, aiNode* node, const aiScene* scene);
     Mesh processMesh(Model& model, aiMesh* mesh, const aiScene* scene);

@@ -2,9 +2,11 @@
 
 
 Scene::Scene():
-	activeCameraID(0)
+	activeCameraID(0),
+	_ambientLight(0.1f, { 1.0f, 1.0f, 1.0f }),
+	_diffuseLight(0.15f, { 1.0f, 1.0f, 1.0f }, { -1.0f, -1.0f, -1.0f })
 {
-
+	;
 }
 
 
@@ -32,3 +34,14 @@ std::shared_ptr<Camera> &Scene::getActiveCamera()
 {
 	return _cameras[activeCameraID];
 }
+
+AmbientLight &Scene::getAmbientLight()
+{
+	return _ambientLight;
+}
+
+DiffuseLight &Scene::getDiffuseLight()
+{
+	return _diffuseLight;
+}
+

@@ -21,6 +21,9 @@ public:
 	std::vector<std::shared_ptr<Camera>> &getAllCameras();
 	std::vector<std::shared_ptr<ModelObject>> &getAllModels();
 
+	
+	AmbientLight& getAmbientLight();
+	DiffuseLight& getDiffuseLight();
 	std::shared_ptr<Camera> &getActiveCamera();
 
 private:
@@ -29,5 +32,8 @@ private:
 	
 	std::vector<std::shared_ptr<Camera>> _cameras;
 	std::vector<std::shared_ptr<ModelObject>> _models;
-	std::vector<std::shared_ptr<LightSource>> _lights;
+	std::vector<std::shared_ptr<LightSource>> _lights;	
+
+	AmbientLight _ambientLight;
+	DiffuseLight _diffuseLight;
 };

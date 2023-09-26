@@ -61,10 +61,15 @@ set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREADED ON)  
 set(Boost_USE_STATIC_RUNTIME OFF) 
 
-set(BOOST_ROOT X:/software/boost_1_82_0)
+# set(BOOST_ROOT X:/software/boost_1_82_0)
 # Set Boost root folder as BOOST_ROOT environment variable or this will fail
-find_package(Boost COMPONENTS filesystem timer) 
+find_package(Boost COMPONENTS) 
 
+IF (Boost_FOUND)
+	message(STATUS "BOOST FOUND !")
+ELSE ()
+    message(STATUS "BOOST NOT Found !")
+ENDIF()
 # Put all libraries into a variable
 set(LIBS glfw3 opengl32 assimp STB_IMAGE GLAD ${Boost_LIBRARIES})
 
@@ -73,6 +78,9 @@ set(LIBS glfw3 opengl32 assimp STB_IMAGE GLAD ${Boost_LIBRARIES})
 include_directories(
 	"${CMAKE_SOURCE_DIR}/src"
 	"${CMAKE_SOURCE_DIR}/include"
+)
+
+include_directories(
 	${Boost_INCLUDE_DIRS}
 )
 

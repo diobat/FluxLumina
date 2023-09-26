@@ -26,8 +26,8 @@ public:
     int _width, _height, _components;
 
     GLenum _colorChannels;
-    bool use_linear;
-    bool is_loaded = false;
+    bool _useLinear;
+    bool _isLoaded = false;
 
     unsigned char * _pixels = nullptr;
 };

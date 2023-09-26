@@ -8,16 +8,22 @@ layout(location = 3) in vec3 aObjectColor;
 
 
 // Uniforms
-uniform mat4 MVP;	// Model View Projection
+uniform mat4 MVP;	// Camera's Model View Projection
 uniform mat4 transform;	// Transform matrix
 
 // Output
 out vec3 objectColor;
+out vec3 Normal;
 out vec2 TexCoords;
+out vec3 FragPos;
 
 void main()
 {
-	objectColor = aObjectColor;
-	TexCoords = aTexCoords;
 	gl_Position = MVP * transform * vec4(aPosition, 1.0f);
+
+	objectColor = aObjectColor;
+	Normal = aNormal;
+	TexCoords = aTexCoords;
+	FragPos = vec3(transform * vec4(aPosition, 1.0f));
+
 }

@@ -185,6 +185,7 @@ void openGL::renderModel(ModelObject& model)
     auto xyz_array = model.getPosition();
     glm::vec3 coordinates(xyz_array[0], xyz_array[1], xyz_array[2]);
 
+    // Model matrix
     glm::mat4 modelMatrix = glm::mat4(1.0f);
     //Apply translation to the model matrix
     modelMatrix = glm::translate(modelMatrix, coordinates);             
@@ -193,8 +194,26 @@ void openGL::renderModel(ModelObject& model)
     // Apply rotation to the model matrix
     glm::fquat std_quat = model.getRotation();
     modelMatrix = modelMatrix * glm::mat4_cast(std_quat);
-    
+
     _shaderPrograms[0].setUniformMatrix4fv("transform", modelMatrix);
+
+    // Lighting
+    // Ambient light
+    std::array<float, 3> ambColor = _scene->getAmbientLight().getColor();
+    glm::vec3 ambientColor = glm::vec3(ambColor[0], ambColor[1], ambColor[2]);
+    _shaderPrograms[0].setUniform3fv("ambColor", ambientColor);
+
+    _shaderPrograms[0].setUniform1f("ambIntensity", _scene->getAmbientLight().getIntensity());
+    // Diffuse light
+    std::array<float, 3> diffColor = _scene->getDiffuseLight().getColor();
+    glm::vec3 diffuseColor = glm::vec3(diffColor[0], diffColor[1], diffColor[2]);
+    _shaderPrograms[0].setUniform3fv("diffColor", diffuseColor);
+
+    _shaderPrograms[0].setUniform1f("diffIntensity", _scene->getDiffuseLight().getIntensity());
+
+    std::array<float, 3> diffDirection = _scene->getDiffuseLight().getDirection();
+    glm::vec3 diffuseDirection = glm::vec3(diffDirection[0], diffDirection[1], diffDirection[2]);
+    _shaderPrograms[0].setUniform3fv("diffDirection", diffuseDirection);
 
     for ( auto& one_mesh : model.getModel()->meshes)
     {
@@ -206,5 +225,4 @@ void openGL::renderModel(ModelObject& model)
         glBindVertexArray(0);
         glBindTexture(GL_TEXTURE_2D, 0);    // Unbind texture
     }
-
 }
