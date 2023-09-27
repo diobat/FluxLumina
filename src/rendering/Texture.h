@@ -18,7 +18,7 @@ class Texture
 {
 public:
     Texture();
-    ~Texture();
+    // ~Texture();
     
     GLuint _id;
     E_TexureType _type;
