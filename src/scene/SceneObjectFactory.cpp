@@ -73,6 +73,8 @@ SceneObjectFactory::SceneObjectFactory(Scene* scene, GraphicalEngine* engine)
     {
         ModelObject& cube = create_Model("res/models/origin_cube.obj");
         cube.setScale(0.3f);
+
+        //LightSource& light = create_LightSource();
     }
 }
 
@@ -97,17 +99,6 @@ ModelObject &SceneObjectFactory::create_Model(const std::string &modelPath, bool
     for (auto &one_mesh : model.meshes)
     {
         _boundEngine->initializeMesh(one_mesh);
-
-        // for(auto& one_texture : one_mesh.textures)
-        // {
-        //     if (!one_texture._isLoaded)
-        //     {
-        //         _boundEngine->initializeTexture(one_texture);
-        //         one_texture._isLoaded = true;
-        //     }
-            
-        //     //TextureData_Free(one_texture);
-        // }
     }
 
     _boundScene->addModel(model_object);
@@ -273,13 +264,10 @@ std::vector<Texture> SceneObjectFactory::loadMaterialTextures(Model &model, aiMa
     return materialTextures;
 }
 
+// LightSource& SceneObjectFactory::create_LightSource(bool debugSphere)
+// {
 
-
-
-void SceneObjectFactory::create_LightSource()
-{
-    
-}
+// }
 
 void SceneObjectFactory::create_Camera()
 {

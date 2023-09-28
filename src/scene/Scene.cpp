@@ -3,8 +3,7 @@
 
 Scene::Scene():
 	activeCameraID(0),
-	_ambientLight(0.1f, { 1.0f, 1.0f, 1.0f }),
-	_diffuseLight(0.15f, { 1.0f, 1.0f, 1.0f }, { -1.0f, -1.0f, -1.0f })
+	_ambientLight(0.1f, { 1.0f, 1.0f, 1.0f })
 {
 	;
 }
@@ -12,7 +11,7 @@ Scene::Scene():
 
 void Scene::addModel(std::shared_ptr<ModelObject> modelToAdd)
 {
-	_models.push_back(modelToAdd);
+	_objects.push_back(modelToAdd);
 }
 
 void Scene::addCamera(std::shared_ptr<Camera> cameraToAdd)
@@ -20,12 +19,12 @@ void Scene::addCamera(std::shared_ptr<Camera> cameraToAdd)
 	_cameras.push_back(cameraToAdd);
 }
 
-std::vector<std::shared_ptr<ModelObject>> &Scene::getAllModels()
+const std::vector<std::shared_ptr<SceneObject>>& Scene::getAllObjects()
 {
-	return _models;
+	return _objects;
 }
 
-std::vector<std::shared_ptr<Camera>> &Scene::getAllCameras()
+const std::vector<std::shared_ptr<Camera>>& Scene::getAllCameras()
 {
 	return _cameras;
 }
@@ -39,9 +38,3 @@ AmbientLight &Scene::getAmbientLight()
 {
 	return _ambientLight;
 }
-
-DiffuseLight &Scene::getDiffuseLight()
-{
-	return _diffuseLight;
-}
-

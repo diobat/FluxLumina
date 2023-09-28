@@ -53,6 +53,11 @@ void Camera::setPosition(const std::array<float, 3>& position)
 	_position = glm::vec3(position[0], position[1], position[2]);
 }
 
+glm::vec3 Camera::getPosition() const
+{
+	return _position;
+}
+
 void Camera::setRotation(const std::array<float, 2>& rotation)
 {
 
@@ -129,4 +134,19 @@ void Camera::truncateRotation()
 	// We only really care about truncating the Vertical Rotation
 	_rotation[1] = std::max(_rotation[1], _rotation_safety_bars[0]);
 	_rotation[1] = std::min(_rotation[1], _rotation_safety_bars[1]);
+}
+
+glm::mat4 Camera::getModelMatrix() const
+{
+	return _modelM;
+}
+
+glm::mat4 Camera::getViewMatrix() const
+{
+	return _viewM;
+}
+
+glm::mat4 Camera::getProjectionMatrix() const
+{
+	return _projM;
 }

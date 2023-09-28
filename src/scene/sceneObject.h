@@ -10,6 +10,7 @@ class SceneObject
 {
 public:
     SceneObject();
+    virtual ~SceneObject();
 
     void setPosition(const std::array<float, 3>& coords);
     std::array<float, 3>& getPosition();
@@ -20,9 +21,6 @@ public:
     const glm::fquat &getRotation();
 
     void rotate(float x, float y, float z);
-
-
-    void kill();
 
 private:
     bool _toRender;

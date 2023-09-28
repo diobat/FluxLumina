@@ -37,6 +37,7 @@ public:
 	void initializeTexture(Texture& texture);
 	void bindTextures(Mesh &texture, E_TexureType type);
 	void renderModel(ModelObject &model);
+	void lightSetup(const LightSource &light);
 
 private:
 	void drawSingleModel();

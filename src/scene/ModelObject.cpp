@@ -7,6 +7,11 @@ ModelObject::ModelObject()  :
 
 }
 
+ModelObject::~ModelObject()
+{
+
+}
+
 void ModelObject::setModel(const std::shared_ptr<Model> &model)
 {
     _model = model;

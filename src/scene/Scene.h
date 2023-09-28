@@ -18,12 +18,10 @@ public:
 	void addCamera(std::shared_ptr<Camera> cameraToAdd);
 	void addModel(std::shared_ptr<ModelObject> modelToAdd);
 
-	std::vector<std::shared_ptr<Camera>> &getAllCameras();
-	std::vector<std::shared_ptr<ModelObject>> &getAllModels();
+	const std::vector<std::shared_ptr<Camera>> &getAllCameras();
+	const std::vector<std::shared_ptr<SceneObject>>& getAllObjects();
 
-	
 	AmbientLight& getAmbientLight();
-	DiffuseLight& getDiffuseLight();
 	std::shared_ptr<Camera> &getActiveCamera();
 
 private:
@@ -31,9 +29,7 @@ private:
 	unsigned int activeCameraID;
 	
 	std::vector<std::shared_ptr<Camera>> _cameras;
-	std::vector<std::shared_ptr<ModelObject>> _models;
-	std::vector<std::shared_ptr<LightSource>> _lights;	
+	std::vector<std::shared_ptr<SceneObject>> _objects;
 
 	AmbientLight _ambientLight;
-	DiffuseLight _diffuseLight;
 };

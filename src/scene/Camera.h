@@ -32,6 +32,7 @@ public:
 	glm::mat4 recalculateMVP();
 
 	void setPosition(const std::array<float, 3>& position);
+	glm::vec3 getPosition() const;
 	void setRotation(const std::array<float, 2>& rotation);
 	void addRotationDelta(const std::array<float, 2>& rotationDelta);
 
@@ -39,6 +40,10 @@ public:
 
 	void move(relativeDirections d);
 	void rotate(const std::array<float, 2>& angleDelta);
+
+	glm::mat4 getModelMatrix() const;
+	glm::mat4 getViewMatrix() const;
+	glm::mat4 getProjectionMatrix() const;
 
 private:
 	bool _debugMode;

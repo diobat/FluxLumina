@@ -11,8 +11,8 @@
 class ModelObject : public SceneObject
 {
 public:
-
     ModelObject();
+    virtual ~ModelObject();	
 
     void setModel(const std::shared_ptr<Model> &model);
     std::shared_ptr<Model> getModel();

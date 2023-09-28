@@ -96,15 +96,79 @@ void openGL::renderFrame()
     _shaderPrograms[0].apply();
 
     // Camera
-    _shaderPrograms[0].setUniformMatrix4fv("MVP", _scene->getActiveCamera()->recalculateMVP());
+    _scene->getActiveCamera()->recalculateMVP();
 
-    // Textures & Models
-    //_textures[0].bind();
+    _shaderPrograms[0].setUniformMatrix4fv("view", _scene->getActiveCamera()->getViewMatrix());
+    _shaderPrograms[0].setUniformMatrix4fv("projection", _scene->getActiveCamera()->getProjectionMatrix());
+    //_shaderPrograms[0].setUniform3fv("viewPos", _scene->getActiveCamera()->getPosition());
 
-    for (auto model : _scene->getAllModels())
+    for (auto model : _scene->getAllObjects())
     {
-        renderModel(*model);
+        // Models
+        ModelObject* modelObject = dynamic_cast<ModelObject*>(&(*model));
+        if (modelObject != nullptr)
+        {
+        renderModel(*modelObject);
+            continue;
+        }
+
+        // Light sources
+        std::shared_ptr<LightSource> lightSourceObject = std::dynamic_pointer_cast<LightSource>(model);
+        if (lightSourceObject != nullptr)
+        {
+            lightSetup(*lightSourceObject);
+            continue;
+        }
     }
+}
+
+void openGL::renderModel(ModelObject &model)
+{
+    auto xyz_array = model.getPosition();
+    glm::vec3 coordinates(xyz_array[0], xyz_array[1], xyz_array[2]);
+
+    // Model matrix
+    glm::mat4 modelMatrix = glm::mat4(1.0f);
+    // Apply translation to the model matrix
+    modelMatrix = glm::translate(modelMatrix, coordinates);
+    // Apply scale to the model matrix
+    modelMatrix = glm::scale(modelMatrix, glm::vec3(model.getScale()));
+    // Apply rotation to the model matrix
+    glm::fquat std_quat = model.getRotation();
+    modelMatrix = modelMatrix * glm::mat4_cast(std_quat);
+
+    _shaderPrograms[0].setUniformMatrix4fv("model", modelMatrix);
+
+    for (auto &one_mesh : model.getModel()->meshes)
+    {
+        bindTextures(one_mesh, DIFFUSE);
+
+        // draw mesh
+        glBindVertexArray(one_mesh.VAO);
+        glDrawElements(GL_TRIANGLES, one_mesh.indices.size(), GL_UNSIGNED_INT, 0);
+        glBindVertexArray(0);
+        glBindTexture(GL_TEXTURE_2D, 0); // Unbind texture
+    }
+}
+
+void openGL::lightSetup(const LightSource& light)
+{
+    // Ambient light
+    std::array<float, 3> ambColor = _scene->getAmbientLight().getColor();
+    glm::vec3 ambientColor = glm::vec3(ambColor[0], ambColor[1], ambColor[2]);
+    _shaderPrograms[0].setUniform3fv("ambColor", ambientColor);
+    _shaderPrograms[0].setUniform1f("ambIntensity", _scene->getAmbientLight().getIntensity());
+
+    // Diffuse light
+    const std::array<float, 3>& diffColor = light.getColor();
+    glm::vec3 diffuseColor = glm::vec3(diffColor[0], diffColor[1], diffColor[2]);
+    _shaderPrograms[0].setUniform3fv("diffColor", diffuseColor);
+
+    _shaderPrograms[0].setUniform1f("diffIntensity", light.getIntensity());
+
+    // std::array<float, 3> diffDirection = _scene->getDiffuseLight().getDirection();
+    // glm::vec3 diffuseDirection = glm::vec3(diffDirection[0], diffDirection[1], diffDirection[2]);
+    // _shaderPrograms[0].setUniform3fv("diffDirection", diffuseDirection);
 }
 
 void openGL::resizeWindow(GLFWwindow* window, int width, int height)
@@ -177,52 +241,5 @@ void openGL::bindTextures(Mesh& mesh, E_TexureType index)
         _shaderPrograms[0].setUniform1i("sampleFromTexture", 1);
         glActiveTexture(GL_TEXTURE0 + i);
         glBindTexture(GL_TEXTURE_2D, mesh.textures[i]._id);
-    }
-}
-
-void openGL::renderModel(ModelObject& model)
-{
-    auto xyz_array = model.getPosition();
-    glm::vec3 coordinates(xyz_array[0], xyz_array[1], xyz_array[2]);
-
-    // Model matrix
-    glm::mat4 modelMatrix = glm::mat4(1.0f);
-    //Apply translation to the model matrix
-    modelMatrix = glm::translate(modelMatrix, coordinates);             
-    // Apply scale to the model matrix
-    modelMatrix = glm::scale(modelMatrix, glm::vec3(model.getScale())); 
-    // Apply rotation to the model matrix
-    glm::fquat std_quat = model.getRotation();
-    modelMatrix = modelMatrix * glm::mat4_cast(std_quat);
-
-    _shaderPrograms[0].setUniformMatrix4fv("transform", modelMatrix);
-
-    // Lighting
-    // Ambient light
-    std::array<float, 3> ambColor = _scene->getAmbientLight().getColor();
-    glm::vec3 ambientColor = glm::vec3(ambColor[0], ambColor[1], ambColor[2]);
-    _shaderPrograms[0].setUniform3fv("ambColor", ambientColor);
-
-    _shaderPrograms[0].setUniform1f("ambIntensity", _scene->getAmbientLight().getIntensity());
-    // Diffuse light
-    std::array<float, 3> diffColor = _scene->getDiffuseLight().getColor();
-    glm::vec3 diffuseColor = glm::vec3(diffColor[0], diffColor[1], diffColor[2]);
-    _shaderPrograms[0].setUniform3fv("diffColor", diffuseColor);
-
-    _shaderPrograms[0].setUniform1f("diffIntensity", _scene->getDiffuseLight().getIntensity());
-
-    std::array<float, 3> diffDirection = _scene->getDiffuseLight().getDirection();
-    glm::vec3 diffuseDirection = glm::vec3(diffDirection[0], diffDirection[1], diffDirection[2]);
-    _shaderPrograms[0].setUniform3fv("diffDirection", diffuseDirection);
-
-    for ( auto& one_mesh : model.getModel()->meshes)
-    {
-        bindTextures(one_mesh, DIFFUSE);
-
-        // draw mesh
-        glBindVertexArray(one_mesh.VAO);
-        glDrawElements(GL_TRIANGLES, one_mesh.indices.size(), GL_UNSIGNED_INT, 0);
-        glBindVertexArray(0);
-        glBindTexture(GL_TEXTURE_2D, 0);    // Unbind texture
     }
 }

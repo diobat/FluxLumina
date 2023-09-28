@@ -58,7 +58,6 @@ int main(void)
     ModelObject &ground = factory.create_Model("res/models/ground.obj");
     ground.setPosition({0.0f, -0.5f, 0.0f});
 
-
     ModelObject& mothership = factory.create_Model("res/models/Mothership/Mothership.obj");
     mothership.setPosition({0.0f, 10.0f, 7.5f});
     mothership.setScale(0.001f);

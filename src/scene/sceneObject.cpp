@@ -15,6 +15,11 @@ SceneObject::SceneObject()  :
     ;
 }
 
+SceneObject::~SceneObject()
+{
+    ;
+}
+
 void SceneObject::setPosition(const std::array<float, 3>& coords)
 {
     _coordinates = coords;
