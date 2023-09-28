@@ -239,7 +239,6 @@ std::vector<Texture> SceneObjectFactory::loadMaterialTextures(Model &model, aiMa
 
         for(unsigned int k = 0; k < loadedTextures.size(); k++)
         {
-
             if(std::strcmp(loadedTextures[k]._path.data(), str.C_Str()) == 0)
             {
                 materialTextures.push_back(loadedTextures[k]);
@@ -256,12 +255,8 @@ std::vector<Texture> SceneObjectFactory::loadMaterialTextures(Model &model, aiMa
             _boundEngine->initializeTexture(texture);
             materialTextures.push_back(texture);
             loadedTextures.push_back(texture);
-           
         }
-        
     }
-
-
     return materialTextures;
 }
 

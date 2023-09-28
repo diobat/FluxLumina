@@ -28,6 +28,7 @@ uniform Light light;
 uniform vec3 viewPos;
 
 uniform int sampleFromDiffuse;
+uniform int sampleFromSpecular;
 
 uniform vec3 ambColor;
 uniform float ambIntensity;
@@ -42,12 +43,6 @@ out vec4 fragColor;
 
 void main()
 {   
-	// // Sample from texture or use object color
-	// if(sampleFromDiffuse == 0)
-	// 	fragColor = vec4(objectColor, 1.0);
-	// else
-	// 	fragColor = texture(material.diffuse, TexCoords);
-
 	// Ambient light
 	vec4 ambient = ambIntensity * vec4(ambColor, 1.0);
 
@@ -55,7 +50,6 @@ void main()
 	vec3 norm = normalize(Normal);
 	vec3 diffLightDir = normalize(diffPosition - FragPos);
 	float diff = max(dot(Normal, diffLightDir), 0.0); // The impact of diff light on the vertex is the dot product of the light direction and the normal
-	//vec3 diffuse =  light.diffuse * (diff * diffColor);
 	vec4 diffuse = vec4(0.0);
 	if(sampleFromDiffuse == 0)
 		diffuse = diff * vec4(objectColor, 1.0);
@@ -67,12 +61,11 @@ void main()
     vec3 reflectDir = reflect(-diffLightDir, norm);  
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
 	vec4 specular = vec4(0.0);
-	if(sampleFromDiffuse == 0)
+	if(sampleFromSpecular == 0)
 		specular = spec * vec4(objectColor, 1.0);
 	else
     	specular =  (spec * texture(material.specular, TexCoords));  
 
-	// vec4 resultColor = vec4(ambient,1.0) + vec4(diffuse, 1.0) + fragColor ;
 	vec4 resultColor = ambient + diffuse + specular;
 
 	fragColor = resultColor;
