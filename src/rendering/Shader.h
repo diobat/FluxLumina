@@ -40,7 +40,7 @@ private:
 
     GLuint program_id;
     bool isLinked;
-
+    bool verbose = false;
     bool link();
     bool getUniformLocation(const std::string & uniform_name);
     std::string loadFile(const std::string & filename);

@@ -35,7 +35,7 @@ public:
 
 	void initializeMesh(Mesh& mesh);
 	void initializeTexture(Texture& texture);
-	void bindTextures(Mesh &texture, E_TexureType type);
+	void bindTextures(Mesh &texture);
 	void renderModel(ModelObject &model);
 	void lightSetup(const LightSource &light);
 

@@ -74,7 +74,8 @@ SceneObjectFactory::SceneObjectFactory(Scene* scene, GraphicalEngine* engine)
         ModelObject& cube = create_Model("res/models/origin_cube.obj");
         cube.setScale(0.3f);
 
-        //LightSource& light = create_LightSource();
+        LightSource& light = create_LightSource();
+        light.setPosition({10.0f, 15.0f, 0.0f});
     }
 }
 
@@ -110,7 +111,7 @@ void SceneObjectFactory::load_ModelMeshes(Model& model, const std::string& path)
 {
     // read file via ASSIMP
     Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile(ROOT_DIR + path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+    const aiScene *scene = importer.ReadFile(ROOT_DIR + path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_FixInfacingNormals | aiProcess_CalcTangentSpace);
     // check for errors
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) // if is Not Zero
     {
@@ -264,10 +265,13 @@ std::vector<Texture> SceneObjectFactory::loadMaterialTextures(Model &model, aiMa
     return materialTextures;
 }
 
-// LightSource& SceneObjectFactory::create_LightSource(bool debugSphere)
-// {
+LightSource& SceneObjectFactory::create_LightSource(bool debugSphere)
+{
+    std::shared_ptr<LightSource> light = std::make_shared<LightSource>(debugSphere);
+    _boundScene->addLightSource(light);
 
-// }
+    return *light;
+}
 
 void SceneObjectFactory::create_Camera()
 {

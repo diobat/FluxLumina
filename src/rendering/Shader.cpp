@@ -1,5 +1,5 @@
 /** 
- * Copyright (C) 2018 Tomasz Ga³aj
+ * Copyright (C) 2018 Tomasz Gaï¿½aj
  **/
 
 #include "Shader.h"
@@ -173,7 +173,10 @@ bool Shader::getUniformLocation(const std::string & uniform_name)
     }
     else
     {
-        fprintf(stderr, "Error! Can't find uniform %s\n", uniform_name.c_str());
+        if(verbose)
+        {
+            fprintf(stderr, "Error! Can't find uniform %s\n", uniform_name.c_str());
+        }
         return false;
     }
 }

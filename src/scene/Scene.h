@@ -17,6 +17,7 @@ public:
 
 	void addCamera(std::shared_ptr<Camera> cameraToAdd);
 	void addModel(std::shared_ptr<ModelObject> modelToAdd);
+	void addLightSource(std::shared_ptr<LightSource> lightSourceToAdd);
 
 	const std::vector<std::shared_ptr<Camera>> &getAllCameras();
 	const std::vector<std::shared_ptr<SceneObject>>& getAllObjects();

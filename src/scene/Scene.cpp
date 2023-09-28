@@ -8,15 +8,19 @@ Scene::Scene():
 	;
 }
 
+void Scene::addCamera(std::shared_ptr<Camera> cameraToAdd)
+{
+	_cameras.push_back(cameraToAdd);
+}
 
 void Scene::addModel(std::shared_ptr<ModelObject> modelToAdd)
 {
 	_objects.push_back(modelToAdd);
 }
 
-void Scene::addCamera(std::shared_ptr<Camera> cameraToAdd)
+void Scene::addLightSource(std::shared_ptr<LightSource> lightSourceToAdd)
 {
-	_cameras.push_back(cameraToAdd);
+	_objects.push_back(lightSourceToAdd);
 }
 
 const std::vector<std::shared_ptr<SceneObject>>& Scene::getAllObjects()

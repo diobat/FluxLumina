@@ -100,7 +100,7 @@ void openGL::renderFrame()
 
     _shaderPrograms[0].setUniformMatrix4fv("view", _scene->getActiveCamera()->getViewMatrix());
     _shaderPrograms[0].setUniformMatrix4fv("projection", _scene->getActiveCamera()->getProjectionMatrix());
-    //_shaderPrograms[0].setUniform3fv("viewPos", _scene->getActiveCamera()->getPosition());
+    _shaderPrograms[0].setUniform3fv("viewPos", _scene->getActiveCamera()->getPosition());
 
     for (auto model : _scene->getAllObjects())
     {
@@ -108,7 +108,7 @@ void openGL::renderFrame()
         ModelObject* modelObject = dynamic_cast<ModelObject*>(&(*model));
         if (modelObject != nullptr)
         {
-        renderModel(*modelObject);
+            renderModel(*modelObject);
             continue;
         }
 
@@ -141,12 +141,13 @@ void openGL::renderModel(ModelObject &model)
 
     for (auto &one_mesh : model.getModel()->meshes)
     {
-        bindTextures(one_mesh, DIFFUSE);
+        bindTextures(one_mesh);
 
         // draw mesh
         glBindVertexArray(one_mesh.VAO);
         glDrawElements(GL_TRIANGLES, one_mesh.indices.size(), GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
+
         glBindTexture(GL_TEXTURE_2D, 0); // Unbind texture
     }
 }
@@ -166,9 +167,9 @@ void openGL::lightSetup(const LightSource& light)
 
     _shaderPrograms[0].setUniform1f("diffIntensity", light.getIntensity());
 
-    // std::array<float, 3> diffDirection = _scene->getDiffuseLight().getDirection();
-    // glm::vec3 diffuseDirection = glm::vec3(diffDirection[0], diffDirection[1], diffDirection[2]);
-    // _shaderPrograms[0].setUniform3fv("diffDirection", diffuseDirection);
+    std::array<float, 3> diffPosition = light.getPosition();
+    glm::vec3 diffusePosition = glm::vec3(diffPosition[0], diffPosition[1], diffPosition[2]);
+    _shaderPrograms[0].setUniform3fv("diffPosition", diffusePosition);
 }
 
 void openGL::resizeWindow(GLFWwindow* window, int width, int height)
@@ -232,14 +233,56 @@ void openGL::initializeTexture(Texture& texture)
     glGenerateMipmap(GL_TEXTURE_2D);
 }
 
-void openGL::bindTextures(Mesh& mesh, E_TexureType index)
+void openGL::bindTextures(Mesh& mesh)
 {
 
-    _shaderPrograms[0].setUniform1i("sampleFromTexture", 0);
+    unsigned int diffuseNr = 0;
+    unsigned int specularNr = 0;
+
+    _shaderPrograms[0].setUniform1i("sampleFromDiffuse", 0);
+    _shaderPrograms[0].setUniform1i("sampleFromSpecular", 0);
+
+    if (mesh.textures.size() == 0)
+    {
+        return;
+    }
+
+    int imageUnitSpace;
+
     for (int i = 0; i < mesh.textures.size(); i++)
     {
-        _shaderPrograms[0].setUniform1i("sampleFromTexture", 1);
-        glActiveTexture(GL_TEXTURE0 + i);
-        glBindTexture(GL_TEXTURE_2D, mesh.textures[i]._id);
+
+        switch (mesh.textures[i]._type)
+        {
+        case DIFFUSE:
+            imageUnitSpace = 0;
+            _shaderPrograms[0].setUniform1i("sampleFromDiffuse", 1);
+            _shaderPrograms[0].setUniform1i("material.diffuse", imageUnitSpace + diffuseNr);
+            glActiveTexture(GL_TEXTURE0 + imageUnitSpace + diffuseNr);
+            //glBindImageTexture(imageUnitSpace + diffuseNr, mesh.textures[i]._id, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA8UI);
+            glBindTexture(GL_TEXTURE_2D, mesh.textures[i]._id);
+            diffuseNr++;
+            break;
+        case SPECULAR:
+            imageUnitSpace = 10;
+            _shaderPrograms[0].setUniform1i("sampleFromSpecular", 1);
+            _shaderPrograms[0].setUniform1i("material.specular", imageUnitSpace + specularNr);
+            _shaderPrograms[0].setUniform1f("material.shininess", 0.5);
+
+            glActiveTexture(GL_TEXTURE0 + imageUnitSpace + specularNr);
+            glBindTexture(GL_TEXTURE_2D, mesh.textures[i]._id);
+            specularNr++;
+            break;
+        case NORMAL:
+            imageUnitSpace = 20;
+            break;
+        case HEIGHT:
+            imageUnitSpace = 30;
+            break;
+        default:
+            imageUnitSpace = 0;
+            break;
+        }
+
     }
 }
