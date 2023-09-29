@@ -3,7 +3,7 @@
 
 Scene::Scene():
 	activeCameraID(0),
-	_ambientLight(0.1f, { 1.0f, 1.0f, 1.0f })
+	_ambientLight(0.2f, { 1.0f, 1.0f, 1.0f })
 {
 	;
 }

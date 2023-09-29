@@ -73,9 +73,6 @@ SceneObjectFactory::SceneObjectFactory(Scene* scene, GraphicalEngine* engine)
     {
         ModelObject& cube = create_Model("res/models/origin_cube.obj");
         cube.setScale(0.3f);
-
-        LightSource& light = create_LightSource();
-        light.setPosition({10.0f, 15.0f, 0.0f});
     }
 }
 

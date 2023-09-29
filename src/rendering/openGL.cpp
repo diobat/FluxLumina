@@ -154,22 +154,33 @@ void openGL::renderModel(ModelObject &model)
 
 void openGL::lightSetup(const LightSource& light)
 {
+    // Light source position
+    std::array<float, 3> diffPosition = light.getPosition();
+    glm::vec3 diffusePosition = glm::vec3(diffPosition[0], diffPosition[1], diffPosition[2]);
+    _shaderPrograms[0].setUniform3fv("light.position", diffusePosition);
+
     // Ambient light
     std::array<float, 3> ambColor = _scene->getAmbientLight().getColor();
     glm::vec3 ambientColor = glm::vec3(ambColor[0], ambColor[1], ambColor[2]);
-    _shaderPrograms[0].setUniform3fv("ambColor", ambientColor);
+    _shaderPrograms[0].setUniform3fv("light.ambient", ambientColor);
     _shaderPrograms[0].setUniform1f("ambIntensity", _scene->getAmbientLight().getIntensity());
 
     // Diffuse light
     const std::array<float, 3>& diffColor = light.getColor();
     glm::vec3 diffuseColor = glm::vec3(diffColor[0], diffColor[1], diffColor[2]);
-    _shaderPrograms[0].setUniform3fv("diffColor", diffuseColor);
-
+    _shaderPrograms[0].setUniform3fv("light.diffuse", diffuseColor);
     _shaderPrograms[0].setUniform1f("diffIntensity", light.getIntensity());
 
-    std::array<float, 3> diffPosition = light.getPosition();
-    glm::vec3 diffusePosition = glm::vec3(diffPosition[0], diffPosition[1], diffPosition[2]);
-    _shaderPrograms[0].setUniform3fv("diffPosition", diffusePosition);
+    // Specular light
+    _shaderPrograms[0].setUniform3fv("light.specular", glm::vec3{0.25f, 0.25f, 0.25f});
+
+
+    // Attenuation factors
+    const std::array<float, 3>& attFactors = light.getAttenuationFactors();
+    _shaderPrograms[0].setUniform1f("light.constant", attFactors[0]);
+    _shaderPrograms[0].setUniform1f("light.linear", attFactors[1]);
+    _shaderPrograms[0].setUniform1f("light.quadratic", attFactors[2]);
+
 }
 
 void openGL::resizeWindow(GLFWwindow* window, int width, int height)

@@ -10,9 +10,14 @@ struct Material
 struct Light
 {
 	vec3 position;
+
 	vec3 ambient;
 	vec3 diffuse;
 	vec3 specular;
+
+	float constant;
+	float linear;
+	float quadratic;
 };
 
 // Inputs from the vertex shader
@@ -33,7 +38,6 @@ uniform int sampleFromSpecular;
 uniform vec3 ambColor;
 uniform float ambIntensity;
 
-uniform vec3 diffPosition;
 uniform vec3 diffColor;
 uniform float diffIntensity;
 
@@ -43,18 +47,26 @@ out vec4 fragColor;
 
 void main()
 {   
+	// Attenuation
+	float distance = length(light.position - FragPos);
+	float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));
+
 	// Ambient light
-	vec4 ambient = ambIntensity * vec4(ambColor, 1.0);
+	vec4 ambient = vec4(0.0);
+	if(sampleFromDiffuse == 0)
+		vec4 ambient = ambIntensity * vec4(light.ambient, 1.0) * vec4(objectColor,1.0);
+	else 
+		vec4 ambient = ambIntensity * vec4(light.ambient, 1.0) * texture(material.diffuse, TexCoords);
 
 	// Diffuse light
 	vec3 norm = normalize(Normal);
-	vec3 diffLightDir = normalize(diffPosition - FragPos);
+	vec3 diffLightDir = normalize(light.position - FragPos);
 	float diff = max(dot(Normal, diffLightDir), 0.0); // The impact of diff light on the vertex is the dot product of the light direction and the normal
 	vec4 diffuse = vec4(0.0);
 	if(sampleFromDiffuse == 0)
 		diffuse = diff * vec4(objectColor, 1.0);
 	else 
-		diffuse = (diff * texture(material.diffuse, TexCoords));
+		diffuse = vec4(light.diffuse, 1.0) * (diff * texture(material.diffuse, TexCoords));
 
 	//Specular light
     vec3 viewDir = normalize(viewPos - FragPos);
@@ -62,11 +74,9 @@ void main()
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
 	vec4 specular = vec4(0.0);
 	if(sampleFromSpecular == 0)
-		specular = spec * vec4(objectColor, 1.0);
+		;
 	else
-    	specular =  (spec * texture(material.specular, TexCoords));  
+    	specular = vec4(light.specular, 1.0) * (spec * texture(material.specular, TexCoords));  
 
-	vec4 resultColor = ambient + diffuse + specular;
-
-	fragColor = resultColor;
+	fragColor = ambient +  (diffuse + specular) * attenuation;
 }

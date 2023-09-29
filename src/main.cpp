@@ -61,10 +61,14 @@ int main(void)
     ModelObject& mothership = factory.create_Model("res/models/Mothership/Mothership.obj");
     mothership.setPosition({0.0f, 10.0f, 7.5f});
     mothership.setScale(0.001f);
-    mothership.rotate(0.0f, 180.0f, 90.0f);
+    //mothership.rotate(0.0f, 180.0f, 90.0f);
 
     ModelObject& backpack = factory.create_Model("res/models/backpack/backpack.obj", true);
     backpack.setPosition({0.0f, 3.0f, -7.5f});
+
+    LightSource &light = factory.create_LightSource();
+    light.setPosition({5.0f, 5.0f, -5.0f});
+    light.setAttenuationFactors({1.0f, 0.09f, 0.032f});
 
     // User Input handler
     std::shared_ptr<UserInput::glfwKeyboardScanner> userInput = std::make_shared<UserInput::glfwKeyboardScanner>(graphicalEngine.getWindowPtr());

@@ -30,6 +30,15 @@ const std::array<float, 3>& LightSource::getColor() const
     return _color;
 }
 
+void LightSource::setAttenuationFactors(std::array<float, 3> attenuationFactors)
+{
+    _attenuationFactors = attenuationFactors;
+}
+
+const std::array<float, 3>& LightSource::getAttenuationFactors() const
+{
+    return _attenuationFactors;
+}
 
 AmbientLight::AmbientLight(float intensity, std::array<float, 3> color) : 
     _intensity(intensity),
@@ -37,7 +46,6 @@ AmbientLight::AmbientLight(float intensity, std::array<float, 3> color) :
 {
     ;
 }
-
 
 // Ambient Light
 void AmbientLight::setIntensity(float intensity)
