@@ -17,6 +17,7 @@
 #include "rendering/Shader.h"
 #include "rendering/texture.h"
 #include "user_input/glfwUserInputScanner.h"
+#include "util/Arithmetic.h"
 
 class openGL : public GraphicalEngine//, public I_Listener
 {
@@ -38,6 +39,11 @@ public:
 	void bindTextures(Mesh &texture);
 	void renderModel(ModelObject &model);
 	void lightSetup(const LightSource &light);
+	void lightSetup(unsigned int shaderIndex, const DirectionalLight &light);
+	void lightSetup(unsigned int shaderIndex, const PointLight &light);
+	void lightSetup(unsigned int shaderIndex, const SpotLight &light);
+
+	void allLightsSetup(const LightContents &lights);
 
 private:
 	void drawSingleModel();

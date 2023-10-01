@@ -13,6 +13,7 @@
 
 // First-party includes
 #include <scene/sceneObject.h>
+#include <util/Arithmetic.h>
 
 enum class relativeDirections : unsigned int
 {
@@ -24,7 +25,7 @@ enum class relativeDirections : unsigned int
 	DOWN
 };
 
-class Camera : public SceneObject
+class Camera
 {
 public:
 	Camera();
@@ -32,7 +33,8 @@ public:
 	glm::mat4 recalculateMVP();
 
 	void setPosition(const std::array<float, 3>& position);
-	glm::vec3 getPosition() const;
+	const glm::vec3& getPosition() const;
+
 	void setRotation(const std::array<float, 2>& rotation);
 	void addRotationDelta(const std::array<float, 2>& rotationDelta);
 

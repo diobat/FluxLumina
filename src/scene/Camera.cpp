@@ -53,7 +53,7 @@ void Camera::setPosition(const std::array<float, 3>& position)
 	_position = glm::vec3(position[0], position[1], position[2]);
 }
 
-glm::vec3 Camera::getPosition() const
+const glm::vec3 &Camera::getPosition() const
 {
 	return _position;
 }

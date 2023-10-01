@@ -38,7 +38,7 @@ public:
     Mesh processMesh(Model& model, aiMesh* mesh, const aiScene* scene);
     std::vector<Texture> loadMaterialTextures(Model &model, aiMaterial *mat, aiTextureType type);
 
-    LightSource& create_LightSource(bool debugSphere = false);
+    std::shared_ptr<LightSource> create_LightSource(E_LightType type);
     void create_Camera();
 
 private:

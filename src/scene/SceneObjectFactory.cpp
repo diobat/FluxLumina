@@ -257,12 +257,29 @@ std::vector<Texture> SceneObjectFactory::loadMaterialTextures(Model &model, aiMa
     return materialTextures;
 }
 
-LightSource& SceneObjectFactory::create_LightSource(bool debugSphere)
+std::shared_ptr<LightSource> SceneObjectFactory::create_LightSource(E_LightType type)
 {
-    std::shared_ptr<LightSource> light = std::make_shared<LightSource>(debugSphere);
+    std::shared_ptr<LightSource> light;
+
+    switch(type)
+    {
+        case E_LightType::DIRECTIONAL_LIGHT:
+            light = std::make_shared<DirectionalLight>();
+            break;
+        case E_LightType::POINT_LIGHT:
+            light = std::make_shared<PointLight>();
+            break;
+        case E_LightType::SPOT_LIGHT:
+            light = std::make_shared<SpotLight>();
+            break;
+        default:
+            light = nullptr;
+            break;
+    }
+
     _boundScene->addLightSource(light);
 
-    return *light;
+    return light;
 }
 
 void SceneObjectFactory::create_Camera()

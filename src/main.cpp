@@ -66,9 +66,9 @@ int main(void)
     ModelObject& backpack = factory.create_Model("res/models/backpack/backpack.obj", true);
     backpack.setPosition({0.0f, 3.0f, -7.5f});
 
-    LightSource &light = factory.create_LightSource();
-    light.setPosition({5.0f, 5.0f, -5.0f});
-    light.setAttenuationFactors({1.0f, 0.09f, 0.032f});
+    auto light = factory.create_LightSource( E_LightType::POINT_LIGHT);
+    light->setPosition({5.0f, 5.0f, -5.0f});
+    light->setAttenuationFactors({1.0f, 0.09f, 0.032f});
 
     // User Input handler
     std::shared_ptr<UserInput::glfwKeyboardScanner> userInput = std::make_shared<UserInput::glfwKeyboardScanner>(graphicalEngine.getWindowPtr());

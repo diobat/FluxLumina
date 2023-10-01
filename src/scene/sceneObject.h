@@ -12,8 +12,8 @@ public:
     SceneObject();
     virtual ~SceneObject();
 
-    void setPosition(const std::array<float, 3>& coords);
-    const std::array<float, 3>& getPosition() const;
+    virtual void setPosition(const std::array<float, 3>& coords);
+    virtual const std::array<float, 3>& getPosition() const;
 
     void setScale (float scale);
     float getScale();

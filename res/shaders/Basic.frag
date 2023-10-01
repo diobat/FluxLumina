@@ -158,30 +158,25 @@ void main()
 {
 	vec3 totalLight = vec3(0.0);
 
-	if(sampleFromDiffuse == 1)
-	{
-		// Calculate common input arguments for all the light calculations
-		vec3 norm = normalize(Normal);
-		vec3 viewDir = normalize(viewPos - FragPos);
-		// 1 - Directional Lights
-		for(int i = 0; i < numDirLights; i++)
-		{
-			totalLight += CalcDirLight(dirLight[i], norm, viewDir);
-		}
 
-		// 2 - Point Lights
-		for(int i = 0; i < numPointLights; i++)
-		{
-			totalLight += CalcPointLight(pointLight[i], norm, FragPos, viewDir);
-		}
-
-		// 3 - Spot light
-		// totalLight += calcSpotLight(spotLight, norm, FragPos, viewDir);
-	}
-	else
+	// Calculate common input arguments for all the light calculations
+	vec3 norm = normalize(Normal);
+	vec3 viewDir = normalize(viewPos - FragPos);
+	// 1 - Directional Lights
+	for(int i = 0; i < numDirLights; i++)
 	{
-		totalLight = objectColor;
+		totalLight += CalcDirLight(dirLight[i], norm, viewDir);
 	}
+
+	// 2 - Point Lights
+	for(int i = 0; i < numPointLights; i++)
+	{
+		totalLight += CalcPointLight(pointLight[i], norm, FragPos, viewDir);
+	}
+
+	// 3 - Spot light
+	// totalLight += calcSpotLight(spotLight, norm, FragPos, viewDir);
+
 
 
 	fragColor = vec4(totalLight, 1.0);
