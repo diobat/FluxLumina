@@ -70,6 +70,16 @@ int main(void)
     light->setPosition({5.0f, 5.0f, -5.0f});
     light->setAttenuationFactors({1.0f, 0.09f, 0.032f});
 
+    // auto light2 = factory.create_LightSource( E_LightType::POINT_LIGHT);
+    // light2->setPosition({-15.0f, 5.0f, -5.0f});
+    // light2->setAttenuationFactors({1.0f, 0.09f, 0.032f});
+
+    auto light3 = factory.create_LightSource( E_LightType::SPOT_LIGHT);
+    auto light4 = std::dynamic_pointer_cast<SpotLight>(light3);
+    light4->setPosition({0.0f, 10.0f, 0.0f});
+    // light4->setDirection({0.0f, -1.0f, -1.5f});
+    //light4->pointAt(backpack.getPosition());
+
     // User Input handler
     std::shared_ptr<UserInput::glfwKeyboardScanner> userInput = std::make_shared<UserInput::glfwKeyboardScanner>(graphicalEngine.getWindowPtr());
     update(graphicalEngine, userInput);

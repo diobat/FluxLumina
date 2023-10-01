@@ -49,7 +49,7 @@ public:
         float intensity = 0.8f, 
         const std::array<float, 3>& color = {1.0f, 1.0f, 1.0f}
         );
-    ~DirectionalLight() {};
+    ~DirectionalLight() = default;
 
     // Direction setter and getter just wrap the position setter and getter
     void setDirection(std::array<float, 3> direction);
@@ -66,6 +66,7 @@ public:
         const std::array<float, 3> &color = {1.0f, 1.0f, 1.0f},
         const std::array<float, 3> &attenuationFactors = {1.0f, 0.0f, 0.0f}
         );
+    ~PointLight() = default;
 
 
 };
@@ -77,12 +78,14 @@ public:
         float intensity = 0.8f,
         std::array<float, 3> color = {1.0f, 1.0f, 1.0f},
         const std::array<float, 3> &attenuationFactors = { 1.0f, 0.0f, 0.0f },
+        const std::array<float, 3>& direction = { 0.0f, -1.0f, 0.0f },
         float cutoff = 10.0f
         );
-    ~SpotLight() {};
+    ~SpotLight() = default;
 
     void setDirection(std::array<float, 3> direction);
     const std::array<float, 3>& getDirection() const;
+    void pointAt(const std::array<float, 3>& point);
 
     void setCutoff(float cutoff);
     float getCutoff() const;
@@ -97,7 +100,7 @@ class AmbientLight : public LightSource
 {
 public:
     AmbientLight(float intensity = 0.5f, std::array<float, 3> color = {1.0f, 1.0f, 1.0f});
-    ~AmbientLight() {};
+    ~AmbientLight() = default;
 
     void setIntensity(float intensity);
     float getIntensity() const;

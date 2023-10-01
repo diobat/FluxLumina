@@ -274,6 +274,7 @@ std::shared_ptr<LightSource> SceneObjectFactory::create_LightSource(E_LightType 
             break;
         default:
             light = nullptr;
+            return light;
             break;
     }
 

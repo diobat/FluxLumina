@@ -38,12 +38,12 @@ public:
 	void initializeTexture(Texture& texture);
 	void bindTextures(Mesh &texture);
 	void renderModel(ModelObject &model);
-	void lightSetup(const LightSource &light);
+
+	void allLightsSetup(const LightContents &lights);
 	void lightSetup(unsigned int shaderIndex, const DirectionalLight &light);
 	void lightSetup(unsigned int shaderIndex, const PointLight &light);
 	void lightSetup(unsigned int shaderIndex, const SpotLight &light);
 
-	void allLightsSetup(const LightContents &lights);
 
 private:
 	void drawSingleModel();
