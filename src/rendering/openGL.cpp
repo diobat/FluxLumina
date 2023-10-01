@@ -37,7 +37,7 @@ int openGL::initialize()
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    _window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Hello Modern GL!", nullptr, nullptr);
+    _window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Espigão Simulator 3000", nullptr, nullptr);
 
     if (!_window)
     {
@@ -102,23 +102,13 @@ void openGL::renderFrame()
     _shaderPrograms[0].setUniformMatrix4fv("projection", _scene->getActiveCamera()->getProjectionMatrix());
     _shaderPrograms[0].setUniform3fv("viewPos", _scene->getActiveCamera()->getPosition());
 
-    for (auto model : _scene->getAllObjects())
-    {
-        // Models
-        ModelObject* modelObject = dynamic_cast<ModelObject*>(&(*model));
-        if (modelObject != nullptr)
-        {
-            renderModel(*modelObject);
-            continue;
-        }
+    // Light
+    allLightsSetup(_scene->getAllLights());
 
-        // Light sources
-        std::shared_ptr<LightSource> lightSourceObject = std::dynamic_pointer_cast<LightSource>(model);
-        if (lightSourceObject != nullptr)
-        {
-            lightSetup(*lightSourceObject);
-            continue;
-        }
+
+    for (auto model : _scene->getAllModels())
+    {
+        renderModel(*model);
     }
 }
 
@@ -182,6 +172,67 @@ void openGL::lightSetup(const LightSource& light)
     _shaderPrograms[0].setUniform1f("light.quadratic", attFactors[2]);
 
 }
+
+void openGL::allLightsSetup(const LightContents &lights)
+{
+    
+    auto directionalLights = lights.directionalLights;
+
+    _shaderPrograms[0].setUniform1i("numDirLights", directionalLights.size());
+    for(unsigned int i(0); i<directionalLights.size(); ++i)
+    {
+        lightSetup(i, *directionalLights[i]);
+    }
+
+    auto pointLights = lights.pointLights;
+    _shaderPrograms[0].setUniform1i("numPointLights", pointLights.size());
+    for(unsigned int i(0); i<pointLights.size(); ++i)
+    {
+        lightSetup(i, *pointLights[i]);
+    }
+
+
+}
+
+void openGL::lightSetup(unsigned int shaderIndex, const DirectionalLight &light)
+{
+    // Direction
+    glm::vec3 direction = conversion::toVec3(light.getDirection());
+    _shaderPrograms[0].setUniform3fv("dirLight[" + std::to_string(shaderIndex) + "].direction", direction);
+
+    // Color
+    glm::vec3 color = conversion::toVec3(light.getColor());
+    _shaderPrograms[0].setUniform3fv("dirLight[" + std::to_string(shaderIndex) + "].ambient", color);
+    _shaderPrograms[0].setUniform3fv("dirLight[" + std::to_string(shaderIndex) + "].diffuse", color);
+    _shaderPrograms[0].setUniform3fv("dirLight[" + std::to_string(shaderIndex) + "].specular", color);
+
+}
+
+void openGL::lightSetup(unsigned int shaderIndex, const PointLight &light)
+{
+    // Position
+    glm::vec3 position = conversion::toVec3(light.getPosition());
+    _shaderPrograms[0].setUniform3fv("pointLight[" + std::to_string(shaderIndex) + "].position", position);
+
+    // Color
+    glm::vec3 color = conversion::toVec3(light.getColor());
+    _shaderPrograms[0].setUniform3fv("pointLight[" + std::to_string(shaderIndex) + "].ambient", color);
+    _shaderPrograms[0].setUniform3fv("pointLight[" + std::to_string(shaderIndex) + "].diffuse", color);
+    _shaderPrograms[0].setUniform3fv("pointLight[" + std::to_string(shaderIndex) + "].specular", color);
+
+    // Attenuation factors
+    const std::array<float, 3>& attFactors = light.getAttenuationFactors();
+    _shaderPrograms[0].setUniform1f("pointLight[" + std::to_string(shaderIndex) + "].constant", attFactors[0]);
+    _shaderPrograms[0].setUniform1f("pointLight[" + std::to_string(shaderIndex) + "].linear", attFactors[1]);
+    _shaderPrograms[0].setUniform1f("pointLight[" + std::to_string(shaderIndex) + "].quadratic", attFactors[2]);
+
+}
+
+void openGL::lightSetup(unsigned int shaderIndex, const SpotLight &light)
+{
+
+}
+
 
 void openGL::resizeWindow(GLFWwindow* window, int width, int height)
 {
