@@ -6,12 +6,10 @@ layout(location = 1) in vec3 aNormal;
 layout(location = 2) in vec2 aTexCoords;
 layout(location = 3) in vec3 aObjectColor;
 
-
 // Uniforms
 uniform mat4 model;			// Model matrix
 uniform mat4 view;			// View matrix
 uniform mat4 projection;	// Projection matrix
-
 
 // Output
 out vec3 objectColor;
