@@ -87,12 +87,12 @@ public:
     const std::array<float, 3>& getDirection() const;
     void pointAt(const std::array<float, 3>& point);
 
-    void setCutoff(float cutoff);
-    float getCutoff() const;
+    void setCutoff(float cutoff, float delta = 1.0f);
+    const std::array<float, 2>& getCutoff() const;
 
 private:
     std::array<float, 3> _direction;
-    float _cutoff;
+    std::array<float, 2> _cutoff;
 
 };
 

@@ -225,8 +225,9 @@ void openGL::lightSetup(unsigned int shaderIndex, const SpotLight &light)
     _shaderPrograms[0].setUniform1f("spotLight[" + std::to_string(shaderIndex) + "].quadratic", attFactors[2]);
 
     // Cutoff
-    _shaderPrograms[0].setUniform1f("spotLight[" + std::to_string(shaderIndex) + "].cutOff", glm::cos(glm::radians(light.getCutoff())));
-
+    std::array<float, 2> cutoff = light.getCutoff();
+    _shaderPrograms[0].setUniform1f("spotLight[" + std::to_string(shaderIndex) + "].innerCutOff", glm::cos(glm::radians(cutoff[0])));
+    _shaderPrograms[0].setUniform1f("spotLight[" + std::to_string(shaderIndex) + "].outerCutOff", glm::cos(glm::radians(cutoff[1])));
 }
 
 

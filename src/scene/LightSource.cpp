@@ -78,10 +78,9 @@ PointLight::PointLight(float intensity,const std::array<float, 3>& color, const 
 
 SpotLight::SpotLight(float intensity, std::array<float, 3> color,const std::array<float, 3>& attenuationFactors, const std::array<float, 3> & direction, float cutoff) :
     LightSource(intensity, color),
-    _cutoff(cutoff),
     _direction(direction)
 {
-    _cutoff = 20.0f;
+    _cutoff = {cutoff, cutoff * 1.7f};
 }
 
 void SpotLight::setDirection(std::array<float, 3> direction)
@@ -103,13 +102,14 @@ void SpotLight::pointAt(const std::array<float, 3>& point)
     _direction = Math::normalize({x, y, z});
 }
 
-void SpotLight::setCutoff(float cutoff)
+void SpotLight::setCutoff(float cutoff, float delta)
 {
-    _cutoff = std::min(std::max(cutoff, 0.0f), 45.0f);
+    _cutoff[0] = std::min(std::max(cutoff, 0.0f), 45.0f);
+    _cutoff[1] = _cutoff[0] + delta;
 }
 
 
-float SpotLight::getCutoff() const
+const std::array<float, 2>& SpotLight::getCutoff() const
 {
     return _cutoff;
 }
