@@ -67,8 +67,6 @@ public:
         const std::array<float, 3> &attenuationFactors = {1.0f, 0.0f, 0.0f}
         );
     ~PointLight() = default;
-
-
 };
 
 class SpotLight : public LightSource

@@ -14,7 +14,5 @@ namespace Math
 namespace conversion
 {
     std::array<float, 3> toFloat3(const glm::vec3& vec);
-
     glm::vec3 toVec3(const std::array<float, 3> &vec);
-
 }
