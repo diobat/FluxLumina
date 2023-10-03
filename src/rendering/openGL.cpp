@@ -59,8 +59,8 @@ int openGL::initialize()
     glClearColor(0.6784f, 0.8f, 1.0f, 1.0f);
     glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 
+    // Enable depth test
     glEnable(GL_DEPTH_TEST);
-
     // Accept fragment if it closer to the camera than the former one
     glDepthFunc(GL_LESS);
 
@@ -90,6 +90,7 @@ int openGL::initialize()
 
 void openGL::renderFrame()
 {
+    // Reset color and depth buffers
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Shader
@@ -229,7 +230,6 @@ void openGL::lightSetup(unsigned int shaderIndex, const SpotLight &light)
     _shaderPrograms[0].setUniform1f("spotLight[" + std::to_string(shaderIndex) + "].innerCutOff", glm::cos(glm::radians(cutoff[0])));
     _shaderPrograms[0].setUniform1f("spotLight[" + std::to_string(shaderIndex) + "].outerCutOff", glm::cos(glm::radians(cutoff[1])));
 }
-
 
 void openGL::resizeWindow(GLFWwindow* window, int width, int height)
 {

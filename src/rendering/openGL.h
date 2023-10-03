@@ -36,23 +36,22 @@ public:
 
 	void initializeMesh(Mesh& mesh);
 	void initializeTexture(Texture& texture);
-	void bindTextures(Mesh &texture);
+	void bindTextures(Mesh &mesh);
 	void renderModel(ModelObject &model);
+
+private:
+	void drawSingleModel();
 
 	void allLightsSetup(const LightContents &lights);
 	void lightSetup(unsigned int shaderIndex, const DirectionalLight &light);
 	void lightSetup(unsigned int shaderIndex, const PointLight &light);
 	void lightSetup(unsigned int shaderIndex, const SpotLight &light);
 
-
-private:
-	void drawSingleModel();
-
 	GLFWwindow* _window;
-	std::shared_ptr<Scene> _scene;
-	std::shared_ptr<UserInput::glfwKeyboardScanner> _userInput;
 
+	std::shared_ptr<UserInput::glfwKeyboardScanner> _userInput;
 	std::shared_ptr<Camera> _camera;
+
 	std::vector<Shader> _shaderPrograms;
 
 };
