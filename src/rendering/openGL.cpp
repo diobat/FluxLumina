@@ -76,14 +76,11 @@ int openGL::initialize()
     // End window resize code
 
     // Select shader program to use
-    Shader shader("Basic.vert", "Basic.frag");
+    auto shader = std::make_shared<Shader>("Basic.vert", "Basic.frag");
     _shaderPrograms.push_back(shader);
-    _shaderPrograms[0].apply();
-
-    // Texture newTexture;
-    // newTexture.load("res/models/alliance.png");
-    // _textures.push_back(newTexture);
-
+    auto shader2 = std::make_shared<Shader>("Simple.vert", "Simple.frag");
+    _shaderPrograms.push_back(shader2);
+    useShader(0);
 
     return 1;
 }
@@ -93,24 +90,25 @@ void openGL::renderFrame()
     // Reset color and depth buffers
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // Shader
-    _shaderPrograms[0].apply();
+    //Default shader
+    useShader(0);
 
     // Camera
-    _scene->getActiveCamera()->recalculateMVP();
-
-    _shaderPrograms[0].setUniformMatrix4fv("view", _scene->getActiveCamera()->getViewMatrix());
-    _shaderPrograms[0].setUniformMatrix4fv("projection", _scene->getActiveCamera()->getProjectionMatrix());
-    _shaderPrograms[0].setUniform3fv("viewPos", _scene->getActiveCamera()->getPosition());
+    cameraSetup();
 
     // Light
     allLightsSetup(_scene->getAllLights());
 
-
-    for (auto model : _scene->getAllModels())
+    // Draw models
+    for(int i(0); i<_shaderPrograms.size(); i++)
     {
-        renderModel(*model);
+        useShader(i);
+        for (auto model : _scene->getModels(_shaderPrograms[i]->getProgramId()))
+        {
+            renderModel(*model);
+        }
     }
+
 }
 
 void openGL::renderModel(ModelObject &model)
@@ -128,7 +126,7 @@ void openGL::renderModel(ModelObject &model)
     glm::fquat std_quat = model.getRotation();
     modelMatrix = modelMatrix * glm::mat4_cast(std_quat);
 
-    _shaderPrograms[0].setUniformMatrix4fv("model", modelMatrix);
+    _shaderPrograms[currentShaderIndex]->setUniformMatrix4fv("model", modelMatrix);
 
     for (auto &one_mesh : model.getModel()->meshes)
     {
@@ -143,25 +141,37 @@ void openGL::renderModel(ModelObject &model)
     }
 }
 
+void openGL::cameraSetup()
+{
+    // Camera
+    _scene->getActiveCamera()->recalculateMVP();
+    for (int i(0); i < _shaderPrograms.size(); i++)
+    {
+        _shaderPrograms[i]->setUniformMatrix4fv("view", _scene->getActiveCamera()->getViewMatrix());
+        _shaderPrograms[i]->setUniformMatrix4fv("projection", _scene->getActiveCamera()->getProjectionMatrix());
+        _shaderPrograms[i]->setUniform3fv("viewPos", _scene->getActiveCamera()->getPosition());
+    }
+}
+
 void openGL::allLightsSetup(const LightContents &lights)
 {
     
     auto directionalLights = lights.directionalLights;
-    _shaderPrograms[0].setUniform1i("numDirLights", directionalLights.size());
+    _shaderPrograms[currentShaderIndex]->setUniform1i("numDirLights", directionalLights.size());
     for(unsigned int i(0); i<directionalLights.size(); ++i)
     {
         lightSetup(i, *directionalLights[i]);
     }
 
     auto pointLights = lights.pointLights;
-    _shaderPrograms[0].setUniform1i("numPointLights", pointLights.size());
+    _shaderPrograms[currentShaderIndex]->setUniform1i("numPointLights", pointLights.size());
     for(unsigned int i(0); i<pointLights.size(); ++i)
     {
         lightSetup(i, *pointLights[i]);
     }
 
     auto spotLights = lights.spotLights;
-    _shaderPrograms[0].setUniform1i("numSpotLights", spotLights.size());
+    _shaderPrograms[currentShaderIndex]->setUniform1i("numSpotLights", spotLights.size());
     for(unsigned int i(0); i<spotLights.size(); ++i)
     {
         lightSetup(i, *spotLights[i]);
@@ -169,66 +179,64 @@ void openGL::allLightsSetup(const LightContents &lights)
 
 }
 
-void openGL::lightSetup(unsigned int shaderIndex, const DirectionalLight &light)
+void openGL::lightSetup(unsigned int lightIndex, const DirectionalLight &light)
 {
     // Direction
     glm::vec3 direction = conversion::toVec3(light.getDirection());
-    _shaderPrograms[0].setUniform3fv("dirLight[" + std::to_string(shaderIndex) + "].direction", direction);
+    _shaderPrograms[currentShaderIndex]->setUniform3fv("dirLight[" + std::to_string(lightIndex) + "].direction", direction);
 
     // Color
     glm::vec3 color = conversion::toVec3(light.getColor());
-    _shaderPrograms[0].setUniform3fv("dirLight[" + std::to_string(shaderIndex) + "].ambient", color);
-    _shaderPrograms[0].setUniform3fv("dirLight[" + std::to_string(shaderIndex) + "].diffuse", color);
-    _shaderPrograms[0].setUniform3fv("dirLight[" + std::to_string(shaderIndex) + "].specular", color);
-
+    _shaderPrograms[currentShaderIndex]->setUniform3fv("dirLight[" + std::to_string(lightIndex) + "].ambient", color);
+    _shaderPrograms[currentShaderIndex]->setUniform3fv("dirLight[" + std::to_string(lightIndex) + "].diffuse", color);
+    _shaderPrograms[currentShaderIndex]->setUniform3fv("dirLight[" + std::to_string(lightIndex) + "].specular", color);
 }
 
-void openGL::lightSetup(unsigned int shaderIndex, const PointLight &light)
+void openGL::lightSetup(unsigned int lightIndex, const PointLight &light)
 {
     // Position
     glm::vec3 position = conversion::toVec3(light.getPosition());
-    _shaderPrograms[0].setUniform3fv("pointLight[" + std::to_string(shaderIndex) + "].position", position);
+    _shaderPrograms[currentShaderIndex]->setUniform3fv("pointLight[" + std::to_string(lightIndex) + "].position", position);
 
     // Color
     glm::vec3 color = conversion::toVec3(light.getColor());
-    _shaderPrograms[0].setUniform3fv("pointLight[" + std::to_string(shaderIndex) + "].ambient", color);
-    _shaderPrograms[0].setUniform3fv("pointLight[" + std::to_string(shaderIndex) + "].diffuse", color);
-    _shaderPrograms[0].setUniform3fv("pointLight[" + std::to_string(shaderIndex) + "].specular", color);
+    _shaderPrograms[currentShaderIndex]->setUniform3fv("pointLight[" + std::to_string(lightIndex) + "].ambient", color);
+    _shaderPrograms[currentShaderIndex]->setUniform3fv("pointLight[" + std::to_string(lightIndex) + "].diffuse", color);
+    _shaderPrograms[currentShaderIndex]->setUniform3fv("pointLight[" + std::to_string(lightIndex) + "].specular", color);
 
     // Attenuation factors
     const std::array<float, 3>& attFactors = light.getAttenuationFactors();
-    _shaderPrograms[0].setUniform1f("pointLight[" + std::to_string(shaderIndex) + "].constant", attFactors[0]);
-    _shaderPrograms[0].setUniform1f("pointLight[" + std::to_string(shaderIndex) + "].linear", attFactors[1]);
-    _shaderPrograms[0].setUniform1f("pointLight[" + std::to_string(shaderIndex) + "].quadratic", attFactors[2]);
-
+    _shaderPrograms[currentShaderIndex]->setUniform1f("pointLight[" + std::to_string(lightIndex) + "].constant", attFactors[0]);
+    _shaderPrograms[currentShaderIndex]->setUniform1f("pointLight[" + std::to_string(lightIndex) + "].linear", attFactors[1]);
+    _shaderPrograms[currentShaderIndex]->setUniform1f("pointLight[" + std::to_string(lightIndex) + "].quadratic", attFactors[2]);
 }
 
-void openGL::lightSetup(unsigned int shaderIndex, const SpotLight &light)
+void openGL::lightSetup(unsigned int lightIndex, const SpotLight &light)
 {
     // Position
     glm::vec3 position = conversion::toVec3(light.getPosition());
-    _shaderPrograms[0].setUniform3fv("spotLight[" + std::to_string(shaderIndex) + "].position", position);
+    _shaderPrograms[currentShaderIndex]->setUniform3fv("spotLight[" + std::to_string(lightIndex) + "].position", position);
 
     // Direction
     glm::vec3 direction = conversion::toVec3(light.getDirection());
-    _shaderPrograms[0].setUniform3fv("spotLight[" + std::to_string(shaderIndex) + "].direction", direction);
+    _shaderPrograms[currentShaderIndex]->setUniform3fv("spotLight[" + std::to_string(lightIndex) + "].direction", direction);
 
     // Color
     glm::vec3 color = conversion::toVec3(light.getColor());
-    _shaderPrograms[0].setUniform3fv("spotLight[" + std::to_string(shaderIndex) + "].ambient", color);
-    _shaderPrograms[0].setUniform3fv("spotLight[" + std::to_string(shaderIndex) + "].diffuse", color);
-    _shaderPrograms[0].setUniform3fv("spotLight[" + std::to_string(shaderIndex) + "].specular", color);
+    _shaderPrograms[currentShaderIndex]->setUniform3fv("spotLight[" + std::to_string(lightIndex) + "].ambient", color);
+    _shaderPrograms[currentShaderIndex]->setUniform3fv("spotLight[" + std::to_string(lightIndex) + "].diffuse", color);
+    _shaderPrograms[currentShaderIndex]->setUniform3fv("spotLight[" + std::to_string(lightIndex) + "].specular", color);
 
     // Attenuation factors
     const std::array<float, 3>& attFactors = light.getAttenuationFactors();
-    _shaderPrograms[0].setUniform1f("spotLight[" + std::to_string(shaderIndex) + "].constant", attFactors[0]);
-    _shaderPrograms[0].setUniform1f("spotLight[" + std::to_string(shaderIndex) + "].linear", attFactors[1]);
-    _shaderPrograms[0].setUniform1f("spotLight[" + std::to_string(shaderIndex) + "].quadratic", attFactors[2]);
+    _shaderPrograms[currentShaderIndex]->setUniform1f("spotLight[" + std::to_string(lightIndex) + "].constant", attFactors[0]);
+    _shaderPrograms[currentShaderIndex]->setUniform1f("spotLight[" + std::to_string(lightIndex) + "].linear", attFactors[1]);
+    _shaderPrograms[currentShaderIndex]->setUniform1f("spotLight[" + std::to_string(lightIndex) + "].quadratic", attFactors[2]);
 
     // Cutoff
     std::array<float, 2> cutoff = light.getCutoff();
-    _shaderPrograms[0].setUniform1f("spotLight[" + std::to_string(shaderIndex) + "].innerCutOff", glm::cos(glm::radians(cutoff[0])));
-    _shaderPrograms[0].setUniform1f("spotLight[" + std::to_string(shaderIndex) + "].outerCutOff", glm::cos(glm::radians(cutoff[1])));
+    _shaderPrograms[currentShaderIndex]->setUniform1f("spotLight[" + std::to_string(lightIndex) + "].innerCutOff", glm::cos(glm::radians(cutoff[0])));
+    _shaderPrograms[currentShaderIndex]->setUniform1f("spotLight[" + std::to_string(lightIndex) + "].outerCutOff", glm::cos(glm::radians(cutoff[1])));
 }
 
 void openGL::resizeWindow(GLFWwindow* window, int width, int height)
@@ -243,6 +251,7 @@ void openGL::resizeWindow(GLFWwindow* window, int width, int height)
 
 void openGL::initializeMesh(Mesh& mesh)
 {
+
     // create buffers/arrays
     glGenVertexArrays(1, &mesh.VAO);
     glGenBuffers(1, &mesh.VBO);
@@ -298,8 +307,8 @@ void openGL::bindTextures(Mesh& mesh)
     unsigned int diffuseNr = 0;
     unsigned int specularNr = 0;
 
-    _shaderPrograms[0].setUniform1i("sampleFromDiffuse", 0);
-    _shaderPrograms[0].setUniform1i("sampleFromSpecular", 0);
+    _shaderPrograms[currentShaderIndex]->setUniform1i("sampleFromDiffuse", 0);
+    _shaderPrograms[currentShaderIndex]->setUniform1i("sampleFromSpecular", 0);
 
     if (mesh.textures.size() == 0)
     {
@@ -315,8 +324,8 @@ void openGL::bindTextures(Mesh& mesh)
         {
         case DIFFUSE:
             imageUnitSpace = 0;
-            _shaderPrograms[0].setUniform1i("sampleFromDiffuse", 1);
-            _shaderPrograms[0].setUniform1i("material.diffuse", imageUnitSpace + diffuseNr);
+            _shaderPrograms[currentShaderIndex]->setUniform1i("sampleFromDiffuse", 1);
+            _shaderPrograms[currentShaderIndex]->setUniform1i("material.diffuse", imageUnitSpace + diffuseNr);
             glActiveTexture(GL_TEXTURE0 + imageUnitSpace + diffuseNr);
             //glBindImageTexture(imageUnitSpace + diffuseNr, mesh.textures[i]._id, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA8UI);
             glBindTexture(GL_TEXTURE_2D, mesh.textures[i]._id);
@@ -324,9 +333,9 @@ void openGL::bindTextures(Mesh& mesh)
             break;
         case SPECULAR:
             imageUnitSpace = 10;
-            _shaderPrograms[0].setUniform1i("sampleFromSpecular", 1);
-            _shaderPrograms[0].setUniform1i("material.specular", imageUnitSpace + specularNr);
-            _shaderPrograms[0].setUniform1f("material.shininess", 0.5);
+            _shaderPrograms[currentShaderIndex]->setUniform1i("sampleFromSpecular", 1);
+            _shaderPrograms[currentShaderIndex]->setUniform1i("material.specular", imageUnitSpace + specularNr);
+            _shaderPrograms[currentShaderIndex]->setUniform1f("material.shininess", 0.5);
 
             glActiveTexture(GL_TEXTURE0 + imageUnitSpace + specularNr);
             glBindTexture(GL_TEXTURE_2D, mesh.textures[i]._id);
@@ -344,4 +353,15 @@ void openGL::bindTextures(Mesh& mesh)
         }
 
     }
+}
+
+unsigned int openGL::getShaderProgramID(unsigned int shaderIndex) const
+{
+    return _shaderPrograms[shaderIndex]->getProgramId();
+}
+
+void openGL::useShader(unsigned int shaderIndex)
+{
+    currentShaderIndex = shaderIndex;
+    glUseProgram(_shaderPrograms[shaderIndex]->getProgramId());
 }

@@ -13,6 +13,8 @@ public:
 	virtual void initializeMesh(Mesh &mesh) = 0;
 	virtual void initializeTexture(Texture &texture) = 0;
 
+	virtual unsigned int getShaderProgramID(unsigned int shaderIndex) const = 0;
+
 protected:
 	std::shared_ptr<Scene> _scene;
 };

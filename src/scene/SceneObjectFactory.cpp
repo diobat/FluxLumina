@@ -86,10 +86,13 @@ void SceneObjectFactory::bindEngine(GraphicalEngine *engine)
     _boundEngine = engine;
 }
 
-ModelObject &SceneObjectFactory::create_Model(const std::string &modelPath, bool flipUVs)
+ModelObject &SceneObjectFactory::create_Model(const std::string &modelPath, unsigned int shader, bool flipUVs)
 {
     std::shared_ptr<ModelObject> model_object = std::make_shared<ModelObject>();
     Model& model = (*model_object->getModel());
+
+    // Set the shader in position 0 as the default shader
+    model_object->setShaderIndex(_boundEngine->getShaderProgramID(shader));
 
     flipUVsOnLoad = flipUVs;
 

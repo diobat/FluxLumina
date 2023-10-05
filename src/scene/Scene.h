@@ -3,12 +3,13 @@
 //	STD includes
 #include <vector>
 #include <memory>
+#include <unordered_map>
 
 //	First Party includes
 #include "scene\Camera.h"
 #include "scene\ModelObject.h"
 #include "scene\LightSource.h"
-
+#include "scene\ModelContents.h"
 
 struct LightContents
 {
@@ -20,14 +21,13 @@ struct LightContents
 struct SceneContents
 {
 	std::vector<std::shared_ptr<Camera>> cameras;
-	std::vector<std::shared_ptr<ModelObject>> models;
+	ModelContents models;
 	LightContents lights;
 };
 
-class Scene// : public I_Publisher
+class Scene
 {
 public:
-
 	Scene();
 
 	void addCamera(std::shared_ptr<Camera> cameraToAdd);
@@ -36,8 +36,11 @@ public:
 
 	const SceneContents &getAllObjects() const;
 	const std::vector<std::shared_ptr<Camera>> &getAllCameras() const;
-	const std::vector<std::shared_ptr<ModelObject>> &getAllModels() const;
+	const std::vector<std::shared_ptr<ModelObject>> &getModels(unsigned int shaderIndex) const;
 	const LightContents &getAllLights() const;
+	const ModelContents &getAllModels() const;
+
+	std::vector<unsigned int> getShaderIDs() const;
 
 	AmbientLight& getAmbientLight();
 	std::shared_ptr<Camera> &getActiveCamera();
@@ -49,9 +52,6 @@ private:
 	void addSpotLight(std::shared_ptr<SpotLight> spotLightToAdd);
 
 	unsigned int activeCameraID;
-	
-	//std::vector<std::shared_ptr<Camera>> _cameras;
-	//std::vector<std::shared_ptr<SceneObject>> _objects;
 
 	SceneContents _objects;
 

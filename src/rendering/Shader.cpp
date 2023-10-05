@@ -154,12 +154,9 @@ bool Shader::link()
     return isLinked;
 }
 
-void Shader::apply()
+GLuint Shader::getProgramId() const
 {
-    if (program_id != 0 && isLinked)
-    {
-        glUseProgram(program_id);
-    }
+    return program_id;
 }
 
 bool Shader::getUniformLocation(const std::string & uniform_name)

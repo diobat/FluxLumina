@@ -15,7 +15,7 @@ void Scene::addCamera(std::shared_ptr<Camera> cameraToAdd)
 
 void Scene::addModel(std::shared_ptr<ModelObject> modelToAdd)
 {
-	_objects.models.push_back(modelToAdd);
+	_objects.models.addModel(modelToAdd);
 }
 
 void Scene::addLightSource(std::shared_ptr<LightSource> lightSourceToAdd)
@@ -68,14 +68,24 @@ const std::vector<std::shared_ptr<Camera>> &Scene::getAllCameras() const
 	return _objects.cameras;
 }
 
-const std::vector<std::shared_ptr<ModelObject>> &Scene::getAllModels() const
+const ModelContents &Scene::getAllModels() const
 {
 	return _objects.models;
+}
+
+const std::vector<std::shared_ptr<ModelObject>> &Scene::getModels(unsigned int shaderIndex) const
+{
+	return _objects.models.getModels(shaderIndex);
 }
 
 const LightContents &Scene::getAllLights() const
 {
 	return _objects.lights;
+}
+
+std::vector<unsigned int> Scene::getShaderIDs() const
+{
+	return _objects.models.getShaderIDs();
 }
 
 std::shared_ptr<Camera> &Scene::getActiveCamera()
