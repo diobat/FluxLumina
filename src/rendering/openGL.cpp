@@ -80,6 +80,8 @@ int openGL::initialize()
     _shaderPrograms.push_back(shader);
     auto shader2 = std::make_shared<Shader>("Simple.vert", "Simple.frag");
     _shaderPrograms.push_back(shader2);
+    auto shader3 = std::make_shared<Shader>("Basic.vert", "transparency.frag");
+    _shaderPrograms.push_back(shader3);
     useShader(0);
 
     return 1;
@@ -299,7 +301,7 @@ void openGL::initializeTexture(Texture& texture)
     //glTexStorage2D(GL_TEXTURE_2D, 2 /* mip map levels */, GL_RGB8, texture._width, texture._height);
     glTexImage2D(GL_TEXTURE_2D, 0, texture._colorChannels, texture._width, texture._height, 0, texture._colorChannels, GL_UNSIGNED_BYTE, texture._pixels);
     glGenerateMipmap(GL_TEXTURE_2D);
-}
+}   
 
 void openGL::bindTextures(Mesh& mesh)
 {

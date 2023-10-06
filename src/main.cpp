@@ -82,6 +82,9 @@ int main(void)
     statue4.rotate(-90.0f, 0.0f, 0.0f);
     statue4.setScale(0.01f);
 
+    auto& grass = factory.create_Model("res/models/grassSquare/grassSquare.obj", 2);
+    grass.setPosition({10.0f, 1.0f, 10.0f});
+
     auto light = factory.create_LightSource( E_LightType::POINT_LIGHT);
     light->setPosition({5.0f, 5.0f, -5.0f});
     light->setAttenuationFactors({1.0f, 0.09f, 0.032f});
