@@ -47,13 +47,21 @@ int main(void)
 
     factory.create_Camera();
 
+    auto &window = factory.create_Model("res/models/window/window.obj", 2);
+    window.setPosition({-10.0f, 10.0f, 10.0f});
+
+    auto &window2 = factory.create_Model("res/models/window/window.obj", 2);
+    window2.setPosition({-10.0f, 10.0f, 8.0f});
+
+    auto &window3 = factory.create_Model("res/models/window/window.obj", 2);
+    window3.setPosition({-10.0f, 10.0f, 6.0f});
+
     ModelObject &ground = factory.create_Model("res/models/ground.obj");
     ground.setPosition({0.0f, -0.5f, 0.0f});
 
     ModelObject& mothership = factory.create_Model("res/models/Mothership/Mothership.obj");
     mothership.setPosition({0.0f, 10.0f, 7.5f});
     mothership.setScale(0.001f);
-    //mothership.rotate(0.0f, 180.0f, 90.0f);
 
     ModelObject& backpack = factory.create_Model("res/models/backpack/backpack.obj", 0, true);
     backpack.setPosition({0.0f, 3.0f, -7.5f});

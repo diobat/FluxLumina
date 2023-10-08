@@ -222,6 +222,17 @@ Mesh SceneObjectFactory::processMesh(Model &model, aiMesh *mesh, const aiScene *
         textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
         std::vector<Texture> specularMaps = loadMaterialTextures(model, material, aiTextureType_SPECULAR);
         textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+
+        float opacity = 1.0f;
+        if(material->Get(AI_MATKEY_OPACITY, opacity) == AI_SUCCESS)
+        {
+            if(opacity < 1.0f)
+            {
+                model.hasTransparency = true;
+            }
+        }
+    
+
     }
     // return a mesh object created from the extracted mesh data
     return Mesh(vertices, indices, textures);
@@ -249,6 +260,7 @@ std::vector<Texture> SceneObjectFactory::loadMaterialTextures(Model &model, aiMa
 
         if(!isPreviouslyLoaded)
         {
+
             Texture texture = TextureFromFile(str.C_Str(), model.directory);
             setTextureData(texture, type);
 

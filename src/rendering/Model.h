@@ -28,6 +28,7 @@ public:
     /*  Model Data */
     std::string directory;
     std::vector<Mesh> meshes;
+    bool hasTransparency = false;
 };
 
 #endif

@@ -63,6 +63,9 @@ int openGL::initialize()
     glEnable(GL_DEPTH_TEST);
     // Accept fragment if it closer to the camera than the former one
     glDepthFunc(GL_LESS);
+    // Enable blending
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     // Window resize code
     glfwSetWindowUserPointer(_window, this);
@@ -105,10 +108,31 @@ void openGL::renderFrame()
     for(int i(0); i<_shaderPrograms.size(); i++)
     {
         useShader(i);
+        // Render all the non-transparent models
+        std::map<float, std::shared_ptr<ModelObject>> sortedTransparentModels;
         for (auto model : _scene->getModels(_shaderPrograms[i]->getProgramId()))
         {
-            renderModel(*model);
+            if(model->getModel()->hasTransparency)
+            {
+                glm::vec3 modelPosition = conversion::toVec3(model->getPosition());
+                glm::vec3 cameraPosition = _scene->getActiveCamera()->getPosition();
+                float distance = glm::length(_scene->getActiveCamera()->getPosition() - modelPosition);
+                sortedTransparentModels[distance] = model;
+            }
+            else
+            {
+                renderModel(*model);
+            }
         }
+        // Render all the transparent models (from in decreasing distance to the camera)
+        if(!sortedTransparentModels.empty())
+        {
+            for (std::map<float, std::shared_ptr<ModelObject>>::reverse_iterator it = sortedTransparentModels.rbegin(); it != sortedTransparentModels.rend(); ++it)
+            {
+                renderModel(*it->second);
+            }
+        }
+
     }
 
 }
