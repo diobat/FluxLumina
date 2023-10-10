@@ -13,6 +13,19 @@ void update(openGL& graphicalEngine, std::shared_ptr<UserInput::glfwKeyboardScan
     float newTime  = 0.0f;
     float gameTime = 0.0f;
 
+    // Handle framebuffer
+
+    // Get window dimensions
+    int width, height;
+    glfwGetWindowSize(graphicalEngine.getWindowPtr(), &width, &height);
+    auto FBO = graphicalEngine.addFBO(E_AttachmentFormat::RENDERBUFFER, width, height);
+    FBO->addAttachment(E_AttachmentType::COLOR);
+    FBO->addAttachment(E_AttachmentType::DEPTH);
+    FBO->addAttachment(E_AttachmentType::STENCIL);
+    graphicalEngine.unbindFBO();
+
+    std::cout << "Framebuffer is complete: " << std::boolalpha << graphicalEngine.isFrameBufferComplete(FBO) << std::endl;
+
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(graphicalEngine.getWindowPtr()))
     {
@@ -41,6 +54,7 @@ int main(void)
     openGL graphicalEngine;
     graphicalEngine.initialize();
     graphicalEngine.bindScene(scene);
+
 
     // Init object factory
     SceneObjectFactory factory(&(*scene), &graphicalEngine);
@@ -109,6 +123,7 @@ int main(void)
 
     // User Input handler
     std::shared_ptr<UserInput::glfwKeyboardScanner> userInput = std::make_shared<UserInput::glfwKeyboardScanner>(graphicalEngine.getWindowPtr());
+    userInput->bindToScene(scene);
     update(graphicalEngine, userInput);
 
     glfwTerminate();

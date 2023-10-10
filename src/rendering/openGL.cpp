@@ -2,7 +2,7 @@
 
 openGL::openGL()
 {
-
+    ;
 }
 
 openGL::~openGL()
@@ -13,7 +13,7 @@ openGL::~openGL()
 void openGL::bindScene(std::shared_ptr<Scene> scene)
 {
     _scene = scene;
-    _userInput->bindToScene(_scene);
+    //_userInput->bindToScene(_scene);
 }
 
 GLFWwindow* openGL::getWindowPtr()
@@ -78,6 +78,9 @@ int openGL::initialize()
     glfwSetWindowSizeCallback(_window, func);
     // End window resize code
 
+    // Framebuffer Manager initialization
+    _frameBuffers = std::make_unique<FBOManager>(_window);
+
     // Select shader program to use
     auto shader = std::make_shared<Shader>("Basic.vert", "Basic.frag");
     _shaderPrograms.push_back(shader);
@@ -85,6 +88,8 @@ int openGL::initialize()
     _shaderPrograms.push_back(shader2);
     auto shader3 = std::make_shared<Shader>("Basic.vert", "transparency.frag");
     _shaderPrograms.push_back(shader3);
+    auto shader4 = std::make_shared<Shader>("Quad.vert", "Quad.frag");
+    _shaderPrograms.push_back(shader4);
     useShader(0);
 
     return 1;
@@ -114,9 +119,7 @@ void openGL::renderFrame()
         {
             if(model->getModel()->hasTransparency)
             {
-                glm::vec3 modelPosition = conversion::toVec3(model->getPosition());
-                glm::vec3 cameraPosition = _scene->getActiveCamera()->getPosition();
-                float distance = glm::length(_scene->getActiveCamera()->getPosition() - modelPosition);
+                float distance = glm::length(_scene->getActiveCamera()->getPosition() - conversion::toVec3(model->getPosition()));
                 sortedTransparentModels[distance] = model;
             }
             else
@@ -269,9 +272,9 @@ void openGL::resizeWindow(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
 
-    if (_camera != nullptr)
+    if (_scene->getActiveCamera() != nullptr)
     {
-        _camera->resizeCameraPlane(width, height);
+        _scene->getActiveCamera()->resizeCameraPlane(width, height);
     }
 }
 
@@ -390,4 +393,36 @@ void openGL::useShader(unsigned int shaderIndex)
 {
     currentShaderIndex = shaderIndex;
     glUseProgram(_shaderPrograms[shaderIndex]->getProgramId());
+}
+
+std::shared_ptr<FBO> openGL::addFBO(E_AttachmentFormat format, int width, int height)
+{
+    if (width <= 0 || height <= 0)
+    {
+        glfwGetWindowSize(_window, &width, &height);
+    }
+
+    std::shared_ptr<FBO> fbo = _frameBuffers->addFBO(format, width, height);
+    return fbo;
+}
+
+void openGL::bindFBO(unsigned int fboIndex)
+{
+    _frameBuffers->bindFBO(fboIndex);
+}
+
+void openGL::unbindFBO()
+{
+    _frameBuffers->unbindFBO();
+}
+
+unsigned int openGL::getFBOIndex(std::shared_ptr<FBO> fbo) const
+{
+    return _frameBuffers->getFBOIndex(fbo);
+}
+
+bool openGL::isFrameBufferComplete(std::shared_ptr<FBO> fbo) const
+{
+    return _frameBuffers->isFrameBufferComplete(fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }

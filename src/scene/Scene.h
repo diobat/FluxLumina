@@ -53,6 +53,8 @@ private:
 
 	unsigned int activeCameraID;
 
+	unsigned int _id;
+
 	SceneContents _objects;
 
 	AmbientLight _ambientLight;

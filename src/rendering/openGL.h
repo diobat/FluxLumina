@@ -3,7 +3,7 @@
 // STD library includes
 #include <iostream>
 
-// GLFW incldues
+// GLFW include
 #include "rendering/GLFW_Wrapper.h"
 
 // GLM - Math is a gateway science
@@ -16,13 +16,13 @@
 #include "rendering/GraphicalEngine.h"
 #include "rendering/Shader.h"
 #include "rendering/texture.h"
+#include "rendering/framebuffer/Framebuffer_Manager.h"
 #include "user_input/glfwUserInputScanner.h"
 #include "util/Arithmetic.h"
 
 class openGL : public GraphicalEngine
 {
 public:
-
 	openGL();
 	~openGL();
 
@@ -30,17 +30,28 @@ public:
 
 	void bindScene(std::shared_ptr<Scene> scene);
 	void renderFrame();
-	void resizeWindow(GLFWwindow* window, int width, int height);
 
+	// Window
+	void resizeWindow(GLFWwindow* window, int width, int height);
 	GLFWwindow* getWindowPtr();
 
+	// Models
 	void initializeMesh(Mesh& mesh);
 	void initializeTexture(Texture& texture);
 	void bindTextures(Mesh &mesh);
 	void renderModel(ModelObject &model);
 
+	// Shaders
 	unsigned int getShaderProgramID(unsigned int shaderIndex) const;
 	void useShader(unsigned int shaderIndex);
+
+	// Framebuffers
+	std::shared_ptr<FBO> addFBO(E_AttachmentFormat format, int width, int height);
+	void bindFBO(unsigned int fboIndex);
+	void unbindFBO();
+	unsigned int getFBOIndex(std::shared_ptr<FBO> fbo) const;
+	bool isFrameBufferComplete(std::shared_ptr<FBO>) const;
+
 
 private:
 	void allLightsSetup(const LightContents &lights);
@@ -50,11 +61,17 @@ private:
 
 	void cameraSetup();
 
+	// GLFW window
 	GLFWwindow* _window;
 
+	// Scene
 	std::shared_ptr<UserInput::glfwKeyboardScanner> _userInput;
-	std::shared_ptr<Camera> _camera;
 
+	// Framebuffer
+	std::unique_ptr<FBOManager> _frameBuffers;
+
+	// Shaders
 	std::vector<std::shared_ptr<Shader>> _shaderPrograms;
 	unsigned int currentShaderIndex = 0;
+
 };
