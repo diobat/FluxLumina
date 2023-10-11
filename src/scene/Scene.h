@@ -11,6 +11,11 @@
 #include "scene\LightSource.h"
 #include "scene\ModelContents.h"
 
+namespace
+{
+	unsigned int _sceneIDCounter = 0;
+}
+
 struct LightContents
 {
 	std::vector<std::shared_ptr<DirectionalLight>> directionalLights;

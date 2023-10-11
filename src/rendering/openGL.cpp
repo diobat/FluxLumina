@@ -10,20 +10,23 @@ openGL::~openGL()
     glfwTerminate();
 }
 
-void openGL::bindScene(std::shared_ptr<Scene> scene)
-{
-    _scene = scene;
-    //_userInput->bindToScene(_scene);
-}
-
 GLFWwindow* openGL::getWindowPtr()
 {
     return _window;
 }
 
+void openGL::enable(GLuint feature)
+{
+    glEnable(feature);
+}
+
+void openGL::disable(GLuint feature)
+{
+    glDisable(feature);
+}
+
 int openGL::initialize()
 {
-
     int WINDOW_WIDTH = 2048;
     int WINDOW_HEIGHT = 1536;
 
@@ -66,6 +69,7 @@ int openGL::initialize()
     // Enable blending
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glClearStencil(0);
 
     // Window resize code
     glfwSetWindowUserPointer(_window, this);
@@ -95,19 +99,25 @@ int openGL::initialize()
     return 1;
 }
 
-void openGL::renderFrame()
+
+
+// Next step is to encapsulate this in a method that also handles Framebuffer changes
+void openGL::renderFrame(std::shared_ptr<Scene> scene)
 {
+    // For window resizing purposes
+    _scene = scene; 
+
+    // Bind the proper FBO
+    _frameBuffers->bindProperFBOFromScene(scene);
+
     // Reset color and depth buffers
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    //Default shader
-    useShader(0);
-
     // Camera
-    cameraSetup();
+    cameraSetup(scene);
 
     // Light
-    allLightsSetup(_scene->getAllLights());
+    allLightsSetup(scene->getAllLights());
 
     // Draw models
     for(int i(0); i<_shaderPrograms.size(); i++)
@@ -115,11 +125,11 @@ void openGL::renderFrame()
         useShader(i);
         // Render all the non-transparent models
         std::map<float, std::shared_ptr<ModelObject>> sortedTransparentModels;
-        for (auto model : _scene->getModels(_shaderPrograms[i]->getProgramId()))
+        for (auto model : scene->getModels(_shaderPrograms[i]->getProgramId()))
         {
             if(model->getModel()->hasTransparency)
             {
-                float distance = glm::length(_scene->getActiveCamera()->getPosition() - conversion::toVec3(model->getPosition()));
+                float distance = glm::length(scene->getActiveCamera()->getPosition() - conversion::toVec3(model->getPosition()));
                 sortedTransparentModels[distance] = model;
             }
             else
@@ -170,15 +180,15 @@ void openGL::renderModel(ModelObject &model)
     }
 }
 
-void openGL::cameraSetup()
+void openGL::cameraSetup(std::shared_ptr<Scene> scene)
 {
     // Camera
-    _scene->getActiveCamera()->recalculateMVP();
+    scene->getActiveCamera()->recalculateMVP();
     for (int i(0); i < _shaderPrograms.size(); i++)
     {
-        _shaderPrograms[i]->setUniformMatrix4fv("view", _scene->getActiveCamera()->getViewMatrix());
-        _shaderPrograms[i]->setUniformMatrix4fv("projection", _scene->getActiveCamera()->getProjectionMatrix());
-        _shaderPrograms[i]->setUniform3fv("viewPos", _scene->getActiveCamera()->getPosition());
+        _shaderPrograms[i]->setUniformMatrix4fv("view", scene->getActiveCamera()->getViewMatrix());
+        _shaderPrograms[i]->setUniformMatrix4fv("projection", scene->getActiveCamera()->getProjectionMatrix());
+        _shaderPrograms[i]->setUniform3fv("viewPos", scene->getActiveCamera()->getPosition());
     }
 }
 
@@ -356,7 +366,6 @@ void openGL::bindTextures(Mesh& mesh)
             _shaderPrograms[currentShaderIndex]->setUniform1i("sampleFromDiffuse", 1);
             _shaderPrograms[currentShaderIndex]->setUniform1i("material.diffuse", imageUnitSpace + diffuseNr);
             glActiveTexture(GL_TEXTURE0 + imageUnitSpace + diffuseNr);
-            //glBindImageTexture(imageUnitSpace + diffuseNr, mesh.textures[i]._id, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA8UI);
             glBindTexture(GL_TEXTURE_2D, mesh.textures[i]._id);
             diffuseNr++;
             break;
@@ -365,7 +374,6 @@ void openGL::bindTextures(Mesh& mesh)
             _shaderPrograms[currentShaderIndex]->setUniform1i("sampleFromSpecular", 1);
             _shaderPrograms[currentShaderIndex]->setUniform1i("material.specular", imageUnitSpace + specularNr);
             _shaderPrograms[currentShaderIndex]->setUniform1f("material.shininess", 0.5);
-
             glActiveTexture(GL_TEXTURE0 + imageUnitSpace + specularNr);
             glBindTexture(GL_TEXTURE_2D, mesh.textures[i]._id);
             specularNr++;
@@ -424,5 +432,9 @@ unsigned int openGL::getFBOIndex(std::shared_ptr<FBO> fbo) const
 bool openGL::isFrameBufferComplete(std::shared_ptr<FBO> fbo) const
 {
     return _frameBuffers->isFrameBufferComplete(fbo);
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+FBOManager& openGL::getFBOManager()
+{
+    return *_frameBuffers;
 }

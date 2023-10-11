@@ -13,6 +13,12 @@ public:
 	virtual void initializeMesh(Mesh &mesh) = 0;
 	virtual void initializeTexture(Texture &texture) = 0;
 
+	virtual void renderFrame(std::shared_ptr<Scene>) = 0{};
+
+	void bindScene(std::shared_ptr<Scene> scene);
+	void unbindScene(std::shared_ptr<Scene> scene);
+	std::shared_ptr<Scene> getScene(unsigned int sceneIndex) const;
+
 	virtual unsigned int getShaderProgramID(unsigned int shaderIndex) const = 0;
 
 protected:

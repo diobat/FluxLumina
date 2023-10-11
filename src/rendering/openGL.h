@@ -28,12 +28,15 @@ public:
 
 	int initialize();
 
-	void bindScene(std::shared_ptr<Scene> scene);
-	void renderFrame();
+	void renderFrame(std::shared_ptr<Scene> scene) override;
 
 	// Window
-	void resizeWindow(GLFWwindow* window, int width, int height);
+	void resizeWindow(GLFWwindow *window, int width, int height);
 	GLFWwindow* getWindowPtr();
+
+	// Features
+	void enable(GLuint feature);
+	void disable(GLuint feature);
 
 	// Models
 	void initializeMesh(Mesh& mesh);
@@ -51,6 +54,7 @@ public:
 	void unbindFBO();
 	unsigned int getFBOIndex(std::shared_ptr<FBO> fbo) const;
 	bool isFrameBufferComplete(std::shared_ptr<FBO>) const;
+	FBOManager& getFBOManager();
 
 
 private:
@@ -59,7 +63,7 @@ private:
 	void lightSetup(unsigned int shaderIndex, const PointLight &light);
 	void lightSetup(unsigned int shaderIndex, const SpotLight &light);
 
-	void cameraSetup();
+	void cameraSetup(std::shared_ptr<Scene> scene);
 
 	// GLFW window
 	GLFWwindow* _window;

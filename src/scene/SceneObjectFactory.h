@@ -31,13 +31,20 @@ public:
     void bindScene(Scene* scene);
     void bindEngine(GraphicalEngine* engine);
 
+    // Importing models
     ModelObject &create_Model(const std::string &modelPath, unsigned int shader = 0, bool flipUVs = false);
     void load_ModelMeshes(Model& model, std::string const &path);
     void processNode(Model& model, aiNode* node, const aiScene* scene);
     Mesh processMesh(Model& model, aiMesh* mesh, const aiScene* scene);
     std::vector<Texture> loadMaterialTextures(Model &model, aiMaterial *mat, aiTextureType type);
 
+    // Create quad
+    ModelObject &createQuad(std::vector<float> vertices, unsigned int shader = 0);
+
+    // Creating lights
     std::shared_ptr<LightSource> create_LightSource(E_LightType type);
+
+    // Creating cameras
     void create_Camera();
 
 private:

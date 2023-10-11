@@ -2,7 +2,8 @@
 
 FBOManager::FBOManager(GLFWwindow *window) : 
     _currentFBOIndex(-1),
-    _window(window)
+    _window(window),
+    _forceDefault(false)
 {
     ;
 }
@@ -76,9 +77,47 @@ unsigned int FBOManager::getFBOIndex(std::shared_ptr<FBO> fbo) const
     return -1;
 }
 
+bool FBOManager::bindSceneToFBO(std::shared_ptr<Scene> scene, std::shared_ptr<FBO> fbo)
+{
+    if(fbo == nullptr)
+    {
+        if(_fboSceneMap.find(scene) != _fboSceneMap.end())
+        {
+            _fboSceneMap.erase(scene);
+            return true;
+        }
+        return false;
+    }
+
+    _fboSceneMap[scene] = fbo;
+    return true;
+}
+
+bool FBOManager::unbindSceneFromFBO(std::shared_ptr<Scene> scene)
+{
+    return bindSceneToFBO(scene, nullptr);
+}
+
 bool FBOManager::isFrameBufferComplete(std::shared_ptr<FBO> fbo) const
 {
     return isFrameBufferComplete(getFBOIndex(fbo));
+}
+
+void FBOManager::bindProperFBOFromScene(std::shared_ptr<Scene> scene)
+{
+    if(_forceDefault)
+    {
+        unbindFBO();
+        return;
+    }
+
+    if(_fboSceneMap.find(scene) == _fboSceneMap.end())
+    {   
+        bindFBO(0);
+        return;
+    }
+
+    bindFBO(getFBOIndex(_fboSceneMap[scene]));
 }
 
 bool FBOManager::isFrameBufferComplete(unsigned int fboIndex) const

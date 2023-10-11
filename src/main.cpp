@@ -7,7 +7,7 @@
 
 #include <memory>
 
-void update(openGL& graphicalEngine, std::shared_ptr<UserInput::glfwKeyboardScanner>& userInput)
+void update(openGL& graphicalEngine, std::vector<std::shared_ptr<Scene>> scenes, std::shared_ptr<UserInput::glfwKeyboardScanner>& userInput)
 {
     float startTime = static_cast<float>(glfwGetTime());
     float newTime  = 0.0f;
@@ -15,26 +15,60 @@ void update(openGL& graphicalEngine, std::shared_ptr<UserInput::glfwKeyboardScan
 
     // Handle framebuffer
 
-    // Get window dimensions
-    int width, height;
-    glfwGetWindowSize(graphicalEngine.getWindowPtr(), &width, &height);
-    auto FBO = graphicalEngine.addFBO(E_AttachmentFormat::RENDERBUFFER, width, height);
-    FBO->addAttachment(E_AttachmentType::COLOR);
-    FBO->addAttachment(E_AttachmentType::DEPTH);
-    FBO->addAttachment(E_AttachmentType::STENCIL);
-    graphicalEngine.unbindFBO();
+    graphicalEngine.getFBOManager().bindProperFBOFromScene(scenes[0]);
 
-    std::cout << "Framebuffer is complete: " << std::boolalpha << graphicalEngine.isFrameBufferComplete(FBO) << std::endl;
+    auto colorattachmentID = graphicalEngine.getFBOManager().getFBO(0)->getColorAttachmentID(0);
 
-    /* Loop until the user closes the window */
+    float quadVertices[] = {
+        // positions   // texCoords
+        -1.0f, 1.0f, 0.0f, 1.0f,
+        -1.0f, -1.0f, 0.0f, 0.0f,
+        1.0f, -1.0f, 1.0f, 0.0f,
+
+        -1.0f, 1.0f, 0.0f, 1.0f,
+        1.0f, -1.0f, 1.0f, 0.0f,
+        1.0f, 1.0f, 1.0f, 1.0f
+        };
+
+    unsigned int quadVAO, quadVBO;
+    glGenVertexArrays(1, &quadVAO);
+    glGenBuffers(1, &quadVBO);
+    glBindVertexArray(quadVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *)0);
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *)(2 * sizeof(float)));
+
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
     while (!glfwWindowShouldClose(graphicalEngine.getWindowPtr()))
     {
         /* Update game time value */
         newTime  = static_cast<float>(glfwGetTime());
         gameTime = newTime - startTime;
 
+        glBindFramebuffer(GL_FRAMEBUFFER, 0); 
         /* Render here */
-        graphicalEngine.renderFrame();
+        glEnable(GL_DEPTH_TEST);
+        graphicalEngine.renderFrame(scenes[0]);
+
+        // // second pass
+        glBindFramebuffer(GL_FRAMEBUFFER, 0); 
+
+        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        glDisable(GL_DEPTH_TEST);
+        glUseProgram(graphicalEngine.getShaderProgramID(3));
+        glBindVertexArray(quadVAO);
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, colorattachmentID);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+
+        //graphicalEngine.renderFrame(scenes[1]);
 
         /* Swap front and back buffers */
         glfwSwapBuffers(graphicalEngine.getWindowPtr());
@@ -51,12 +85,31 @@ int main(void)
     // Scene initialization
     std::shared_ptr<Scene> scene = std::make_shared<Scene>();
 
+
     openGL graphicalEngine;
     graphicalEngine.initialize();
     graphicalEngine.bindScene(scene);
 
+    auto& FBOManager = graphicalEngine.getFBOManager();
+
+    // Get window dimensions
+    int width, height;
+    glfwGetWindowSize(graphicalEngine.getWindowPtr(), &width, &height);
+    auto FBO = graphicalEngine.addFBO(E_AttachmentFormat::RENDERBUFFER, width, height);
+    FBO->addAttachment(E_AttachmentType::COLOR);
+    FBO->addAttachment(E_AttachmentType::DEPTH);
+    //FBO->addAttachment(E_AttachmentType::STENCIL);
+
+    if(!graphicalEngine.isFrameBufferComplete(FBO))
+    {
+        std::cout << "Framebuffer is not complete" << std::endl;
+        return -1;
+    }
+
+    FBOManager.bindSceneToFBO(scene, FBO);
 
     // Init object factory
+
     SceneObjectFactory factory(&(*scene), &graphicalEngine);
 
     factory.create_Camera();
@@ -70,7 +123,7 @@ int main(void)
     auto &window3 = factory.create_Model("res/models/window/window.obj", 2);
     window3.setPosition({-10.0f, 10.0f, 6.0f});
 
-    ModelObject &ground = factory.create_Model("res/models/ground.obj");
+    ModelObject &ground = factory.create_Model("res/models/ground.obj", 0);
     ground.setPosition({0.0f, -0.5f, 0.0f});
 
     ModelObject& mothership = factory.create_Model("res/models/Mothership/Mothership.obj");
@@ -121,10 +174,34 @@ int main(void)
     // light4->setDirection({0.0f, -1.0f, -1.5f});
     light4->pointAt({0.0f, 0.0f, 0.0f});
 
+
+    std::shared_ptr<Scene> scene2 = std::make_shared<Scene>();
+    factory.bindScene(&(*scene2));
+    factory.create_Camera();
+
+    ModelObject &quad = factory.create_Model("res/models/quad/quad.obj", 3);
+    Texture tempText;
+    tempText._id = FBO->getColorAttachmentID(0);
+    tempText._type = E_TexureType::DIFFUSE;
+    tempText._width = width;
+    tempText._height = height;
+    tempText._components = 3;
+    tempText._colorChannels = GL_RGB;
+    tempText._useLinear = true;
+    tempText._isLoaded = true;
+    
+    quad.getModel()->meshes[0].textures.push_back(tempText);
+
+    std::cout << "Number of textures: " << quad.getModel()->meshes[0].textures.size() << std::endl;
+
+    std::vector<std::shared_ptr<Scene>> scenes;
+    scenes.push_back(scene);
+    scenes.push_back(scene2);
+
     // User Input handler
     std::shared_ptr<UserInput::glfwKeyboardScanner> userInput = std::make_shared<UserInput::glfwKeyboardScanner>(graphicalEngine.getWindowPtr());
     userInput->bindToScene(scene);
-    update(graphicalEngine, userInput);
+    update(graphicalEngine, scenes, userInput);
 
     glfwTerminate();
     return 0;

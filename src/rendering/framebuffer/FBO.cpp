@@ -1,12 +1,13 @@
 #include "rendering/framebuffer/FBO.h"
 
+
 FBO::FBO(unsigned int width, unsigned int height) : 
     _id(-1),
     _originalSize({width, height}),
     _depthAttachmentID(-1),
     _stencilAttachmentID(-1)
 {
-    ;
+    glGenFramebuffers(1, &_id);
 }
 
 
@@ -23,16 +24,13 @@ unsigned int FBO::addColorAttachment()
 
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _textureId, 0);
 
-    _colorAttachmentIDs.push_back(_textureId);
-
     return _textureId;
 }
 
 TextureFBO::TextureFBO(unsigned int width, unsigned int height) : 
     FBO(width, height)
-
 {
-    glGenFramebuffers(1, &_id);
+    ;
 }
 
 TextureFBO::~TextureFBO()
@@ -61,13 +59,13 @@ void TextureFBO::addAttachment(E_AttachmentType type)
     switch(type)
     {
         case E_AttachmentType::COLOR:
-            addColorAttachment();
+            _colorAttachmentIDs.push_back(addColorAttachment());
             break;
         case E_AttachmentType::DEPTH:
-            addDepthAttachment();
+            _depthAttachmentID = addDepthAttachment();
             break;
         case E_AttachmentType::STENCIL:
-            addStencilAttachment();
+            _stencilAttachmentID = addStencilAttachment();
             break;
         default:
             break;
@@ -76,40 +74,44 @@ void TextureFBO::addAttachment(E_AttachmentType type)
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void TextureFBO::addDepthAttachment()
+unsigned int TextureFBO::addDepthAttachment()
 {
     if(_depthAttachmentID != -1)
     {
         glDeleteTextures(1, &_depthAttachmentID);
     }
-
     unsigned int textureId;
     glGenTextures(1, &textureId);
     glBindTexture(GL_TEXTURE_2D, textureId);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, getOriginalSize()[0], getOriginalSize()[1], 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-    
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, getOriginalSize()[0], getOriginalSize()[1], 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, NULL);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, textureId, 0);
 
-    _depthAttachmentID = textureId;
+    return textureId;
 }
 
-void TextureFBO::addStencilAttachment()
+unsigned int TextureFBO::addStencilAttachment()
 {
     if(_stencilAttachmentID != -1)
     {
         glDeleteTextures(1, &_stencilAttachmentID);
     }
-
     unsigned int textureId;
     glGenTextures(1, &textureId);
     glBindTexture(GL_TEXTURE_2D, textureId);
 
     glTexImage2D(GL_TEXTURE_2D, 0, GL_STENCIL_INDEX, getOriginalSize()[0], getOriginalSize()[1], 0, GL_STENCIL_INDEX, GL_UNSIGNED_BYTE, NULL);
-    
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_TEXTURE_2D, textureId, 0);
 
-    _stencilAttachmentID = textureId;
+    return textureId;
 }
 
 RenderBufferFBO::RenderBufferFBO(unsigned int width, unsigned int height) : 
@@ -125,8 +127,7 @@ RenderBufferFBO::~RenderBufferFBO()
 
 void RenderBufferFBO::addAttachment(E_AttachmentType type)
 {
-    unsigned int _attachmentID;
-    glBindRenderbuffer(GL_RENDERBUFFER, _id);
+    glBindFramebuffer(GL_FRAMEBUFFER, _id);
 
     switch(type)
     {
@@ -143,18 +144,30 @@ void RenderBufferFBO::addAttachment(E_AttachmentType type)
             break;
     }
 
-    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void RenderBufferFBO::addDepthAttachment()
+unsigned int RenderBufferFBO::addDepthAttachment()
 {
+    unsigned int rb_id;
+    glGenRenderbuffers(1, &rb_id);
+    glBindRenderbuffer(GL_RENDERBUFFER, rb_id);
+
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, getOriginalSize()[0], getOriginalSize()[1]);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _id);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rb_id);
+
+    return rb_id;
 }
 
-void RenderBufferFBO::addStencilAttachment()
+unsigned int RenderBufferFBO::addStencilAttachment()
 {
+    unsigned int rb_id;
+    glGenRenderbuffers(1, &rb_id);
+    glBindRenderbuffer(GL_RENDERBUFFER, rb_id);
+
     glRenderbufferStorage(GL_RENDERBUFFER, GL_STENCIL_INDEX, getOriginalSize()[0], getOriginalSize()[1]);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, _id);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rb_id);
+
+    return rb_id;
 }
 

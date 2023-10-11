@@ -1,15 +1,16 @@
 #version 430 core
 
+
 // Inputs
 in vec2 TexCoords;
 
 // Uniforms
-uniform sampler2D screenTexture;
+uniform sampler2D material;
 
 // Outputs
 out vec4 FragColor;
 
 void main()
 { 
-    FragColor = texture(screenTexture, TexCoords);
+    FragColor = texture(material, TexCoords);
 }

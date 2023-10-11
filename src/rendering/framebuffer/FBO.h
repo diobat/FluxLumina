@@ -52,12 +52,11 @@ public:
     TextureFBO(unsigned int width, unsigned int height);
     ~TextureFBO();
 
-    void addAttachment(E_AttachmentType type);
+    void addAttachment(E_AttachmentType type) override;
 
 private:
-    void addDepthAttachment();
-    void addStencilAttachment();
-
+    unsigned int addDepthAttachment();
+    unsigned int addStencilAttachment();
 };
 
 class RenderBufferFBO : public FBO
@@ -66,11 +65,9 @@ public:
     RenderBufferFBO(unsigned int width, unsigned int height);
     ~RenderBufferFBO();
 
-    void addAttachment(E_AttachmentType type);
+    void addAttachment(E_AttachmentType type) override;
 
 private:
-    void addDepthAttachment();
-    void addStencilAttachment();
-
-
+    unsigned int addDepthAttachment();
+    unsigned int addStencilAttachment();
 };
