@@ -20,19 +20,24 @@ struct Vertex
 class Mesh
 {
 public:
-    /*  Mesh Data  */
-    std::vector<Vertex> vertices;
-    std::vector<unsigned int> indices;
-    std::vector<Texture> textures;
-    unsigned int VAO, VBO, EBO;
-
     /*  Functions  */
     // constructor
     Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures)
     {
-        this->vertices = vertices;
-        this->indices = indices;
-        this->textures = textures;
+        this->_vertices = vertices;
+        this->_indices = indices;
+        this->_textures = textures;
     }
+
+    void attachTexture(std::vector<Texture> textures)
+    {
+        _textures.insert(_textures.end(), textures.begin(), textures.end());
+    }
+
+    /*  Mesh Data  */
+    std::vector<Vertex> _vertices;
+    std::vector<unsigned int> _indices;
+    std::vector<Texture> _textures;
+    unsigned int VAO, VBO, EBO;
 
 };

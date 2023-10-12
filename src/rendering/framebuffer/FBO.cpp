@@ -27,11 +27,31 @@ unsigned int FBO::addColorAttachment()
     return _textureId;
 }
 
+
+std::vector<Texture> FBO::getTextures() const
+{
+    std::vector<Texture> returnTextures;
+    for(unsigned int i = 0; i < _colorAttachmentIDs.size(); ++i)
+    {
+        Texture tempText;
+        tempText._id = _colorAttachmentIDs[i];
+        tempText._type = E_TexureType::DIFFUSE;
+        tempText._colorChannels = GL_RGB;
+        tempText._components = 3;
+        tempText._useLinear = true;
+        returnTextures.push_back(tempText);
+    }
+
+    return returnTextures;
+}
+
+
 TextureFBO::TextureFBO(unsigned int width, unsigned int height) : 
     FBO(width, height)
 {
     ;
 }
+
 
 TextureFBO::~TextureFBO()
 {

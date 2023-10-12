@@ -164,14 +164,7 @@ int main(void)
     factory.create_Camera();
 
     ModelObject &quad = factory.create_Model("res/models/quad/quad.obj", 3);
-
-    Texture tempText;
-    tempText._id = graphicalEngine.getFBOManager().getFBO(0)->getColorAttachmentID(0);
-    tempText._type = E_TexureType::DIFFUSE;
-    tempText._colorChannels = GL_RGB;
-    tempText._components = 3;
-    tempText._useLinear = true;
-    quad.getModel()->meshes[0].textures.push_back(tempText);
+    quad.getModel()->meshes[0].attachTexture(FBO->getTextures());
 
     std::vector<std::shared_ptr<Scene>> scenes;
     scenes.push_back(scene);

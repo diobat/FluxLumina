@@ -7,6 +7,9 @@
 #include <array>
 #include <vector>
 
+// First-party includes
+#include "rendering/Texture.h"
+
 enum E_AttachmentType
 {
     COLOR,
@@ -34,6 +37,8 @@ public:
     unsigned int getColorAttachmentID(unsigned int index) const { return _colorAttachmentIDs[index]; }
     unsigned int getDepthAttachmentID() const { return _depthAttachmentID; }
     unsigned int getStencilAttachmentID() const { return _stencilAttachmentID; }
+
+    std::vector<Texture> getTextures() const;
 
 protected:
     unsigned int addColorAttachment();

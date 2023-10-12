@@ -173,7 +173,7 @@ void openGL::renderModel(ModelObject &model)
 
         // draw mesh
         glBindVertexArray(one_mesh.VAO);
-        glDrawElements(GL_TRIANGLES, one_mesh.indices.size(), GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, one_mesh._indices.size(), GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
 
         glBindTexture(GL_TEXTURE_2D, 0); // Unbind texture
@@ -302,9 +302,9 @@ void openGL::initializeMesh(Mesh& mesh)
     // A great thing about structs is that their memory layout is sequential for all its items.
     // The effect is that we can simply pass a pointer to the struct and it translates perfectly to a glm::vec3/2 array which
     // again translates to 3/2 floats which translates to a byte array.
-    glBufferData(GL_ARRAY_BUFFER, mesh.vertices.size() * sizeof(Vertex), &mesh.vertices[0], GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, mesh._vertices.size() * sizeof(Vertex), &mesh._vertices[0], GL_STATIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh.indices.size() * sizeof(unsigned int), &mesh.indices[0], GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh._indices.size() * sizeof(unsigned int), &mesh._indices[0], GL_STATIC_DRAW);
 
     // set the vertex attribute pointers
     // vertex Positions
@@ -349,24 +349,24 @@ void openGL::bindTextures(Mesh& mesh)
     _shaderPrograms[currentShaderIndex]->setUniform1i("sampleFromDiffuse", 0);
     _shaderPrograms[currentShaderIndex]->setUniform1i("sampleFromSpecular", 0);
 
-    if (mesh.textures.size() == 0)
+    if (mesh._textures.size() == 0)
     {
         return;
     }
 
     int imageUnitSpace;
 
-    for (int i = 0; i < mesh.textures.size(); i++)
+    for (int i = 0; i < mesh._textures.size(); i++)
     {
 
-        switch (mesh.textures[i]._type)
+        switch (mesh._textures[i]._type)
         {
         case DIFFUSE:
             imageUnitSpace = 0;
             _shaderPrograms[currentShaderIndex]->setUniform1i("sampleFromDiffuse", 1);
             _shaderPrograms[currentShaderIndex]->setUniform1i("material.diffuse", imageUnitSpace + diffuseNr);
             glActiveTexture(GL_TEXTURE0 + imageUnitSpace + diffuseNr);
-            glBindTexture(GL_TEXTURE_2D, mesh.textures[i]._id);
+            glBindTexture(GL_TEXTURE_2D, mesh._textures[i]._id);
             diffuseNr++;
             break;
         case SPECULAR:
@@ -375,7 +375,7 @@ void openGL::bindTextures(Mesh& mesh)
             _shaderPrograms[currentShaderIndex]->setUniform1i("material.specular", imageUnitSpace + specularNr);
             _shaderPrograms[currentShaderIndex]->setUniform1f("material.shininess", 0.5);
             glActiveTexture(GL_TEXTURE0 + imageUnitSpace + specularNr);
-            glBindTexture(GL_TEXTURE_2D, mesh.textures[i]._id);
+            glBindTexture(GL_TEXTURE_2D, mesh._textures[i]._id);
             specularNr++;
             break;
         case NORMAL:
