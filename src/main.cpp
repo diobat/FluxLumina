@@ -12,35 +12,7 @@ void update(openGL& graphicalEngine, std::vector<std::shared_ptr<Scene>> scenes,
     float startTime = static_cast<float>(glfwGetTime());
     float newTime  = 0.0f;
     float gameTime = 0.0f;
-
-    // Handle framebuffer
-
-    graphicalEngine.getFBOManager().bindProperFBOFromScene(scenes[0]);
-
-    auto colorattachmentID = graphicalEngine.getFBOManager().getFBO(0)->getColorAttachmentID(0);
-
-    float quadVertices[] = {
-        // positions   // texCoords
-        -1.0f, 1.0f, 0.0f, 1.0f,
-        -1.0f, -1.0f, 0.0f, 0.0f,
-        1.0f, -1.0f, 1.0f, 0.0f,
-
-        -1.0f, 1.0f, 0.0f, 1.0f,
-        1.0f, -1.0f, 1.0f, 0.0f,
-        1.0f, 1.0f, 1.0f, 1.0f
-        };
-
-    unsigned int quadVAO, quadVBO;
-    glGenVertexArrays(1, &quadVAO);
-    glGenBuffers(1, &quadVBO);
-    glBindVertexArray(quadVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *)0);
-    glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *)(2 * sizeof(float)));
-
+    
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     while (!glfwWindowShouldClose(graphicalEngine.getWindowPtr()))
@@ -49,26 +21,36 @@ void update(openGL& graphicalEngine, std::vector<std::shared_ptr<Scene>> scenes,
         newTime  = static_cast<float>(glfwGetTime());
         gameTime = newTime - startTime;
 
-        glBindFramebuffer(GL_FRAMEBUFFER, 0); 
+        //glBindFramebuffer(GL_FRAMEBUFFER, 1); 
         /* Render here */
         glEnable(GL_DEPTH_TEST);
         graphicalEngine.renderFrame(scenes[0]);
 
         // // second pass
-        glBindFramebuffer(GL_FRAMEBUFFER, 0); 
+        //glBindFramebuffer(GL_FRAMEBUFFER, 0); 
 
-        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        //glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+        //glClear(GL_COLOR_BUFFER_BIT);
 
         glDisable(GL_DEPTH_TEST);
-        glUseProgram(graphicalEngine.getShaderProgramID(3));
-        glBindVertexArray(quadVAO);
+        // glUseProgram(graphicalEngine.getShaderProgramID(3));
+        // glBindVertexArray(quadVAO);
 
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, colorattachmentID);
-        glDrawArrays(GL_TRIANGLES, 0, 6);
+        // glActiveTexture(GL_TEXTURE0);
+        // glBindTexture(GL_TEXTURE_2D, colorattachmentID);
+        // glDrawArrays(GL_TRIANGLES, 0, 6);
 
-        //graphicalEngine.renderFrame(scenes[1]);
+        graphicalEngine.renderFrame(scenes[1]);
+
+        ////////////////////////////////////////////////////////////
+        // glBindFramebuffer(GL_READ_FRAMEBUFFER, 1);
+        // glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+        // int width, height;
+        // glfwGetWindowSize(graphicalEngine.getWindowPtr(), &width, &height);
+
+        // glBlitFramebuffer(0, 0, width, height, 0, 0, width, height,
+        //                   GL_COLOR_BUFFER_BIT, GL_NEAREST);
+        ////////////////////////////////////////////////////////////
 
         /* Swap front and back buffers */
         glfwSwapBuffers(graphicalEngine.getWindowPtr());
@@ -175,24 +157,21 @@ int main(void)
     light4->pointAt({0.0f, 0.0f, 0.0f});
 
 
+    // Scene 2
+
     std::shared_ptr<Scene> scene2 = std::make_shared<Scene>();
     factory.bindScene(&(*scene2));
     factory.create_Camera();
 
     ModelObject &quad = factory.create_Model("res/models/quad/quad.obj", 3);
-    Texture tempText;
-    tempText._id = FBO->getColorAttachmentID(0);
-    tempText._type = E_TexureType::DIFFUSE;
-    tempText._width = width;
-    tempText._height = height;
-    tempText._components = 3;
-    tempText._colorChannels = GL_RGB;
-    tempText._useLinear = true;
-    tempText._isLoaded = true;
-    
-    quad.getModel()->meshes[0].textures.push_back(tempText);
 
-    std::cout << "Number of textures: " << quad.getModel()->meshes[0].textures.size() << std::endl;
+    Texture tempText;
+    tempText._id = graphicalEngine.getFBOManager().getFBO(0)->getColorAttachmentID(0);
+    tempText._type = E_TexureType::DIFFUSE;
+    tempText._colorChannels = GL_RGB;
+    tempText._components = 3;
+    tempText._useLinear = true;
+    quad.getModel()->meshes[0].textures.push_back(tempText);
 
     std::vector<std::shared_ptr<Scene>> scenes;
     scenes.push_back(scene);

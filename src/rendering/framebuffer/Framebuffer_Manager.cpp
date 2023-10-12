@@ -112,8 +112,8 @@ void FBOManager::bindProperFBOFromScene(std::shared_ptr<Scene> scene)
     }
 
     if(_fboSceneMap.find(scene) == _fboSceneMap.end())
-    {   
-        bindFBO(0);
+    {
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
         return;
     }
 
