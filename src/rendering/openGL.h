@@ -39,8 +39,8 @@ public:
 	void disable(GLuint feature);
 
 	// Models
-	void initializeMesh(Mesh& mesh);
-	void initializeTexture(Texture& texture);
+	void initializeMesh(Mesh& mesh) override;
+	void initializeTexture(Texture& texture) override;
 	void bindTextures(Mesh &mesh);
 	void renderModel(ModelObject &model);
 
@@ -56,6 +56,9 @@ public:
 	bool isFrameBufferComplete(std::shared_ptr<FBO>) const;
 	FBOManager& getFBOManager();
 
+	// Cubemaps
+	void initializeSkybox(Skybox &skybox, const std::array<Texture, 6>& textures) override;
+	void renderSkybox(Skybox &skybox);
 
 private:
 	void allLightsSetup(const LightContents &lights);

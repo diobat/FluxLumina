@@ -10,6 +10,7 @@
 #include "scene\ModelObject.h"
 #include "scene\LightSource.h"
 #include "scene\ModelContents.h"
+#include "scene\Skybox.h"
 
 namespace
 {
@@ -49,9 +50,9 @@ public:
 
 	AmbientLight& getAmbientLight();
 	std::shared_ptr<Camera> &getActiveCamera();
+	Skybox& getSkybox();
 
 private:
-
 	void addDirectionalLight(std::shared_ptr<DirectionalLight> directionalLightToAdd);
 	void addPointLight(std::shared_ptr<PointLight> pointLightToAdd);
 	void addSpotLight(std::shared_ptr<SpotLight> spotLightToAdd);
@@ -63,4 +64,5 @@ private:
 	SceneContents _objects;
 
 	AmbientLight _ambientLight;
+	Skybox _skybox;
 };

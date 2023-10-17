@@ -12,6 +12,7 @@ public:
 	
 	virtual void initializeMesh(Mesh &mesh) = 0;
 	virtual void initializeTexture(Texture &texture) = 0;
+	virtual void initializeSkybox(Skybox &skybox, const std::array<Texture, 6>& textures) = 0;
 
 	virtual void renderFrame(std::shared_ptr<Scene>) = 0{};
 
@@ -22,7 +23,7 @@ public:
 	virtual unsigned int getShaderProgramID(unsigned int shaderIndex) const = 0;
 
 protected:
-	std::shared_ptr<Scene> _scene;
+	std::vector<std::shared_ptr<Scene>> _scenes;
 };
 
 
