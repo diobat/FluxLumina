@@ -7,6 +7,7 @@
 #include "scene/ModelObject.h"
 #include "scene/Camera.h"
 #include "scene/LightSource.h"
+#include "rendering/Cubemap.h"
 
 // STD library includes
 #include <iostream>
@@ -38,17 +39,16 @@ public:
     Mesh processMesh(Model& model, aiMesh* mesh, const aiScene* scene);
     std::vector<Texture> loadMaterialTextures(Model &model, aiMaterial *mat, aiTextureType type);
 
-    // Create quad
-    ModelObject &createQuad(std::vector<float> vertices, unsigned int shader = 0);
-
     // Creating lights
     std::shared_ptr<LightSource> create_LightSource(E_LightType type);
 
     // Creating cameras
     void create_Camera();
 
-private:
+    // Creating cubemaps
+    std::shared_ptr<Cubemap> create_Skybox(std::vector<std::string> faces);
 
+private:
     Scene* _boundScene;
     GraphicalEngine* _boundEngine;
 };

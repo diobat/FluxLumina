@@ -21,36 +21,7 @@ void update(openGL& graphicalEngine, std::vector<std::shared_ptr<Scene>> scenes,
         newTime  = static_cast<float>(glfwGetTime());
         gameTime = newTime - startTime;
 
-        //glBindFramebuffer(GL_FRAMEBUFFER, 1); 
-        /* Render here */
-        glEnable(GL_DEPTH_TEST);
         graphicalEngine.renderFrame(scenes[0]);
-
-        // // second pass
-        //glBindFramebuffer(GL_FRAMEBUFFER, 0); 
-
-        //glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-        //glClear(GL_COLOR_BUFFER_BIT);
-
-        glDisable(GL_DEPTH_TEST);
-        // glUseProgram(graphicalEngine.getShaderProgramID(3));
-        // glBindVertexArray(quadVAO);
-
-        // glActiveTexture(GL_TEXTURE0);
-        // glBindTexture(GL_TEXTURE_2D, colorattachmentID);
-        // glDrawArrays(GL_TRIANGLES, 0, 6);
-
-        graphicalEngine.renderFrame(scenes[1]);
-
-        ////////////////////////////////////////////////////////////
-        // glBindFramebuffer(GL_READ_FRAMEBUFFER, 1);
-        // glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-        // int width, height;
-        // glfwGetWindowSize(graphicalEngine.getWindowPtr(), &width, &height);
-
-        // glBlitFramebuffer(0, 0, width, height, 0, 0, width, height,
-        //                   GL_COLOR_BUFFER_BIT, GL_NEAREST);
-        ////////////////////////////////////////////////////////////
 
         /* Swap front and back buffers */
         glfwSwapBuffers(graphicalEngine.getWindowPtr());
@@ -72,29 +43,23 @@ int main(void)
     graphicalEngine.initialize();
     graphicalEngine.bindScene(scene);
 
-    auto& FBOManager = graphicalEngine.getFBOManager();
-
-    // Get window dimensions
-    int width, height;
-    glfwGetWindowSize(graphicalEngine.getWindowPtr(), &width, &height);
-    auto FBO = graphicalEngine.addFBO(E_AttachmentFormat::RENDERBUFFER, width, height);
-    FBO->addAttachment(E_AttachmentType::COLOR);
-    FBO->addAttachment(E_AttachmentType::DEPTH);
-    //FBO->addAttachment(E_AttachmentType::STENCIL);
-
-    if(!graphicalEngine.isFrameBufferComplete(FBO))
-    {
-        std::cout << "Framebuffer is not complete" << std::endl;
-        return -1;
-    }
-
-    FBOManager.bindSceneToFBO(scene, FBO);
-
     // Init object factory
 
     SceneObjectFactory factory(&(*scene), &graphicalEngine);
 
     factory.create_Camera();
+
+    // Skybox setup
+    auto skybox = factory.create_Skybox(
+        {"res/models/skybox/right.jpg",
+         "res/models/skybox/left.jpg",
+         "res/models/skybox/top.jpg",
+         "res/models/skybox/bottom.jpg",
+         "res/models/skybox/front.jpg",
+         "res/models/skybox/back.jpg"});
+
+
+    // Scene objects 
 
     auto &window = factory.create_Model("res/models/window/window.obj", 2);
     window.setPosition({-10.0f, 10.0f, 10.0f});
@@ -121,26 +86,30 @@ int main(void)
     statue.rotate(-90.0f, 0.0f, 0.0f);
     statue.setScale(0.01f);
 
-    auto &statue2 = factory.create_Model("res/models/Statue/12330_Statue_v1_L2.obj", 0);
+    auto &statue2 = factory.create_Model("res/models/Statue/12330_Statue_v1_L2.obj", 5);
     statue2.setPosition({0.0f, 0.0f, -5.0f});
-    //statue2.rotate(-90.0f, 0.0f, 0.0f);
     statue2.rotate(-90.0f, 0.0f, 0.0f);
     statue2.setScale(0.01f);
 
     auto &statue3 = factory.create_Model("res/models/Statue/12330_Statue_v1_L2.obj", 1);
     statue3.setPosition({-5.0f, 0.0f, 0.0f});
-    //statue3.rotate(-90.0f, 0.0f, 90.0f);
     statue3.rotate(-90.0f, 0.0f, 0.0f);
     statue3.setScale(0.01f);
 
     auto &statue4 = factory.create_Model("res/models/Statue/12330_Statue_v1_L2.obj", 0);
     statue4.setPosition({5.0f, 0.0f, 0.0f});
-    //statue4.rotate(-90.0f, 0.0f, -90.0f);
     statue4.rotate(-90.0f, 0.0f, 0.0f);
     statue4.setScale(0.01f);
 
     auto& grass = factory.create_Model("res/models/grassSquare/grassSquare.obj", 2);
     grass.setPosition({10.0f, 1.0f, 10.0f});
+
+    auto& cube = factory.create_Model("res/models/cube/cube.obj", 5);
+    std::vector<Texture> cubeTextures = {scene->getSkybox().getCubemap()->getTexture()};
+    cube.getModel()->meshes[0].attachTexture(cubeTextures);
+    cube.setPosition({10.0f, 10.0f, 10.0f});
+
+    // Lights   
 
     auto light = factory.create_LightSource( E_LightType::POINT_LIGHT);
     light->setPosition({5.0f, 5.0f, -5.0f});
@@ -157,18 +126,20 @@ int main(void)
     light4->pointAt({0.0f, 0.0f, 0.0f});
 
 
+
+
     // Scene 2
 
-    std::shared_ptr<Scene> scene2 = std::make_shared<Scene>();
-    factory.bindScene(&(*scene2));
-    factory.create_Camera();
+    // std::shared_ptr<Scene> scene2 = std::make_shared<Scene>();
+    // factory.bindScene(&(*scene2));
+    // factory.create_Camera();
 
-    ModelObject &quad = factory.create_Model("res/models/quad/quad.obj", 3);
-    quad.getModel()->meshes[0].attachTexture(FBO->getTextures());
+    // ModelObject &quad = factory.create_Model("res/models/quad/quad.obj", 3);
+    // quad.getModel()->meshes[0].attachTexture(FBO->getTextures());
 
     std::vector<std::shared_ptr<Scene>> scenes;
     scenes.push_back(scene);
-    scenes.push_back(scene2);
+    // scenes.push_back(scene2);
 
     // User Input handler
     std::shared_ptr<UserInput::glfwKeyboardScanner> userInput = std::make_shared<UserInput::glfwKeyboardScanner>(graphicalEngine.getWindowPtr());

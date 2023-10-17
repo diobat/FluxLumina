@@ -11,7 +11,8 @@ enum E_TexureType
     DIFFUSE,
     SPECULAR,
     NORMAL,
-    HEIGHT
+    HEIGHT,
+    CUBEMAP
 };
 
 class Texture

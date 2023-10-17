@@ -3,6 +3,9 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
+///////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////// HELPER FUNCTIONS
+///////////////////////////////////////////////////////////////////////////////////////////
 
 namespace
 {
@@ -64,6 +67,10 @@ namespace
     }
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////// INITIALIZATION
+///////////////////////////////////////////////////////////////////////////////////////////
+
 SceneObjectFactory::SceneObjectFactory(Scene* scene, GraphicalEngine* engine)
 {
     _boundScene = scene;
@@ -85,6 +92,10 @@ void SceneObjectFactory::bindEngine(GraphicalEngine *engine)
 {
     _boundEngine = engine;
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////// MODELS/MESHES/MATERIALS
+///////////////////////////////////////////////////////////////////////////////////////////
 
 ModelObject &SceneObjectFactory::create_Model(const std::string &modelPath, unsigned int shader, bool flipUVs)
 {
@@ -272,6 +283,10 @@ std::vector<Texture> SceneObjectFactory::loadMaterialTextures(Model &model, aiMa
     return materialTextures;
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////// LIGHT SOURCES
+///////////////////////////////////////////////////////////////////////////////////////////
+
 std::shared_ptr<LightSource> SceneObjectFactory::create_LightSource(E_LightType type)
 {
     std::shared_ptr<LightSource> light;
@@ -298,7 +313,43 @@ std::shared_ptr<LightSource> SceneObjectFactory::create_LightSource(E_LightType 
     return light;
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////// CAMERAS
+///////////////////////////////////////////////////////////////////////////////////////////
+
 void SceneObjectFactory::create_Camera()
 {
     _boundScene->addCamera(std::make_shared<Camera>());
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////// CUBEMAPS
+///////////////////////////////////////////////////////////////////////////////////////////
+
+std::shared_ptr<Cubemap> SceneObjectFactory::create_Skybox(std::vector<std::string> faces)
+{
+    std::array<Texture,6> cubemapTex; 
+
+    if(faces.size() != 6)
+    {
+        return nullptr;
+    }
+
+    for(unsigned int i = 0; i < faces.size(); i++)
+    {
+        Texture texture = TextureFromFile(faces[i].c_str(), "");
+        setTextureData(texture, aiTextureType_DIFFUSE);
+        cubemapTex[i] = texture;
+       
+        if(!*texture._pixels)
+        {
+            std::cout << "ERROR::CUBEMAP::TEXTURE_LOADING_FAILED " << i << std::endl;
+        }
+    }
+    std::shared_ptr<Cubemap> cubemap = std::make_shared<Cubemap>();
+    cubemap->getTexture()._type = E_TexureType::CUBEMAP;
+    _boundScene->getSkybox().setCubemap(cubemap);
+    _boundEngine->initializeSkybox(_boundScene->getSkybox(), cubemapTex);
+
+    return cubemap;
 }

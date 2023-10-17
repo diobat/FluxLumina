@@ -59,7 +59,8 @@ int openGL::initialize()
     }
 
     /* Set the viewport */
-    glClearColor(0.6784f, 0.8f, 1.0f, 1.0f);
+    //glClearColor(0.6784f, 0.8f, 1.0f, 1.0f);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 
     // Enable depth test
@@ -86,43 +87,55 @@ int openGL::initialize()
     _frameBuffers = std::make_unique<FBOManager>(_window);
 
     // Select shader program to use
-    auto shader = std::make_shared<Shader>("Basic.vert", "Basic.frag");
-    _shaderPrograms.push_back(shader);
-    auto shader2 = std::make_shared<Shader>("Simple.vert", "Simple.frag");
+    auto shader0 = std::make_shared<Shader>("Basic.vert", "Basic.frag");
+    _shaderPrograms.push_back(shader0);
+    auto shader1 = std::make_shared<Shader>("Simple.vert", "Simple.frag");
+    _shaderPrograms.push_back(shader1);
+    auto shader2 = std::make_shared<Shader>("Basic.vert", "transparency.frag");
     _shaderPrograms.push_back(shader2);
-    auto shader3 = std::make_shared<Shader>("Basic.vert", "transparency.frag");
+    auto shader3 = std::make_shared<Shader>("Quad.vert", "Quad.frag");
     _shaderPrograms.push_back(shader3);
-    auto shader4 = std::make_shared<Shader>("Quad.vert", "Quad.frag");
+    auto shader4 = std::make_shared<Shader>("Skybox.vert", "Skybox.frag");
     _shaderPrograms.push_back(shader4);
+    auto shader5 = std::make_shared<Shader>("Reflection.vert", "Reflection.frag");
+    //shader5->verbose = true;
+    _shaderPrograms.push_back(shader5);
     useShader(0);
 
     return 1;
 }
 
-
-
 // Next step is to encapsulate this in a method that also handles Framebuffer changes
 void openGL::renderFrame(std::shared_ptr<Scene> scene)
 {
-    // For window resizing purposes
-    _scene = scene; 
-
     // Bind the proper FBO
     _frameBuffers->bindProperFBOFromScene(scene);
 
-    // Reset color and depth buffers
+    // Reset color and depth buffers 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Camera
+    useShader(0);
     cameraSetup(scene);
 
     // Light
     allLightsSetup(scene->getAllLights());
 
+    // Draw Skybox
+    if (scene->getSkybox().getCubemap() != nullptr)
+    {
+        auto ZZview = glm::mat4(glm::mat3(scene->getActiveCamera()->getViewMatrix())); // remove translation from the view matrix
+        auto ZZprojection = scene->getActiveCamera()->getProjectionMatrix();
+        useShader(4);
+        _shaderPrograms[4]->setUniformMatrix4fv("view", ZZview);
+        _shaderPrograms[4]->setUniformMatrix4fv("projection", ZZprojection);
+        renderSkybox(scene->getSkybox());
+    }
+
     // Draw models
     for(int i(0); i<_shaderPrograms.size(); i++)
     {
-        useShader(i);
+        useShader(i);   
         // Render all the non-transparent models
         std::map<float, std::shared_ptr<ModelObject>> sortedTransparentModels;
         for (auto model : scene->getModels(_shaderPrograms[i]->getProgramId()))
@@ -145,9 +158,7 @@ void openGL::renderFrame(std::shared_ptr<Scene> scene)
                 renderModel(*it->second);
             }
         }
-
     }
-
 }
 
 void openGL::renderModel(ModelObject &model)
@@ -184,7 +195,7 @@ void openGL::cameraSetup(std::shared_ptr<Scene> scene)
 {
     // Camera
     scene->getActiveCamera()->recalculateMVP();
-    for (int i(0); i < _shaderPrograms.size(); i++)
+    for (int i(0); i < _shaderPrograms.size() ; i++)
     {
         _shaderPrograms[i]->setUniformMatrix4fv("view", scene->getActiveCamera()->getViewMatrix());
         _shaderPrograms[i]->setUniformMatrix4fv("projection", scene->getActiveCamera()->getProjectionMatrix());
@@ -282,10 +293,14 @@ void openGL::resizeWindow(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
 
-    if (_scene->getActiveCamera() != nullptr)
+    for(auto scene : _scenes)
     {
-        _scene->getActiveCamera()->resizeCameraPlane(width, height);
+        if (scene->getActiveCamera() != nullptr)
+        {
+            scene->getActiveCamera()->resizeCameraPlane(width, height);
+        }
     }
+
 }
 
 void openGL::initializeMesh(Mesh& mesh)
@@ -299,9 +314,6 @@ void openGL::initializeMesh(Mesh& mesh)
     glBindVertexArray(mesh.VAO);
     // load data into vertex buffers
     glBindBuffer(GL_ARRAY_BUFFER, mesh.VBO);
-    // A great thing about structs is that their memory layout is sequential for all its items.
-    // The effect is that we can simply pass a pointer to the struct and it translates perfectly to a glm::vec3/2 array which
-    // again translates to 3/2 floats which translates to a byte array.
     glBufferData(GL_ARRAY_BUFFER, mesh._vertices.size() * sizeof(Vertex), &mesh._vertices[0], GL_STATIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh._indices.size() * sizeof(unsigned int), &mesh._indices[0], GL_STATIC_DRAW);
@@ -342,9 +354,9 @@ void openGL::initializeTexture(Texture& texture)
 
 void openGL::bindTextures(Mesh& mesh)
 {
-
     unsigned int diffuseNr = 0;
     unsigned int specularNr = 0;
+    unsigned int cubemapNr = 0;
 
     _shaderPrograms[currentShaderIndex]->setUniform1i("sampleFromDiffuse", 0);
     _shaderPrograms[currentShaderIndex]->setUniform1i("sampleFromSpecular", 0);
@@ -370,7 +382,7 @@ void openGL::bindTextures(Mesh& mesh)
             diffuseNr++;
             break;
         case SPECULAR:
-            imageUnitSpace = 10;
+            imageUnitSpace = 20;
             _shaderPrograms[currentShaderIndex]->setUniform1i("sampleFromSpecular", 1);
             _shaderPrograms[currentShaderIndex]->setUniform1i("material.specular", imageUnitSpace + specularNr);
             _shaderPrograms[currentShaderIndex]->setUniform1f("material.shininess", 0.5);
@@ -379,10 +391,17 @@ void openGL::bindTextures(Mesh& mesh)
             specularNr++;
             break;
         case NORMAL:
-            imageUnitSpace = 20;
+            imageUnitSpace = 40;
             break;
         case HEIGHT:
-            imageUnitSpace = 30;
+            imageUnitSpace = 60;
+            break;
+        case CUBEMAP:
+            imageUnitSpace = 80;
+            _shaderPrograms[currentShaderIndex]->setUniform1i("cubemap", imageUnitSpace + cubemapNr);
+            glActiveTexture(GL_TEXTURE0 + imageUnitSpace + cubemapNr);
+            glBindTexture(GL_TEXTURE_CUBE_MAP, mesh._textures[i]._id);
+            cubemapNr++;
             break;
         default:
             imageUnitSpace = 0;
@@ -437,4 +456,58 @@ bool openGL::isFrameBufferComplete(std::shared_ptr<FBO> fbo) const
 FBOManager& openGL::getFBOManager()
 {
     return *_frameBuffers;
+}
+
+void openGL::initializeSkybox(Skybox &skybox, const std::array<Texture, 6>& textures)
+{
+    Cubemap& cubemap = *skybox.getCubemap();
+    // VAO and VBO
+    glGenVertexArrays(1, &cubemap.VAO);
+    glGenBuffers(1, &cubemap.VBO);
+    glBindVertexArray(cubemap.VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, cubemap.VBO);
+
+    auto vertices = *cubemap._vertices;
+
+    glBufferData(GL_ARRAY_BUFFER, sizeof(cubemap._vertices), &cubemap._vertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glBindVertexArray(0); // Unbind VAO
+    glBindBuffer(GL_ARRAY_BUFFER, 0); // Unbind VBO
+
+    // Setup textures of the cubemap
+
+    Texture& cubemapTexture = cubemap.getTexture();
+    glGenTextures(1, &cubemapTexture._id);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture._id);
+    // load and create a texture
+    for (int i(0); i < textures.size() ; ++i)
+    {
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, textures[i]._colorChannels, textures[i]._width, textures[i]._height, 0, textures[i]._colorChannels, GL_UNSIGNED_BYTE, textures[i]._pixels);
+    }
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, 0); // Unbind texture
+}
+
+void openGL::renderSkybox(Skybox& skybox)
+{
+    auto cubemap = skybox.getCubemap();
+
+    //glDepthMask(GL_FALSE);
+    glDepthFunc(GL_LEQUAL);
+
+    glBindVertexArray(cubemap->VAO);
+    glActiveTexture(GL_TEXTURE0);
+    //_shaderPrograms[currentShaderIndex]->setUniform1i("skybox", 0);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap->getTexture()._id);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+    glBindVertexArray(0);
+
+    glDepthFunc(GL_LESS);
+    //glDepthMask(GL_TRUE);
+
 }

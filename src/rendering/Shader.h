@@ -34,13 +34,13 @@ public:
     void setUniformMatrix4fv(const std::string & uniformName, const glm::mat4 & matrix);
     
     GLuint getProgramId() const;
-
+    bool verbose = false;
 private:
     std::map<std::string, GLint> uniformsLocations;
 
     GLuint program_id;
     bool isLinked;
-    bool verbose = false;
+
     bool link();
     bool getUniformLocation(const std::string & uniform_name);
     std::string loadFile(const std::string & filename);

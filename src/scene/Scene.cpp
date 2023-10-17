@@ -98,3 +98,8 @@ AmbientLight &Scene::getAmbientLight()
 {
 	return _ambientLight;
 }
+
+Skybox &Scene::getSkybox()
+{
+	return _skybox;
+}
