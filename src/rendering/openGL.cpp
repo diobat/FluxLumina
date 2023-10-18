@@ -25,81 +25,39 @@ void openGL::disable(GLuint feature)
     glDisable(feature);
 }
 
-int openGL::initialize()
+int openGL::initialize(GLFWwindow* window)
 {
-    int WINDOW_WIDTH = 2048;
-    int WINDOW_HEIGHT = 1536;
-
-    /* Initialize the library */
-    if (!glfwInit())
-        return 0;
-
-    /* Create a windowed mode window and its OpenGL context */
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-    _window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Espigão Simulator 3000", nullptr, nullptr);
-
-    if (!_window)
-    {
-        glfwTerminate();
-        return 0;
-    }
+    _window = window;
 
     /* Make the window's context current */
     glfwMakeContextCurrent(_window);
-    
-    /* Initialize glad */
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-    {
-        std::cout << "Failed to initialize GLAD" << std::endl;
-        return 0;
-    }
+
+    glfwGetWindowSize(_window, &_width, &_height);
 
     /* Set the viewport */
     glClearColor(0.6784f, 0.8f, 1.0f, 1.0f);
-    glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+    glViewport(0, 0, _width, _height);
 
     // Enable depth test
     glEnable(GL_DEPTH_TEST);
     // Accept fragment if it closer to the camera than the former one
     glDepthFunc(GL_LESS);
+
     // Enable blending
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glClearStencil(0);
 
-    // Window resize code
+    // Set window resize code
     glfwSetWindowUserPointer(_window, this);
-
     auto func = [](GLFWwindow* window, int width, int height)
     {
         static_cast<openGL*>(glfwGetWindowUserPointer(window))->resizeWindow(window, width, height);
     };
-
     glfwSetWindowSizeCallback(_window, func);
     // End window resize code
 
     // Framebuffer Manager initialization
     _frameBuffers = std::make_unique<FBOManager>(_window);
-
-    // Select shader program to use
-    // auto shader0 = std::make_shared<Shader>("Basic.vert", "Basic.frag");
-    // _shaderPrograms.push_back(shader0);
-    // auto shader1 = std::make_shared<Shader>("Simple.vert", "Simple.frag");
-    // _shaderPrograms.push_back(shader1);
-    // auto shader2 = std::make_shared<Shader>("Basic.vert", "transparency.frag");
-    // _shaderPrograms.push_back(shader2);
-    // auto shader3 = std::make_shared<Shader>("Quad.vert", "Quad.frag");
-    // _shaderPrograms.push_back(shader3);
-    // auto shader4 = std::make_shared<Shader>("Skybox.vert", "Skybox.frag");
-    // _shaderPrograms.push_back(shader4);
-    // auto shader5 = std::make_shared<Shader>("Reflection.vert", "Reflection.frag");
-    // //shader5->verbose = true;
-    // _shaderPrograms.push_back(shader5);
-    // useShader(0);
 
     _shaderPrograms.addShader("Basic.vert", "Basic.frag");
     _shaderPrograms.addShader("Simple.vert", "Simple.frag");

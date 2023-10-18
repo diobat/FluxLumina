@@ -26,7 +26,7 @@ public:
 	openGL();
 	~openGL();
 
-	int initialize();
+	int initialize(GLFWwindow* window);
 
 	void renderFrame(std::shared_ptr<Scene> scene) override;
 
@@ -69,6 +69,7 @@ private:
 
 	// GLFW window
 	GLFWwindow* _window;
+	int _width, _height;
 
 	// Scene
 	std::shared_ptr<UserInput::glfwKeyboardScanner> _userInput;

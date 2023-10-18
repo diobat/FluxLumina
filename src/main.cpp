@@ -2,6 +2,7 @@
 
 // First-party includes
 #include "rendering/GLFW_Wrapper.h"
+#include "rendering/openGLContext.h"
 #include "rendering/openGL.h"
 #include "scene/SceneObjectFactory.h"
 
@@ -35,18 +36,24 @@ void update(openGL& graphicalEngine, std::vector<std::shared_ptr<Scene>> scenes,
 
 int main(void)
 {
+    GLFWwindow* window = InitializeOpenGLContext();
+
+    if(window == nullptr)
+    {
+        return -1;
+    }
+
     // Scene initialization
     std::shared_ptr<Scene> scene = std::make_shared<Scene>();
 
-
     openGL graphicalEngine;
-    graphicalEngine.initialize();
+    graphicalEngine.initialize(window);
     graphicalEngine.bindScene(scene);
 
     // Init object factory
-
     SceneObjectFactory factory(&(*scene), &graphicalEngine);
 
+    // Camera setup
     factory.create_Camera();
 
     // Skybox setup
@@ -61,8 +68,8 @@ int main(void)
 
     // Scene objects 
 
-    auto &window = factory.create_Model("res/models/window/window.obj", 2);
-    window.setPosition({-10.0f, 10.0f, 10.0f});
+    auto &window1 = factory.create_Model("res/models/window/window.obj", 2);
+    window1.setPosition({-10.0f, 10.0f, 10.0f});
 
     auto &window2 = factory.create_Model("res/models/window/window.obj", 2);
     window2.setPosition({-10.0f, 10.0f, 8.0f});
@@ -82,7 +89,6 @@ int main(void)
 
     auto& statue = factory.create_Model("res/models/Statue/12330_Statue_v1_L2.obj", 1);
     statue.setPosition({0.0f, 0.0f, 5.0f});
-    //statue.rotate(-90.0f, 0.0f, 180.0f);
     statue.rotate(-90.0f, 0.0f, 0.0f);
     statue.setScale(0.01f);
 
@@ -122,22 +128,10 @@ int main(void)
     auto light3 = factory.create_LightSource( E_LightType::SPOT_LIGHT);
     auto light4 = std::dynamic_pointer_cast<SpotLight>(light3);
     light4->setPosition({0.0f, 10.0f, 0.0f});
-    // light4->setDirection({0.0f, -1.0f, -1.5f});
     light4->pointAt({0.0f, 0.0f, 0.0f});
-
-
-    // Scene 2
-
-    // std::shared_ptr<Scene> scene2 = std::make_shared<Sce+ne>();
-    // factory.bindScene(&(*scene2));
-    // factory.create_Camera();
-
-    // ModelObject &quad = factory.create_Model("res/models/quad/quad.obj", 3);
-    // quad.getModel()->meshes[0].attachTexture(FBO->getTextures());
 
     std::vector<std::shared_ptr<Scene>> scenes;
     scenes.push_back(scene);
-    // scenes.push_back(scene2);
 
     // User Input handler
     std::shared_ptr<UserInput::glfwKeyboardScanner> userInput = std::make_shared<UserInput::glfwKeyboardScanner>(graphicalEngine.getWindowPtr());
