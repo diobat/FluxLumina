@@ -20,7 +20,7 @@ public:
 	void unbindScene(std::shared_ptr<Scene> scene);
 	std::shared_ptr<Scene> getScene(unsigned int sceneIndex) const;
 
-	virtual unsigned int getShaderProgramID(unsigned int shaderIndex) const = 0;
+	virtual unsigned int getShaderProgramID(unsigned int shaderIndex) = 0;
 
 protected:
 	std::vector<std::shared_ptr<Scene>> _scenes;

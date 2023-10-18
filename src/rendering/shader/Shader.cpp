@@ -159,6 +159,11 @@ GLuint Shader::getProgramId() const
     return program_id;
 }
 
+const std::string& Shader::getName() const
+{
+    return _name;
+}
+
 bool Shader::getUniformLocation(const std::string & uniform_name)
 {
     GLint uniform_location = glGetUniformLocation(program_id, uniform_name.c_str());

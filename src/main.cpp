@@ -49,26 +49,26 @@ int main(void)
 
     factory.create_Camera();
 
-    // Skybox setup
-    auto skybox = factory.create_Skybox(
-        {"res/models/skybox/right.jpg",
-         "res/models/skybox/left.jpg",
-         "res/models/skybox/top.jpg",
-         "res/models/skybox/bottom.jpg",
-         "res/models/skybox/front.jpg",
-         "res/models/skybox/back.jpg"});
+    // // Skybox setup
+    // auto skybox = factory.create_Skybox(
+    //     {"res/models/skybox/right.jpg",
+    //      "res/models/skybox/left.jpg",
+    //      "res/models/skybox/top.jpg",
+    //      "res/models/skybox/bottom.jpg",
+    //      "res/models/skybox/front.jpg",
+    //      "res/models/skybox/back.jpg"});
 
 
     // Scene objects 
 
-    auto &window = factory.create_Model("res/models/window/window.obj", 2);
-    window.setPosition({-10.0f, 10.0f, 10.0f});
+    // auto &window = factory.create_Model("res/models/window/window.obj", 2);
+    // window.setPosition({-10.0f, 10.0f, 10.0f});
 
-    auto &window2 = factory.create_Model("res/models/window/window.obj", 2);
-    window2.setPosition({-10.0f, 10.0f, 8.0f});
+    // auto &window2 = factory.create_Model("res/models/window/window.obj", 2);
+    // window2.setPosition({-10.0f, 10.0f, 8.0f});
 
-    auto &window3 = factory.create_Model("res/models/window/window.obj", 2);
-    window3.setPosition({-10.0f, 10.0f, 6.0f});
+    // auto &window3 = factory.create_Model("res/models/window/window.obj", 2);
+    // window3.setPosition({-10.0f, 10.0f, 6.0f});
 
     ModelObject &ground = factory.create_Model("res/models/ground.obj", 0);
     ground.setPosition({0.0f, -0.5f, 0.0f});
@@ -86,7 +86,7 @@ int main(void)
     statue.rotate(-90.0f, 0.0f, 0.0f);
     statue.setScale(0.01f);
 
-    auto &statue2 = factory.create_Model("res/models/Statue/12330_Statue_v1_L2.obj", 5);
+    auto &statue2 = factory.create_Model("res/models/Statue/12330_Statue_v1_L2.obj", 0);
     statue2.setPosition({0.0f, 0.0f, -5.0f});
     statue2.rotate(-90.0f, 0.0f, 0.0f);
     statue2.setScale(0.01f);
@@ -101,13 +101,13 @@ int main(void)
     statue4.rotate(-90.0f, 0.0f, 0.0f);
     statue4.setScale(0.01f);
 
-    auto& grass = factory.create_Model("res/models/grassSquare/grassSquare.obj", 2);
-    grass.setPosition({10.0f, 1.0f, 10.0f});
+    // auto& grass = factory.create_Model("res/models/grassSquare/grassSquare.obj", 2);
+    // grass.setPosition({10.0f, 1.0f, 10.0f});
 
-    auto& cube = factory.create_Model("res/models/cube/cube.obj", 5);
-    std::vector<Texture> cubeTextures = {scene->getSkybox().getCubemap()->getTexture()};
-    cube.getModel()->meshes[0].attachTexture(cubeTextures);
-    cube.setPosition({10.0f, 10.0f, 10.0f});
+    // auto& cube = factory.create_Model("res/models/cube/cube.obj", 5);
+    // std::vector<Texture> cubeTextures = {scene->getSkybox().getCubemap()->getTexture()};
+    // cube.getModel()->meshes[0].attachTexture(cubeTextures);
+    // cube.setPosition({10.0f, 10.0f, 10.0f});
 
     // Lights   
 
@@ -126,11 +126,9 @@ int main(void)
     light4->pointAt({0.0f, 0.0f, 0.0f});
 
 
-
-
     // Scene 2
 
-    // std::shared_ptr<Scene> scene2 = std::make_shared<Scene>();
+    // std::shared_ptr<Scene> scene2 = std::make_shared<Sce+ne>();
     // factory.bindScene(&(*scene2));
     // factory.create_Camera();
 

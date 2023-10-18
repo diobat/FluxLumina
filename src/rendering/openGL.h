@@ -14,7 +14,7 @@
 
 // First party includes
 #include "rendering/GraphicalEngine.h"
-#include "rendering/Shader.h"
+#include "rendering/shader/ShaderLibrary.h"
 #include "rendering/texture.h"
 #include "rendering/framebuffer/Framebuffer_Manager.h"
 #include "user_input/glfwUserInputScanner.h"
@@ -45,8 +45,7 @@ public:
 	void renderModel(ModelObject &model);
 
 	// Shaders
-	unsigned int getShaderProgramID(unsigned int shaderIndex) const;
-	void useShader(unsigned int shaderIndex);
+	unsigned int getShaderProgramID(unsigned int shaderIndex);
 
 	// Framebuffers
 	std::shared_ptr<FBO> addFBO(E_AttachmentFormat format, int width, int height);
@@ -78,7 +77,8 @@ private:
 	std::unique_ptr<FBOManager> _frameBuffers;
 
 	// Shaders
-	std::vector<std::shared_ptr<Shader>> _shaderPrograms;
-	unsigned int currentShaderIndex = 0;
+	ShaderLibrary _shaderPrograms;
+	//std::vector<std::shared_ptr<Shader>> _shaderPrograms;
+	//unsigned int currentShaderIndex = 0;
 
 };

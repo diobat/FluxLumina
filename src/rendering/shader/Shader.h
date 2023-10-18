@@ -30,10 +30,12 @@ public:
     void setUniform2fv      (const std::string & uniformName, const glm::vec2 & vector);
     void setUniform3fv      (const std::string & uniformName, const glm::vec3 & vector);
     void setUniform4fv      (const std::string & uniformName, const glm::vec4 & vector);
+    void setUniformMatrix2fv(const std::string & uniformName, const glm::mat2 & matrix);
     void setUniformMatrix3fv(const std::string & uniformName, const glm::mat3 & matrix);
     void setUniformMatrix4fv(const std::string & uniformName, const glm::mat4 & matrix);
     
     GLuint getProgramId() const;
+    const std::string& getName() const;
     bool verbose = false;
 private:
     std::map<std::string, GLint> uniformsLocations;
@@ -44,5 +46,7 @@ private:
     bool link();
     bool getUniformLocation(const std::string & uniform_name);
     std::string loadFile(const std::string & filename);
+
+    std::string _name;
 };
 
