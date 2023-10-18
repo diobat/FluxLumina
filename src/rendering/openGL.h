@@ -78,7 +78,4 @@ private:
 
 	// Shaders
 	ShaderLibrary _shaderPrograms;
-	//std::vector<std::shared_ptr<Shader>> _shaderPrograms;
-	//unsigned int currentShaderIndex = 0;
-
 };
