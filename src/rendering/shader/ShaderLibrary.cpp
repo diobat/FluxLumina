@@ -2,14 +2,13 @@
 #include "rendering/shader/UniformBufferTemplate.h"
 #include <stdexcept>
 
+#include <iostream>
 
 ShaderLibrary::ShaderLibrary()
 {
-    // glGenBuffers(1, &_UBO);
-    // glBindBuffer(GL_UNIFORM_BUFFER, _UBO);
-    // glBufferData(GL_UNIFORM_BUFFER, sizeof(glm::mat4) * 2, NULL, GL_STATIC_DRAW);
-    // glBindBuffer(GL_UNIFORM_BUFFER, 0);
-    ;
+
+
+
 }
 
 ShaderLibrary::~ShaderLibrary()

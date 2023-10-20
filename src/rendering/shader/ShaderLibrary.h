@@ -7,6 +7,8 @@
 
 // First-Party Headers
 #include "rendering/shader/Shader.h"
+#include "rendering/shader/UniformBuffer.h"
+#include "rendering/shader/UniformBufferTemplate.h"
 
 // Third-Party Headers
 #include <glad/glad.h>
