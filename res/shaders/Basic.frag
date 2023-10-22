@@ -71,7 +71,11 @@ uniform DirLight dirLight[3];
 uniform int numSpotLights;
 uniform SpotLight spotLight[20];
 
-uniform vec3 viewPos;
+layout(std140) uniform viewPosBlock
+{
+	vec3 viewPos;
+};
+
 uniform vec3 ambColor;
 uniform float ambIntensity;
 

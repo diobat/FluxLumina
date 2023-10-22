@@ -7,9 +7,13 @@ layout (location = 2) in vec2 aTexCoords;
 layout (location = 3) in vec3 aObjectColor;
 
 // Uniforms
+
+layout(std140) uniform mvp_camera 
+{
+	mat4 view;
+	mat4 projection;
+};
 uniform mat4 model;
-uniform mat4 view;
-uniform mat4 projection;
 
 // Outputs
 out vec3 Normal;

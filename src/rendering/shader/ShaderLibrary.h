@@ -6,9 +6,9 @@
 #include <memory>
 
 // First-Party Headers
+#include "rendering/shader/ShaderLibraryContents.h"
 #include "rendering/shader/Shader.h"
 #include "rendering/shader/UniformBuffer.h"
-#include "rendering/shader/UniformBufferTemplate.h"
 
 // Third-Party Headers
 #include <glad/glad.h>
@@ -39,7 +39,9 @@ public:
 
     // Uniform setters
 
-    
+    UniformBuffer& createUniformBuffer(const std::string& uniformName);
+    UniformBuffer& getUniformBuffer(const std::string& uniformName);
+    void deleteUniformBuffer(const std::string& uniformName);
 
     // Specialized uniform setters
     void setUniformBool(const std::string& name, bool value);
@@ -91,8 +93,12 @@ public:
     void setUniformMat4(const std::string &shader, const std::string &name, const glm::mat4 &mat);
 
 private:
-    std::vector<std::shared_ptr<Shader>> _shaders;
+    // Shaders
+    std::shared_ptr<ShaderLibraryContents> _contents;
+    std::vector<std::shared_ptr<Shader>>& _shaders;
     unsigned int _activeShader;
 
-    unsigned int _UBO;
+    // Uniform Buffers
+    std::vector<UniformBuffer> _uniformBuffers;
+
 };

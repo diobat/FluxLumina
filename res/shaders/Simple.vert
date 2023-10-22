@@ -7,9 +7,12 @@ layout(location = 2) in vec2 aTexCoords;
 layout(location = 3) in vec3 aObjectColor;
 
 // Uniforms
-uniform mat4 model;			// Model matrix
-uniform mat4 view;			// View matrix
-uniform mat4 projection;	// Projection matrix
+layout(std140) uniform mvp_camera 
+{
+	mat4 view;
+	mat4 projection;
+};
+uniform mat4 model;
 
 // Output
 out vec3 objectColor;

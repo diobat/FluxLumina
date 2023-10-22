@@ -5,7 +5,12 @@ in vec3 Normal;
 in vec3 Position;
 
 // Uniforms
-uniform vec3 viewPos;
+
+layout(std140) uniform viewPosBlock
+{
+	vec3 viewPos;
+};
+
 uniform samplerCube cubemap;
 
 // Outputs

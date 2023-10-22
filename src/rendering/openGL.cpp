@@ -67,6 +67,10 @@ int openGL::initialize(GLFWwindow* window)
     _shaderPrograms.addShader("Reflection.vert", "Reflection.frag");
     _shaderPrograms.use(0);
 
+    // Add uniform buffers to the shaders
+    _shaderPrograms.createUniformBuffer("mvp_camera");
+    _shaderPrograms.createUniformBuffer("viewPosBlock");
+
     return 1;
 }
 
@@ -160,12 +164,18 @@ void openGL::cameraSetup(std::shared_ptr<Scene> scene)
 {
     // Camera
     scene->getActiveCamera()->recalculateMVP();
-    for (int i(0); i < _shaderPrograms.size() ; i++)
-    {
-        _shaderPrograms.setUniformMat4(i, "view", scene->getActiveCamera()->getViewMatrix());
-        _shaderPrograms.setUniformMat4(i, "projection", scene->getActiveCamera()->getProjectionMatrix());
-        _shaderPrograms.setUniformVec3(i, "viewPos", scene->getActiveCamera()->getPosition());
-    }
+
+    std::tuple<glm::mat4, glm::mat4> mvp = {
+        scene->getActiveCamera()->getViewMatrix(),
+        scene->getActiveCamera()->getProjectionMatrix()
+        };
+
+    std::tuple<glm::vec3> cameraPosition = {
+        scene->getActiveCamera()->getPosition()
+    };
+
+    _shaderPrograms.getUniformBuffer("mvp_camera").update(mvp);
+    _shaderPrograms.getUniformBuffer("viewPosBlock").update(cameraPosition);
 }
 
 void openGL::allLightsSetup(const LightContents &lights)
@@ -262,7 +272,7 @@ void openGL::resizeWindow(GLFWwindow* window, int width, int height)
     {
         if (scene->getActiveCamera() != nullptr)
         {
-            scene->getActiveCamera()->resizeCameraPlane(width, height);
+            scene->getActiveCamera()->resizeCameraPlane((float)width, (float)height);
         }
     }
 }

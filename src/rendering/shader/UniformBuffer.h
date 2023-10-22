@@ -3,20 +3,25 @@
 // GLFW include
 #include "rendering/GLFW_Wrapper.h"
 
+// Debug Glm includes
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 // STD library includes
-#include <iostream>
+
 #include <tuple>
 #include <type_traits>
 #include <algorithm>
 
 // First party includes
 #include "util/Arithmetic.h"
+#include "rendering/shader/ShaderLibraryContents.h"
 
 
 namespace
 {
-
     bool validityFlag = false;
+    std::vector<unsigned int> std140MemoryLayout;
 
     // Which types are allowed in the uniform struct?
     template <typename U>
@@ -137,12 +142,11 @@ namespace
 
     // Base template to handle an individual tuple element
     template <size_t Index, typename... Types>
-    unsigned int printTupleElements(unsigned int size, const std::tuple<Types...> &)
+    unsigned int calculateBufferSize(unsigned int size, const std::tuple<Types...> &)
     {
         // Base case: Do nothing when the index is equal to the tuple size
         if constexpr (Index < sizeof...(Types))
         {
-
             // Check if the current tuple element is a valid type
             if 
             (
@@ -175,37 +179,91 @@ namespace
             // Calculate the aligned offset of the current tuple element
             size = Math::nextHighestMultiple(size, std::min(alignment,16u));
 
+            // Add the offset to the memory layout
+            std140MemoryLayout.push_back(size);
+
             // Add total size of the element
             size += sizeThis;
 
             // Recurse to the next tuple element
-            size = printTupleElements<Index + 1>(size, std::tuple<Types...>());
+            size = calculateBufferSize<Index + 1>(size, std::tuple<Types...>());
         }
-
         // Return the size of the tuple
         return size;
+    }
+
+    template <size_t Index, typename... Types>
+    void updateBufferData(const std::tuple<Types...> &data, unsigned int UBO, const std::vector<unsigned int> &memLayout)
+    {
+        if constexpr (Index < sizeof...(Types))
+        {
+            glBindBuffer(GL_UNIFORM_BUFFER, UBO);
+            glBufferSubData(GL_UNIFORM_BUFFER, memLayout[Index], sizeof(std::get<Index>(data)), &std::get<Index>(data));
+            updateBufferData<Index + 1>(data, UBO, memLayout);
+        }
+        glBindBuffer(GL_UNIFORM_BUFFER, 0);
     }
 }
 
 class UniformBuffer
 {
+    friend class ShaderLibrary;
 public:
+    UniformBuffer(std::weak_ptr<ShaderLibraryContents> shaders, const std::string& name);
 
-    UniformBuffer();
-    ~UniformBuffer();
+    unsigned int id() const;
+    const std::string& handle() const;
+
+    void bindShaderToUniform(unsigned int shader, const std::string &uniformName);
+    void bindAllShadersToUniform(const std::string &uniformName);
 
     template <typename... Types>
-    unsigned int calculateAlignment(const std::tuple<Types...> &object)
+    void update(const std::tuple<Types...> &object)
     {
+        if(!_shaderUniformSize)
+        {
+            createBuffer(object);
+        }
+        updateBufferData<0>(object, _UBO, _memoryLayout);
+    }
+
+private:
+    template <typename... Types>
+    unsigned int createBuffer(const std::tuple<Types...> &object)
+    {
+        _memoryLayout.clear();
+
+        _shaderUniformSize = calculateUniformBufferSize(object);
+
+        assignOpenGLBuffer(_shaderUniformSize);
+
+        return _UBO;
+    }
+
+    template <typename... Types>
+    unsigned int calculateUniformBufferSize(const std::tuple<Types...> &object)
+    {
+        std140MemoryLayout.clear();
         validityFlag = true;
-        unsigned int size = printTupleElements<0>(0, object);
-        std::cout << "Total size: " << size << std::endl;
-        if(!validityFlag)
+        unsigned int size = calculateBufferSize<0>(0, object);
+        if (!validityFlag)
         {
             return 0;
         }
+
+        _memoryLayout = std140MemoryLayout;
         return size;
     }
 
+    unsigned int assignOpenGLBuffer(unsigned int byteSize);
+    unsigned int selectBindingPoint();
+    void removeBindingPoint();
+    void updateBuffer(void* data);
+
     unsigned int _UBO;
+    unsigned int _bindingPoint;
+    std::string _shaderUniformHandle;
+    unsigned int _shaderUniformSize;
+    std::vector<unsigned int> _memoryLayout;
+    std::weak_ptr<ShaderLibraryContents> _shaderLibraryContents;
 };

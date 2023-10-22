@@ -2,13 +2,13 @@
 #include "rendering/shader/UniformBufferTemplate.h"
 #include <stdexcept>
 
-#include <iostream>
 
-ShaderLibrary::ShaderLibrary()
+ShaderLibrary::ShaderLibrary()  :
+    _activeShader(0),
+    _shaders(_contents->_shaders),
+    _contents(std::make_shared<ShaderLibraryContents>())
 {
-
-
-
+    ;
 }
 
 ShaderLibrary::~ShaderLibrary()
@@ -312,3 +312,46 @@ void ShaderLibrary::setUniformMat4(const std::string &shader, const std::string 
     getShader(shader)->setUniformMatrix4fv(name, mat);
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////// UNIFORM BUFFERS
+///////////////////////////////////////////////////////////////////////////////////////////
+
+UniformBuffer& ShaderLibrary::createUniformBuffer(const std::string& uniformName)
+{
+    std::weak_ptr<ShaderLibraryContents> shaders = _contents;
+    _uniformBuffers.emplace_back(UniformBuffer(shaders, uniformName));
+    UniformBuffer& buffer = _uniformBuffers.back();
+
+    buffer.bindAllShadersToUniform(uniformName);
+
+    return buffer;
+}
+
+UniformBuffer& ShaderLibrary::getUniformBuffer(const std::string& uniformName)
+{
+    for(auto& buffer : _uniformBuffers)
+    {
+        if(buffer.handle() == uniformName)
+        {
+            return buffer;
+        }
+    }
+    throw std::runtime_error("Uniform buffer with name " + uniformName + " not found.");
+}
+
+void ShaderLibrary::deleteUniformBuffer(const std::string& uniformName)
+{
+    for(unsigned int i = 0; i < _uniformBuffers.size(); ++i)
+    {
+        if(_uniformBuffers[i].handle() == uniformName)
+        {
+            _uniformBuffers[i].removeBindingPoint();
+            unsigned int UBO = _uniformBuffers[i].id();
+            glDeleteBuffers(1, &UBO);
+
+            _uniformBuffers.erase(_uniformBuffers.begin() + i);
+            return;
+        }
+    }
+    throw std::runtime_error("Uniform buffer with name " + uniformName + " not found.");
+}
