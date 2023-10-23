@@ -6,6 +6,18 @@
 // Standard headers
 #include <array>
 
+
+struct SceneObjectProperties
+{
+    SceneObjectProperties();
+    std::array<float, 3> coordinates;
+    float scale;
+
+    Rotation rotation;
+    std::array<float, 3> originalRotation;
+};
+
+
 class SceneObject
 {
 public:
@@ -26,10 +38,6 @@ private:
     bool _toRender;
 
     // Renderable object properties
-    std::array<float, 3> _coordinates;
-    float _scale;
-
-    std::array<float, 3> _originalRotation;
-    Rotation _rotation;
+    SceneObjectProperties _properties;
 
 };
