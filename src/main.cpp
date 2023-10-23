@@ -39,14 +39,6 @@ void update(openGL& graphicalEngine, std::vector<std::shared_ptr<Scene>> scenes,
 int main(void)
 {
 
-    // UniformBuffer UBO;
-
-    // std::tuple<float, glm::vec3, glm::mat4, float[3], bool, int> example;
-    // std::tuple<glm::mat4, glm::mat4, glm::mat4> example2;
-
-    // std::cout << "Total buffer size is :" << UBO.calculateUniformBufferSize(example) << std:: endl;
-
-
     /// Actual program begins here
 
     GLFWwindow* window = InitializeOpenGLContext();
