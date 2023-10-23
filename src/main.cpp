@@ -15,14 +15,20 @@ void update(openGL& graphicalEngine, std::vector<std::shared_ptr<Scene>> scenes,
     float startTime = static_cast<float>(glfwGetTime());
     float newTime  = 0.0f;
     float gameTime = 0.0f;
-    
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    float deltaTime = 0.0f;
+    std::string windowTitle;
+    glfwSwapInterval(0);
+    // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-    while (!glfwWindowShouldClose(graphicalEngine.getWindowPtr()))
+        while (!glfwWindowShouldClose(graphicalEngine.getWindowPtr()))
     {
         /* Update game time value */
         newTime  = static_cast<float>(glfwGetTime());
+        deltaTime = newTime - gameTime - startTime;
         gameTime = newTime - startTime;
+
+        windowTitle = "Espigão Simulator 3000 - " + std::to_string(1.0f / deltaTime) + " FPS";
+        glfwSetWindowTitle(graphicalEngine.getWindowPtr(), windowTitle.c_str());
 
         graphicalEngine.renderFrame(scenes[0]);
 
