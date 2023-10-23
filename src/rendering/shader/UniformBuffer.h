@@ -258,7 +258,6 @@ private:
     unsigned int assignOpenGLBuffer(unsigned int byteSize);
     unsigned int selectBindingPoint();
     void removeBindingPoint();
-    void updateBuffer(void* data);
 
     unsigned int _UBO;
     unsigned int _bindingPoint;

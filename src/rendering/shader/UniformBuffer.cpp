@@ -51,12 +51,6 @@ void UniformBuffer::bindAllShadersToUniform(const std::string &uniformName)
     }
 }
 
-void UniformBuffer::updateBuffer(void* data)
-{
-    glBindBuffer(GL_UNIFORM_BUFFER, _UBO);
-    glBufferSubData(GL_UNIFORM_BUFFER, 0, _shaderUniformSize, data);
-    glBindBuffer(GL_UNIFORM_BUFFER, 0);
-}
 
 unsigned int UniformBuffer::assignOpenGLBuffer(unsigned int byteSize)
 {
