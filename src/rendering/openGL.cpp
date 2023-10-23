@@ -25,82 +25,51 @@ void openGL::disable(GLuint feature)
     glDisable(feature);
 }
 
-int openGL::initialize()
+int openGL::initialize(GLFWwindow* window)
 {
-    int WINDOW_WIDTH = 2048;
-    int WINDOW_HEIGHT = 1536;
-
-    /* Initialize the library */
-    if (!glfwInit())
-        return 0;
-
-    /* Create a windowed mode window and its OpenGL context */
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-    _window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Espigão Simulator 3000", nullptr, nullptr);
-
-    if (!_window)
-    {
-        glfwTerminate();
-        return 0;
-    }
+    _window = window;
 
     /* Make the window's context current */
     glfwMakeContextCurrent(_window);
-    
-    /* Initialize glad */
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-    {
-        std::cout << "Failed to initialize GLAD" << std::endl;
-        return 0;
-    }
+
+    glfwGetWindowSize(_window, &_width, &_height);
 
     /* Set the viewport */
-    //glClearColor(0.6784f, 0.8f, 1.0f, 1.0f);
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+    glClearColor(0.6784f, 0.8f, 1.0f, 1.0f);
+    glViewport(0, 0, _width, _height);
 
     // Enable depth test
     glEnable(GL_DEPTH_TEST);
     // Accept fragment if it closer to the camera than the former one
     glDepthFunc(GL_LESS);
+
     // Enable blending
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glClearStencil(0);
 
-    // Window resize code
+    // Set window resize code
     glfwSetWindowUserPointer(_window, this);
-
     auto func = [](GLFWwindow* window, int width, int height)
     {
         static_cast<openGL*>(glfwGetWindowUserPointer(window))->resizeWindow(window, width, height);
     };
-
     glfwSetWindowSizeCallback(_window, func);
     // End window resize code
 
     // Framebuffer Manager initialization
     _frameBuffers = std::make_unique<FBOManager>(_window);
 
-    // Select shader program to use
-    auto shader0 = std::make_shared<Shader>("Basic.vert", "Basic.frag");
-    _shaderPrograms.push_back(shader0);
-    auto shader1 = std::make_shared<Shader>("Simple.vert", "Simple.frag");
-    _shaderPrograms.push_back(shader1);
-    auto shader2 = std::make_shared<Shader>("Basic.vert", "transparency.frag");
-    _shaderPrograms.push_back(shader2);
-    auto shader3 = std::make_shared<Shader>("Quad.vert", "Quad.frag");
-    _shaderPrograms.push_back(shader3);
-    auto shader4 = std::make_shared<Shader>("Skybox.vert", "Skybox.frag");
-    _shaderPrograms.push_back(shader4);
-    auto shader5 = std::make_shared<Shader>("Reflection.vert", "Reflection.frag");
-    //shader5->verbose = true;
-    _shaderPrograms.push_back(shader5);
-    useShader(0);
+    _shaderPrograms.addShader("Basic.vert", "Basic.frag");
+    _shaderPrograms.addShader("Simple.vert", "Simple.frag");
+    _shaderPrograms.addShader("Basic.vert", "transparency.frag");
+    _shaderPrograms.addShader("Quad.vert", "Quad.frag");
+    _shaderPrograms.addShader("Skybox.vert", "Skybox.frag");
+    _shaderPrograms.addShader("Reflection.vert", "Reflection.frag");
+    _shaderPrograms.use(0);
+
+    // Add uniform buffers to the shaders
+    _shaderPrograms.createUniformBuffer("mvp_camera");
+    _shaderPrograms.createUniformBuffer("viewPosBlock");
 
     return 1;
 }
@@ -115,7 +84,7 @@ void openGL::renderFrame(std::shared_ptr<Scene> scene)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Camera
-    useShader(0);
+    _shaderPrograms.use(0);
     cameraSetup(scene);
 
     // Light
@@ -126,19 +95,19 @@ void openGL::renderFrame(std::shared_ptr<Scene> scene)
     {
         auto ZZview = glm::mat4(glm::mat3(scene->getActiveCamera()->getViewMatrix())); // remove translation from the view matrix
         auto ZZprojection = scene->getActiveCamera()->getProjectionMatrix();
-        useShader(4);
-        _shaderPrograms[4]->setUniformMatrix4fv("view", ZZview);
-        _shaderPrograms[4]->setUniformMatrix4fv("projection", ZZprojection);
+        _shaderPrograms.use(4);
+        _shaderPrograms.setUniformMat4(4, "view", ZZview);
+        _shaderPrograms.setUniformMat4(4, "projection", ZZprojection);
         renderSkybox(scene->getSkybox());
     }
 
     // Draw models
     for(int i(0); i<_shaderPrograms.size(); i++)
     {
-        useShader(i);   
+        _shaderPrograms.use(i);   
         // Render all the non-transparent models
         std::map<float, std::shared_ptr<ModelObject>> sortedTransparentModels;
-        for (auto model : scene->getModels(_shaderPrograms[i]->getProgramId()))
+        for (auto model : scene->getModels(_shaderPrograms.getShader(i)->getProgramId()))
         {
             if(model->getModel()->hasTransparency)
             {
@@ -176,7 +145,7 @@ void openGL::renderModel(ModelObject &model)
     glm::fquat std_quat = model.getRotation();
     modelMatrix = modelMatrix * glm::mat4_cast(std_quat);
 
-    _shaderPrograms[currentShaderIndex]->setUniformMatrix4fv("model", modelMatrix);
+    _shaderPrograms.setUniformMat4("model", modelMatrix);
 
     for (auto &one_mesh : model.getModel()->meshes)
     {
@@ -195,33 +164,39 @@ void openGL::cameraSetup(std::shared_ptr<Scene> scene)
 {
     // Camera
     scene->getActiveCamera()->recalculateMVP();
-    for (int i(0); i < _shaderPrograms.size() ; i++)
-    {
-        _shaderPrograms[i]->setUniformMatrix4fv("view", scene->getActiveCamera()->getViewMatrix());
-        _shaderPrograms[i]->setUniformMatrix4fv("projection", scene->getActiveCamera()->getProjectionMatrix());
-        _shaderPrograms[i]->setUniform3fv("viewPos", scene->getActiveCamera()->getPosition());
-    }
+
+    std::tuple<glm::mat4, glm::mat4> mvp = {
+        scene->getActiveCamera()->getViewMatrix(),
+        scene->getActiveCamera()->getProjectionMatrix()
+        };
+
+    std::tuple<glm::vec3> cameraPosition = {
+        scene->getActiveCamera()->getPosition()
+    };
+
+    _shaderPrograms.getUniformBuffer("mvp_camera").update(mvp);
+    _shaderPrograms.getUniformBuffer("viewPosBlock").update(cameraPosition);
 }
 
 void openGL::allLightsSetup(const LightContents &lights)
 {
     
     auto directionalLights = lights.directionalLights;
-    _shaderPrograms[currentShaderIndex]->setUniform1i("numDirLights", directionalLights.size());
+    _shaderPrograms.setUniformInt("numDirLights", directionalLights.size());
     for(unsigned int i(0); i<directionalLights.size(); ++i)
     {
         lightSetup(i, *directionalLights[i]);
     }
 
     auto pointLights = lights.pointLights;
-    _shaderPrograms[currentShaderIndex]->setUniform1i("numPointLights", pointLights.size());
+    _shaderPrograms.setUniformInt("numPointLights", pointLights.size());
     for(unsigned int i(0); i<pointLights.size(); ++i)
     {
         lightSetup(i, *pointLights[i]);
     }
 
     auto spotLights = lights.spotLights;
-    _shaderPrograms[currentShaderIndex]->setUniform1i("numSpotLights", spotLights.size());
+    _shaderPrograms.setUniformInt("numSpotLights", spotLights.size());
     for(unsigned int i(0); i<spotLights.size(); ++i)
     {
         lightSetup(i, *spotLights[i]);
@@ -233,60 +208,60 @@ void openGL::lightSetup(unsigned int lightIndex, const DirectionalLight &light)
 {
     // Direction
     glm::vec3 direction = conversion::toVec3(light.getDirection());
-    _shaderPrograms[currentShaderIndex]->setUniform3fv("dirLight[" + std::to_string(lightIndex) + "].direction", direction);
+    _shaderPrograms.setUniformVec3("dirLight[" + std::to_string(lightIndex) + "].direction", direction);
 
     // Color
     glm::vec3 color = conversion::toVec3(light.getColor());
-    _shaderPrograms[currentShaderIndex]->setUniform3fv("dirLight[" + std::to_string(lightIndex) + "].ambient", color);
-    _shaderPrograms[currentShaderIndex]->setUniform3fv("dirLight[" + std::to_string(lightIndex) + "].diffuse", color);
-    _shaderPrograms[currentShaderIndex]->setUniform3fv("dirLight[" + std::to_string(lightIndex) + "].specular", color);
+    _shaderPrograms.setUniformVec3("dirLight[" + std::to_string(lightIndex) + "].ambient", color);
+    _shaderPrograms.setUniformVec3("dirLight[" + std::to_string(lightIndex) + "].diffuse", color);
+    _shaderPrograms.setUniformVec3("dirLight[" + std::to_string(lightIndex) + "].specular", color);
 }
 
 void openGL::lightSetup(unsigned int lightIndex, const PointLight &light)
 {
     // Position
     glm::vec3 position = conversion::toVec3(light.getPosition());
-    _shaderPrograms[currentShaderIndex]->setUniform3fv("pointLight[" + std::to_string(lightIndex) + "].position", position);
+    _shaderPrograms.setUniformVec3("pointLight[" + std::to_string(lightIndex) + "].position", position);
 
     // Color
     glm::vec3 color = conversion::toVec3(light.getColor());
-    _shaderPrograms[currentShaderIndex]->setUniform3fv("pointLight[" + std::to_string(lightIndex) + "].ambient", color);
-    _shaderPrograms[currentShaderIndex]->setUniform3fv("pointLight[" + std::to_string(lightIndex) + "].diffuse", color);
-    _shaderPrograms[currentShaderIndex]->setUniform3fv("pointLight[" + std::to_string(lightIndex) + "].specular", color);
+    _shaderPrograms.setUniformVec3("pointLight[" + std::to_string(lightIndex) + "].ambient", color);
+    _shaderPrograms.setUniformVec3("pointLight[" + std::to_string(lightIndex) + "].diffuse", color);
+    _shaderPrograms.setUniformVec3("pointLight[" + std::to_string(lightIndex) + "].specular", color);
 
     // Attenuation factors
     const std::array<float, 3>& attFactors = light.getAttenuationFactors();
-    _shaderPrograms[currentShaderIndex]->setUniform1f("pointLight[" + std::to_string(lightIndex) + "].constant", attFactors[0]);
-    _shaderPrograms[currentShaderIndex]->setUniform1f("pointLight[" + std::to_string(lightIndex) + "].linear", attFactors[1]);
-    _shaderPrograms[currentShaderIndex]->setUniform1f("pointLight[" + std::to_string(lightIndex) + "].quadratic", attFactors[2]);
+    _shaderPrograms.setUniformFloat("pointLight[" + std::to_string(lightIndex) + "].constant", attFactors[0]);
+    _shaderPrograms.setUniformFloat("pointLight[" + std::to_string(lightIndex) + "].linear", attFactors[1]);
+    _shaderPrograms.setUniformFloat("pointLight[" + std::to_string(lightIndex) + "].quadratic", attFactors[2]);
 }
 
 void openGL::lightSetup(unsigned int lightIndex, const SpotLight &light)
 {
     // Position
     glm::vec3 position = conversion::toVec3(light.getPosition());
-    _shaderPrograms[currentShaderIndex]->setUniform3fv("spotLight[" + std::to_string(lightIndex) + "].position", position);
+    _shaderPrograms.setUniformVec3("spotLight[" + std::to_string(lightIndex) + "].position", position);
 
     // Direction
     glm::vec3 direction = conversion::toVec3(light.getDirection());
-    _shaderPrograms[currentShaderIndex]->setUniform3fv("spotLight[" + std::to_string(lightIndex) + "].direction", direction);
+    _shaderPrograms.setUniformVec3("spotLight[" + std::to_string(lightIndex) + "].direction", direction);
 
     // Color
     glm::vec3 color = conversion::toVec3(light.getColor());
-    _shaderPrograms[currentShaderIndex]->setUniform3fv("spotLight[" + std::to_string(lightIndex) + "].ambient", color);
-    _shaderPrograms[currentShaderIndex]->setUniform3fv("spotLight[" + std::to_string(lightIndex) + "].diffuse", color);
-    _shaderPrograms[currentShaderIndex]->setUniform3fv("spotLight[" + std::to_string(lightIndex) + "].specular", color);
+    _shaderPrograms.setUniformVec3("spotLight[" + std::to_string(lightIndex) + "].ambient", color);
+    _shaderPrograms.setUniformVec3("spotLight[" + std::to_string(lightIndex) + "].diffuse", color);
+    _shaderPrograms.setUniformVec3("spotLight[" + std::to_string(lightIndex) + "].specular", color);
 
     // Attenuation factors
     const std::array<float, 3>& attFactors = light.getAttenuationFactors();
-    _shaderPrograms[currentShaderIndex]->setUniform1f("spotLight[" + std::to_string(lightIndex) + "].constant", attFactors[0]);
-    _shaderPrograms[currentShaderIndex]->setUniform1f("spotLight[" + std::to_string(lightIndex) + "].linear", attFactors[1]);
-    _shaderPrograms[currentShaderIndex]->setUniform1f("spotLight[" + std::to_string(lightIndex) + "].quadratic", attFactors[2]);
+    _shaderPrograms.setUniformFloat("spotLight[" + std::to_string(lightIndex) + "].constant", attFactors[0]);
+    _shaderPrograms.setUniformFloat("spotLight[" + std::to_string(lightIndex) + "].linear", attFactors[1]);
+    _shaderPrograms.setUniformFloat("spotLight[" + std::to_string(lightIndex) + "].quadratic", attFactors[2]);
 
     // Cutoff
     std::array<float, 2> cutoff = light.getCutoff();
-    _shaderPrograms[currentShaderIndex]->setUniform1f("spotLight[" + std::to_string(lightIndex) + "].innerCutOff", glm::cos(glm::radians(cutoff[0])));
-    _shaderPrograms[currentShaderIndex]->setUniform1f("spotLight[" + std::to_string(lightIndex) + "].outerCutOff", glm::cos(glm::radians(cutoff[1])));
+    _shaderPrograms.setUniformFloat("spotLight[" + std::to_string(lightIndex) + "].innerCutOff", glm::cos(glm::radians(cutoff[0])));
+    _shaderPrograms.setUniformFloat("spotLight[" + std::to_string(lightIndex) + "].outerCutOff", glm::cos(glm::radians(cutoff[1])));
 }
 
 void openGL::resizeWindow(GLFWwindow* window, int width, int height)
@@ -297,10 +272,9 @@ void openGL::resizeWindow(GLFWwindow* window, int width, int height)
     {
         if (scene->getActiveCamera() != nullptr)
         {
-            scene->getActiveCamera()->resizeCameraPlane(width, height);
+            scene->getActiveCamera()->resizeCameraPlane((float)width, (float)height);
         }
     }
-
 }
 
 void openGL::initializeMesh(Mesh& mesh)
@@ -358,8 +332,8 @@ void openGL::bindTextures(Mesh& mesh)
     unsigned int specularNr = 0;
     unsigned int cubemapNr = 0;
 
-    _shaderPrograms[currentShaderIndex]->setUniform1i("sampleFromDiffuse", 0);
-    _shaderPrograms[currentShaderIndex]->setUniform1i("sampleFromSpecular", 0);
+    _shaderPrograms.setUniformInt("sampleFromDiffuse", 0);
+    _shaderPrograms.setUniformInt("sampleFromSpecular", 0);
 
     if (mesh._textures.size() == 0)
     {
@@ -375,17 +349,17 @@ void openGL::bindTextures(Mesh& mesh)
         {
         case DIFFUSE:
             imageUnitSpace = 0;
-            _shaderPrograms[currentShaderIndex]->setUniform1i("sampleFromDiffuse", 1);
-            _shaderPrograms[currentShaderIndex]->setUniform1i("material.diffuse", imageUnitSpace + diffuseNr);
+            _shaderPrograms.setUniformInt("sampleFromDiffuse", 1);
+            _shaderPrograms.setUniformInt("material.diffuse", imageUnitSpace + diffuseNr);
             glActiveTexture(GL_TEXTURE0 + imageUnitSpace + diffuseNr);
             glBindTexture(GL_TEXTURE_2D, mesh._textures[i]._id);
             diffuseNr++;
             break;
         case SPECULAR:
             imageUnitSpace = 20;
-            _shaderPrograms[currentShaderIndex]->setUniform1i("sampleFromSpecular", 1);
-            _shaderPrograms[currentShaderIndex]->setUniform1i("material.specular", imageUnitSpace + specularNr);
-            _shaderPrograms[currentShaderIndex]->setUniform1f("material.shininess", 0.5);
+            _shaderPrograms.setUniformInt("sampleFromSpecular", 1);
+            _shaderPrograms.setUniformInt("material.specular", imageUnitSpace + specularNr);
+            _shaderPrograms.setUniformFloat("material.shininess", 0.5);
             glActiveTexture(GL_TEXTURE0 + imageUnitSpace + specularNr);
             glBindTexture(GL_TEXTURE_2D, mesh._textures[i]._id);
             specularNr++;
@@ -398,7 +372,7 @@ void openGL::bindTextures(Mesh& mesh)
             break;
         case CUBEMAP:
             imageUnitSpace = 80;
-            _shaderPrograms[currentShaderIndex]->setUniform1i("cubemap", imageUnitSpace + cubemapNr);
+            _shaderPrograms.setUniformInt("cubemap", imageUnitSpace + cubemapNr);
             glActiveTexture(GL_TEXTURE0 + imageUnitSpace + cubemapNr);
             glBindTexture(GL_TEXTURE_CUBE_MAP, mesh._textures[i]._id);
             cubemapNr++;
@@ -411,15 +385,9 @@ void openGL::bindTextures(Mesh& mesh)
     }
 }
 
-unsigned int openGL::getShaderProgramID(unsigned int shaderIndex) const
+unsigned int openGL::getShaderProgramID(unsigned int shaderIndex)
 {
-    return _shaderPrograms[shaderIndex]->getProgramId();
-}
-
-void openGL::useShader(unsigned int shaderIndex)
-{
-    currentShaderIndex = shaderIndex;
-    glUseProgram(_shaderPrograms[shaderIndex]->getProgramId());
+    return _shaderPrograms.getShader(shaderIndex)->getProgramId();
 }
 
 std::shared_ptr<FBO> openGL::addFBO(E_AttachmentFormat format, int width, int height)
@@ -502,7 +470,6 @@ void openGL::renderSkybox(Skybox& skybox)
 
     glBindVertexArray(cubemap->VAO);
     glActiveTexture(GL_TEXTURE0);
-    //_shaderPrograms[currentShaderIndex]->setUniform1i("skybox", 0);
     glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap->getTexture()._id);
     glDrawArrays(GL_TRIANGLES, 0, 36);
     glBindVertexArray(0);

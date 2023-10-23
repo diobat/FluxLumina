@@ -2,7 +2,7 @@
  * Copyright (C) 2018 Tomasz Ga�aj
  **/
 
-#include "Shader.h"
+#include "rendering/shader/Shader.h"
 
 #include <glm\gtc\type_ptr.hpp>
 #include <fstream>
@@ -157,6 +157,11 @@ bool Shader::link()
 GLuint Shader::getProgramId() const
 {
     return program_id;
+}
+
+const std::string& Shader::getName() const
+{
+    return _name;
 }
 
 bool Shader::getUniformLocation(const std::string & uniform_name)

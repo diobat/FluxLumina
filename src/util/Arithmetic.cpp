@@ -12,6 +12,19 @@ namespace Math
         result[2] = vec[2] / length;
         return result;        
     }
+
+    unsigned int nextHighestMultiple(unsigned int value, unsigned int multiple)
+    {
+        unsigned int remainder = value % multiple;
+        if (remainder == 0)
+        {
+            return value;
+        }
+        else
+        {
+            return value + multiple - remainder;
+        }
+    }
 }
 
 namespace conversion

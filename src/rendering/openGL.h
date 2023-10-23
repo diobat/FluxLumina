@@ -14,7 +14,7 @@
 
 // First party includes
 #include "rendering/GraphicalEngine.h"
-#include "rendering/Shader.h"
+#include "rendering/shader/ShaderLibrary.h"
 #include "rendering/texture.h"
 #include "rendering/framebuffer/Framebuffer_Manager.h"
 #include "user_input/glfwUserInputScanner.h"
@@ -26,7 +26,7 @@ public:
 	openGL();
 	~openGL();
 
-	int initialize();
+	int initialize(GLFWwindow* window);
 
 	void renderFrame(std::shared_ptr<Scene> scene) override;
 
@@ -45,8 +45,7 @@ public:
 	void renderModel(ModelObject &model);
 
 	// Shaders
-	unsigned int getShaderProgramID(unsigned int shaderIndex) const;
-	void useShader(unsigned int shaderIndex);
+	unsigned int getShaderProgramID(unsigned int shaderIndex);
 
 	// Framebuffers
 	std::shared_ptr<FBO> addFBO(E_AttachmentFormat format, int width, int height);
@@ -70,6 +69,7 @@ private:
 
 	// GLFW window
 	GLFWwindow* _window;
+	int _width, _height;
 
 	// Scene
 	std::shared_ptr<UserInput::glfwKeyboardScanner> _userInput;
@@ -78,7 +78,5 @@ private:
 	std::unique_ptr<FBOManager> _frameBuffers;
 
 	// Shaders
-	std::vector<std::shared_ptr<Shader>> _shaderPrograms;
-	unsigned int currentShaderIndex = 0;
-
+	ShaderLibrary _shaderPrograms;
 };
