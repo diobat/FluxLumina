@@ -1,5 +1,7 @@
 #include "scene/SceneObjectFactory.h"
 
+#include "helpers/RootDir.h"
+
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 

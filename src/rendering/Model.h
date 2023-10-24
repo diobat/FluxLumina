@@ -1,26 +1,11 @@
-﻿/** 
- * Code taken from www.learnopengl.com
- * Slightly modified by Tomasz Gałaj 2018
- **/
+﻿#pragma once
 
-#ifndef MODEL_H
-#define MODEL_H
-
-#include <glad/glad.h> 
-
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
-
+// Standard headers
 #include <string>
-#include <iostream>
-#include <map>
 #include <vector>
 
+// First-party headers
 #include "Mesh.h"
-#include "helpers/RootDir.h"
 
 class Model
 {
@@ -30,5 +15,3 @@ public:
     std::vector<Mesh> meshes;
     bool hasTransparency = false;
 };
-
-#endif
