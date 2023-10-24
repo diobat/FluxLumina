@@ -1,22 +1,11 @@
 #pragma once
 
-// Project headers
-#include "util/Rotation.h"
 
 // Standard headers
 #include <array>
 
-
-struct SceneObjectProperties
-{
-    SceneObjectProperties();
-    std::array<float, 3> coordinates;
-    float scale;
-
-    Rotation rotation;
-    std::array<float, 3> originalRotation;
-};
-
+// First-party headers
+#include "scene/SceneObjectProperties.h"
 
 class SceneObject
 {
@@ -34,10 +23,12 @@ public:
 
     void rotate(float x, float y, float z);
 
-private:
-    bool _toRender;
-
+protected:
     // Renderable object properties
     SceneObjectProperties _properties;
 
+private:
+    bool _toRender;
+    // std::weak_ptr<SceneObject> _parent;
+    // std::vector<std::weak_ptr<SceneObject>> _children;
 };

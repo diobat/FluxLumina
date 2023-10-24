@@ -6,14 +6,6 @@ namespace
     const float DEG_TO_RAD = M_PI / 180.0f;
 }
 
-SceneObjectProperties::SceneObjectProperties()  :
-    coordinates({ 0.0f, 0.0f, 0.0f}),
-    scale(1.0f),
-    rotation(Rotation())
-{
-    ;
-}
-
 SceneObject::SceneObject()  :
     _toRender(true),
     _properties()
@@ -45,7 +37,6 @@ float SceneObject::getScale()
 {
     return _properties.scale;
 }
-
 
 const glm::fquat &SceneObject::getRotation()
 {

@@ -132,25 +132,13 @@ void openGL::renderFrame(std::shared_ptr<Scene> scene)
 
 void openGL::renderModel(ModelObject &model)
 {
-    auto xyz_array = model.getPosition();
-    glm::vec3 coordinates(xyz_array[0], xyz_array[1], xyz_array[2]);
 
-    // Model matrix
-    glm::mat4 modelMatrix = glm::mat4(1.0f);
-    // Apply translation to the model matrix
-    modelMatrix = glm::translate(modelMatrix, coordinates);
-    // Apply scale to the model matrix
-    modelMatrix = glm::scale(modelMatrix, glm::vec3(model.getScale()));
-    // Apply rotation to the model matrix
-    glm::fquat std_quat = model.getRotation();
-    modelMatrix = modelMatrix * glm::mat4_cast(std_quat);
-
-    _shaderPrograms.setUniformMat4("model", modelMatrix);
+    _shaderPrograms.setUniformMat4("model", model.getModelMatrix());
 
     for (auto &one_mesh : model.getModel()->meshes)
     {
         bindTextures(one_mesh);
-
+        
         // draw mesh
         glBindVertexArray(one_mesh.VAO);
         glDrawElements(GL_TRIANGLES, one_mesh._indices.size(), GL_UNSIGNED_INT, 0);

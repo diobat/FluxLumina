@@ -3,12 +3,8 @@
 
 ModelObject::ModelObject()  :
     _model(std::make_shared<Model>()),
-    _shaderIndex(0)
-{
-
-}
-
-ModelObject::~ModelObject()
+    _shaderIndex(0),
+    _modelMatrixProvider(_properties)
 {
 
 }
@@ -32,6 +28,11 @@ void ModelObject::setShaderIndex(unsigned int shaderIndex)
 unsigned int ModelObject::getShaderIndex() const
 {
     return _shaderIndex;
+}
+
+const glm::mat4& ModelObject::getModelMatrix()
+{
+    return _modelMatrixProvider.getModelMatrix();
 }
 
 Broadcaster& ModelObject::getBroadcaster()
