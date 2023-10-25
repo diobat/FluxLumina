@@ -73,14 +73,15 @@ namespace
 /////////////////////////// INITIALIZATION
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-SceneObjectFactory::SceneObjectFactory(Scene* scene, GraphicalEngine* engine)
+SceneObjectFactory::SceneObjectFactory(Scene* scene, GraphicalEngine* engine, MeshLibrary* meshLibrary)
 {
     _boundScene = scene;
     _boundEngine = engine;
+    _meshLibrary = meshLibrary;
 
     if(scene != nullptr)
     {
-        ModelObject& cube = create_Model("res/models/origin_cube.obj");
+        ModelObject& cube = create_Model("res/models/origin_cube.obj", 0);
         cube.setScale(0.3f);
     }
 }
@@ -104,12 +105,14 @@ ModelObject &SceneObjectFactory::create_Model(const std::string &modelPath, unsi
     std::shared_ptr<ModelObject> model_object = std::make_shared<ModelObject>();
     Model& model = (*model_object->getModel());
 
-    // Set the shader in position 0 as the default shader
+    // Set the shader program
     model_object->setShaderIndex(_boundEngine->getShaderProgramID(shader));
 
     flipUVsOnLoad = flipUVs;
 
+
     load_ModelMeshes(model, modelPath);
+
     for (auto &one_mesh : model.meshes)
     {
         _boundEngine->initializeMesh(one_mesh);
@@ -122,48 +125,63 @@ ModelObject &SceneObjectFactory::create_Model(const std::string &modelPath, unsi
 
 void SceneObjectFactory::load_ModelMeshes(Model& model, const std::string& path)
 {
-    // read file via ASSIMP
-    Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile(ROOT_DIR + path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_FixInfacingNormals | aiProcess_CalcTangentSpace);
-    // check for errors
-    if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) // if is Not Zero
+
+    // check if model is already loaded
+    if(_meshLibrary != nullptr && !_meshLibrary->isMeshLoaded(path))
     {
-        std::cout << "ERROR::ASSIMP:: " << importer.GetErrorString() << std::endl;
-        return;
+        // read file via ASSIMP
+        Assimp::Importer importer;
+        const aiScene *scene = importer.ReadFile(ROOT_DIR + path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_FixInfacingNormals | aiProcess_CalcTangentSpace);
+        // check for errors
+        if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) // if is Not Zero
+        {
+            std::cout << "ERROR::ASSIMP:: " << importer.GetErrorString() << std::endl;
+            return;
+        }
+        // retrieve the directory path of the filepath
+        model.directory = path;
+
+        // process ASSIMP's root node recursively to build the meshes
+        processNode(model.directory, scene->mRootNode, scene);
+
     }
-    // retrieve the directory path of the filepath
-    model.directory = path.substr(0, path.find_last_of('/'));
 
-    // process ASSIMP's root node recursively to build the meshes
-    processNode(model, scene->mRootNode, scene);
-
+    model.directory = path;
+    model.meshes = _meshLibrary->getMeshes(path);
 }
 
 // processes a node in a recursive fashion. Processes each individual mesh located at the node and repeats this process on its children nodes (if any).
-void SceneObjectFactory::processNode(Model &model, aiNode *node, const aiScene *scene)
+void SceneObjectFactory::processNode(const std::string &path, aiNode *node, const aiScene *scene)
 {
+    std::vector<Mesh> newMeshes;
+
     // process each mesh located at the current node
     for (unsigned int i = 0; i < node->mNumMeshes; i++)
     {
         // the node object only contains indices to index the actual objects in the scene.
         // the scene contains all the data, node is just to keep stuff organized (like relations between nodes).
         aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
-        model.meshes.push_back(processMesh(model, mesh, scene));
+
+        newMeshes.push_back(processMesh(path, mesh, scene));
     }
+    
+    _meshLibrary->addMesh(path, newMeshes);
+
     // after we've processed all of the meshes (if any) we then recursively process each of the children nodes
     for (unsigned int i = 0; i < node->mNumChildren; i++)
     {
-        processNode(model, node->mChildren[i], scene);
+        processNode(path, node->mChildren[i], scene);
     }
+
 }
 
-Mesh SceneObjectFactory::processMesh(Model &model, aiMesh *mesh, const aiScene *scene)
+Mesh SceneObjectFactory::processMesh(const std::string &path, aiMesh *mesh, const aiScene *scene)
 {
     // data to fill
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
     std::vector<Texture> textures;
-
+    bool hasTransparency = false;
 
     // Walk through each of the mesh's vertices
     for (unsigned int i = 0; i < mesh->mNumVertices; i++)
@@ -227,13 +245,16 @@ Mesh SceneObjectFactory::processMesh(Model &model, aiMesh *mesh, const aiScene *
             indices.push_back(face.mIndices[j]);
     }
 
+
+    std::string directory = path.substr(0, path.find_last_of('/'));
+
     // process materials
     if(mesh->mMaterialIndex >= 0)
     {
         aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
-        std::vector<Texture> diffuseMaps = loadMaterialTextures(model, material, aiTextureType_DIFFUSE);
+        std::vector<Texture> diffuseMaps = loadMaterialTextures(directory, material, aiTextureType_DIFFUSE);
         textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
-        std::vector<Texture> specularMaps = loadMaterialTextures(model, material, aiTextureType_SPECULAR);
+        std::vector<Texture> specularMaps = loadMaterialTextures(directory, material, aiTextureType_SPECULAR);
         textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 
         float opacity = 1.0f;
@@ -241,17 +262,17 @@ Mesh SceneObjectFactory::processMesh(Model &model, aiMesh *mesh, const aiScene *
         {
             if(opacity < 1.0f)
             {
-                model.hasTransparency = true;
+                hasTransparency = true;
             }
         }
     
 
     }
     // return a mesh object created from the extracted mesh data
-    return Mesh(vertices, indices, textures);
+    return Mesh(vertices, indices, textures, hasTransparency);
 }
 
-std::vector<Texture> SceneObjectFactory::loadMaterialTextures(Model &model, aiMaterial *mat, aiTextureType type)
+std::vector<Texture> SceneObjectFactory::loadMaterialTextures(const std::string &path, aiMaterial *mat, aiTextureType type)
 {
     std::vector<Texture> materialTextures;
 
@@ -274,7 +295,7 @@ std::vector<Texture> SceneObjectFactory::loadMaterialTextures(Model &model, aiMa
         if(!isPreviouslyLoaded)
         {
 
-            Texture texture = TextureFromFile(str.C_Str(), model.directory);
+            Texture texture = TextureFromFile(str.C_Str(), path);
             setTextureData(texture, type);
 
             _boundEngine->initializeTexture(texture);

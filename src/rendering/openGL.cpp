@@ -109,7 +109,7 @@ void openGL::renderFrame(std::shared_ptr<Scene> scene)
         std::map<float, std::shared_ptr<ModelObject>> sortedTransparentModels;
         for (auto model : scene->getModels(_shaderPrograms.getShader(i)->getProgramId()))
         {
-            if(model->getModel()->hasTransparency)
+            if(model->getModel()->hasTransparency())
             {
                 float distance = glm::length(scene->getActiveCamera()->getPosition() - conversion::toVec3(model->getPosition()));
                 sortedTransparentModels[distance] = model;

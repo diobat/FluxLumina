@@ -8,6 +8,7 @@
 #include "scene/Camera.h"
 #include "scene/LightSource.h"
 #include "rendering/Cubemap.h"
+#include "rendering/MeshLibrary.hpp"
 
 // STD library includes
 #include <iostream>
@@ -27,7 +28,10 @@
 class SceneObjectFactory
 {
 public:
-    SceneObjectFactory(Scene* scene = nullptr, GraphicalEngine* engine = nullptr);
+    SceneObjectFactory(
+        Scene* scene = nullptr, 
+        GraphicalEngine* engine = nullptr,
+        MeshLibrary* meshLibrary = nullptr);
 
     void bindScene(Scene* scene);
     void bindEngine(GraphicalEngine* engine);
@@ -35,9 +39,9 @@ public:
     // Importing models
     ModelObject &create_Model(const std::string &modelPath, unsigned int shader = 0, bool flipUVs = false);
     void load_ModelMeshes(Model& model, std::string const &path);
-    void processNode(Model& model, aiNode* node, const aiScene* scene);
-    Mesh processMesh(Model& model, aiMesh* mesh, const aiScene* scene);
-    std::vector<Texture> loadMaterialTextures(Model &model, aiMaterial *mat, aiTextureType type);
+    void processNode(const std::string &path, aiNode* node, const aiScene* scene);
+    Mesh processMesh(const std::string &path, aiMesh *mesh, const aiScene *scene);
+    std::vector<Texture> loadMaterialTextures(const std::string &path, aiMaterial *mat, aiTextureType type);
 
     // Creating lights
     std::shared_ptr<LightSource> create_LightSource(E_LightType type);
@@ -51,4 +55,5 @@ public:
 private:
     Scene* _boundScene;
     GraphicalEngine* _boundEngine;
+    MeshLibrary* _meshLibrary;
 };

@@ -56,13 +56,14 @@ int main(void)
 
     // Scene initialization
     std::shared_ptr<Scene> scene = std::make_shared<Scene>();
+    std::shared_ptr<MeshLibrary> meshLibrary = std::make_shared<MeshLibrary>();
 
     openGL graphicalEngine;
     graphicalEngine.initialize(window);
     graphicalEngine.bindScene(scene);
 
     // Init object factory
-    SceneObjectFactory factory(&(*scene), &graphicalEngine);
+    SceneObjectFactory factory(scene.get(), &graphicalEngine, meshLibrary.get());
 
     // Camera setup
     factory.create_Camera();
@@ -124,7 +125,7 @@ int main(void)
     std::vector<Texture> cubeTextures = {scene->getSkybox().getCubemap()->getTexture()};
     cube.getModel()->meshes[0].attachTexture(cubeTextures);
     cube.setPosition({10.0f, 10.0f, 10.0f});
-
+    
     // Lights   
 
     auto light = factory.create_LightSource( E_LightType::POINT_LIGHT);

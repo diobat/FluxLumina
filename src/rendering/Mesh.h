@@ -5,6 +5,10 @@
 #include <vector>
 #include <rendering/texture.h>
 
+// Third-party headers
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_generators.hpp>
+
 struct Vertex
 {
     // position
@@ -22,11 +26,13 @@ class Mesh
 public:
     /*  Functions  */
     // constructor
-    Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures)
+    Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures, bool hasTransparency = false)    :
+        _vertices(vertices),
+        _indices(indices),
+        _textures(textures),
+        _hasTransparency(hasTransparency)
     {
-        this->_vertices = vertices;
-        this->_indices = indices;
-        this->_textures = textures;
+        _id = boost::uuids::random_generator()();
     }
 
     void attachTexture(std::vector<Texture> textures)
@@ -34,10 +40,15 @@ public:
         _textures.insert(_textures.end(), textures.begin(), textures.end());
     }
 
-    /*  Mesh Data  */
+    // Structural Data
+    boost::uuids::uuid _id;
+
+    // Mesh Data
     std::vector<Vertex> _vertices;
     std::vector<unsigned int> _indices;
     std::vector<Texture> _textures;
-    unsigned int VAO, VBO, EBO;
+    bool _hasTransparency = false;
 
+    // Rendering Data
+    unsigned int VAO, VBO, EBO;
 };

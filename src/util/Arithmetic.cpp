@@ -25,6 +25,12 @@ namespace Math
             return value + multiple - remainder;
         }
     }
+
+    std::size_t calculateHash(const std::string& target)
+    {
+        return boost::hash<std::string>()(target);
+    }
+
 }
 
 namespace conversion
