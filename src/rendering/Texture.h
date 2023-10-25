@@ -1,8 +1,4 @@
-﻿/** 
- * Copyright (C) 2018 Tomasz Gałaj
- **/
-
-#pragma once
+﻿#pragma once
 #include <string>
 #include <glad/glad.h>
 
@@ -19,7 +15,6 @@ class Texture
 {
 public:
     Texture();
-    // ~Texture();
     
     GLuint _id;
     E_TexureType _type;

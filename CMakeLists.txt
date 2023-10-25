@@ -1,6 +1,4 @@
-cmake_minimum_required(VERSION 3.2 FATAL_ERROR)
-
-
+cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
 
 project(PlusBetterGooder)
 
@@ -62,28 +60,20 @@ add_library(GLAD "thirdparty/glad.c")
 #Boost
 set(Boost_USE_STATIC_LIBS ON) 
 set(Boost_USE_MULTITHREADED ON)  
-set(Boost_USE_STATIC_RUNTIME OFF) 
+set(Boost_USE_STATIC_RUNTIME ON) 
 
 # set(BOOST_ROOT X:/software/boost_1_82_0)
 # Set Boost root folder as BOOST_ROOT environment variable or this will fail
-find_package(Boost COMPONENTS) 
+find_package(Boost REQUIRED) 
+message(STATUS "Found BOOST in ${Boost_INCLUDE_DIR}")
 
-IF (Boost_FOUND)
-	message(STATUS "BOOST FOUND !")
-ELSE ()
-    message(STATUS "BOOST NOT Found !")
-ENDIF()
 # Put all libraries into a variable
 set(LIBS glfw3 opengl32 assimp STB_IMAGE GLAD ${Boost_LIBRARIES})
-
 
 # Define the include DIRs
 include_directories(
 	"${CMAKE_SOURCE_DIR}/src"
 	"${CMAKE_SOURCE_DIR}/include"
-)
-
-include_directories(
 	${Boost_INCLUDE_DIRS}
 )
 

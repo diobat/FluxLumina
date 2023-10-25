@@ -8,7 +8,8 @@ namespace
 
 SceneObject::SceneObject()  :
     _toRender(true),
-    _properties()
+    _properties(),
+    _id(boost::uuids::random_generator()())
 {
     ;
 }

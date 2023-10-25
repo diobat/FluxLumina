@@ -7,6 +7,10 @@
 // First-party headers
 #include "scene/SceneObjectProperties.h"
 
+// Third-party headers
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_generators.hpp>
+
 class SceneObject
 {
 public:
@@ -23,11 +27,14 @@ public:
 
     void rotate(float x, float y, float z);
 
+    boost::uuids::uuid _id;
+
 protected:
     // Renderable object properties
     SceneObjectProperties _properties;
 
 private:
+    
     bool _toRender;
     // std::weak_ptr<SceneObject> _parent;
     // std::vector<std::weak_ptr<SceneObject>> _children;
