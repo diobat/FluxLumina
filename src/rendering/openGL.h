@@ -17,6 +17,7 @@
 #include "rendering/shader/ShaderLibrary.h"
 #include "rendering/texture.h"
 #include "rendering/framebuffer/Framebuffer_Manager.h"
+#include "rendering/engineModules/InstancingManager.hpp"
 #include "user_input/glfwUserInputScanner.h"
 #include "util/Arithmetic.h"
 
@@ -43,6 +44,7 @@ public:
 	void initializeTexture(Texture& texture) override;
 	void bindTextures(Mesh &mesh);
 	void renderModel(ModelObject &model);
+	void renderInstancedMeshes();
 
 	// Shaders
 	unsigned int getShaderProgramID(unsigned int shaderIndex);
@@ -79,4 +81,7 @@ private:
 
 	// Shaders
 	ShaderLibrary _shaderPrograms;
+
+	//Instancing
+	InstancingManager _instancingManager;
 };

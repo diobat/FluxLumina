@@ -4,14 +4,17 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <unordered_map>
 
 // First-Party Headers
 #include "rendering/shader/ShaderLibraryContents.h"
 #include "rendering/shader/Shader.h"
 #include "rendering/shader/UniformBuffer.h"
+#include "Scene/Scene.h"
 
 // Third-Party Headers
 #include <glad/glad.h>
+#include <boost/uuid/uuid.hpp>
 
 class ShaderLibrary
 {
@@ -19,6 +22,7 @@ public:
     ShaderLibrary();
     ~ShaderLibrary();
 
+    // Shader creation
     GLuint addShader(const std::string &vertexShaderFilename,
                       const std::string &fragmentShaderFilename,
                       const std::string &geometryShaderFilename = "",
@@ -27,18 +31,23 @@ public:
 
     GLuint loadShader(const std::string &folderName);
 
+
+    // Shader management
     std::shared_ptr<Shader> getShader(unsigned int index);
     std::shared_ptr<Shader> getShader(const std::string &name);
-
     unsigned int getShaderIndex(const std::string &name) const;
+    std::set<unsigned int> getShaderIndexesPerFeature() const;
+    std::set<unsigned int> getShaderIndexesPerFeature(E_ShaderProgramFeatures feature) const;
     unsigned int getActiveShaderIndex() const;
     int size() const;
 
     void use(unsigned int index);
     void use(const std::string &name);
 
-    // Uniform setters
+    // Instancing
+    void setupSceneMeshes(Scene* scene);
 
+    // Uniform setters
     UniformBuffer& createUniformBuffer(const std::string& uniformName);
     UniformBuffer& getUniformBuffer(const std::string& uniformName);
     void deleteUniformBuffer(const std::string& uniformName);
@@ -91,6 +100,10 @@ public:
     void setUniformMat4(const std::string &name, const glm::mat4 &mat);
     void setUniformMat4(unsigned int index, const std::string &name, const glm::mat4 &mat);
     void setUniformMat4(const std::string &shader, const std::string &name, const glm::mat4 &mat);
+
+
+    // Tomorrow start by establishing the interface for the methods 
+    // we need for interaction with _meshesPerShader
 
 private:
     // Shaders

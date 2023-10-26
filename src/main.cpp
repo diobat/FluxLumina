@@ -61,6 +61,7 @@ int main(void)
     openGL graphicalEngine;
     graphicalEngine.initialize(window);
     graphicalEngine.bindScene(scene);
+    graphicalEngine.bindMeshLibrary(meshLibrary);
 
     // Init object factory
     SceneObjectFactory factory(scene.get(), &graphicalEngine, meshLibrary.get());
@@ -98,7 +99,20 @@ int main(void)
     ModelObject& backpack = factory.create_Model("res/models/backpack/backpack.obj", 0, true);
     backpack.setPosition({0.0f, 3.0f, -7.5f});
 
-    auto& statue = factory.create_Model("res/models/Statue/12330_Statue_v1_L2.obj", 1);
+
+    int width = 10;
+    int height = 10;
+
+    for(int i(0); i < width * height; ++i)
+    {
+        auto& statueN = factory.create_Model("res/models/Statue/12330_Statue_v1_L2.obj", 0);
+        statueN.setPosition({(i % width) * 2.0f - width, 30.0f, (i / width) * 2.0f - height});
+        statueN.rotate(-90.0f, 0.0f, 0.0f);
+        statueN.setScale(0.01f);
+    }
+
+
+    auto& statue = factory.create_Model("./res/models/Statue/12330_Statue_v1_L2.obj", 1);
     statue.setPosition({0.0f, 0.0f, 5.0f});
     statue.rotate(-90.0f, 0.0f, 0.0f);
     statue.setScale(0.01f);

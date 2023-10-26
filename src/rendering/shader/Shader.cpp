@@ -164,6 +164,21 @@ const std::string& Shader::getName() const
     return _name;
 }
 
+void Shader::addSupportedFeature(E_ShaderProgramFeatures feature)
+{
+    _supportedFeatures.insert(feature);
+}
+
+bool Shader::isFeatureSupported(E_ShaderProgramFeatures feature) const
+{
+    return _supportedFeatures.count(feature);
+}
+
+bool Shader::isFeatureless() const
+{
+    return _supportedFeatures.empty();
+}
+
 bool Shader::getUniformLocation(const std::string & uniform_name)
 {
     GLint uniform_location = glGetUniformLocation(program_id, uniform_name.c_str());

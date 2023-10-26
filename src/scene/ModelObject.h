@@ -7,6 +7,9 @@
 #include "util/Listener.h"
 #include "scene/ModelMatrixProvider.h"
 
+// Third-party headers
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_generators.hpp>
 
 
 class ModelObject : public SceneObject, public std::enable_shared_from_this<ModelObject>
@@ -24,7 +27,12 @@ public:
 
     Broadcaster& getBroadcaster();
 
+    const boost::uuids::uuid& uuid() const;
+
 private:
+    // Structural Data
+    boost::uuids::uuid _id;
+
     std::shared_ptr<Model> _model;
     unsigned int _shaderIndex;
     ModelMatrixProvider _modelMatrixProvider;

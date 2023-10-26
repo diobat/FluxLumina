@@ -1,10 +1,8 @@
 #include "Scene.h"
 
-
-Scene::Scene():
-	activeCameraID(0),
-	_ambientLight(0.2f, { 1.0f, 1.0f, 1.0f }),
-	_id(_sceneIDCounter++)
+Scene::Scene() : activeCameraID(0),
+				 _ambientLight(0.2f, {1.0f, 1.0f, 1.0f}),
+				 _id(boost::uuids::random_generator()())
 {
 	;
 }

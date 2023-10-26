@@ -88,6 +88,32 @@ unsigned int ShaderLibrary::getShaderIndex(const std::string &name) const
     throw std::runtime_error("Shader with name " + name + " not found.");
 }
 
+std::set<unsigned int> ShaderLibrary::getShaderIndexesPerFeature() const
+{
+    std::set<unsigned int> shaderIndexesPerFeature;
+    for(unsigned int i = 0; i < _shaders.size(); ++i)
+    {
+        if(_shaders[i]->isFeatureless())
+        {
+            shaderIndexesPerFeature.insert(i);
+        }
+    }
+    return shaderIndexesPerFeature;
+}
+
+std::set<unsigned int> ShaderLibrary::getShaderIndexesPerFeature(E_ShaderProgramFeatures feature) const
+{
+    std::set<unsigned int> shaderIndexesPerFeature;
+    for(unsigned int i = 0; i < _shaders.size(); ++i)
+    {
+        if(_shaders[i]->isFeatureSupported(feature))
+        {
+            shaderIndexesPerFeature.insert(i);
+        }
+    }
+    return shaderIndexesPerFeature;
+}
+
 unsigned int ShaderLibrary::getActiveShaderIndex() const
 {
     return _activeShader;
@@ -109,6 +135,7 @@ void ShaderLibrary::use(const std::string &name)
     _activeShader = getShaderIndex(name);
     glUseProgram(_shaders[_activeShader]->getProgramId());
 }
+
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////// SPECIALIZED UNIFORM SETTERS

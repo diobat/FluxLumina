@@ -19,3 +19,18 @@ void GraphicalEngine::unbindScene(std::shared_ptr<Scene> sceneToUnbind)
         }),
         _scenes.end());
 }
+
+std::shared_ptr<Scene> GraphicalEngine::getScene(unsigned int sceneIndex) const
+{
+    if(sceneIndex >= _scenes.size())
+    {
+        return nullptr;
+    }
+
+    return _scenes[sceneIndex];
+}
+
+void GraphicalEngine::bindMeshLibrary(std::shared_ptr<MeshLibrary> meshLibrary)
+{
+    _meshLibrary = meshLibrary;
+}

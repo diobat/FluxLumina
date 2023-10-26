@@ -17,6 +17,7 @@ public:
 
     void addMesh(const std::string& name, const std::vector<Mesh>& mesh);
     const std::vector<Mesh>& getMeshes(const std::string& name);
+    const Mesh& getMesh(boost::uuids::uuid id) const;
 
     std::vector<Texture>& getLoadedTextures();
 

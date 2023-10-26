@@ -4,7 +4,8 @@
 ModelObject::ModelObject()  :
     _model(std::make_shared<Model>()),
     _shaderIndex(0),
-    _modelMatrixProvider(_properties)
+    _modelMatrixProvider(_properties),
+    _id(boost::uuids::random_generator()())
 {
 
 }
@@ -38,4 +39,9 @@ const glm::mat4& ModelObject::getModelMatrix()
 Broadcaster& ModelObject::getBroadcaster()
 {
     return _broadcaster;
+}
+
+const boost::uuids::uuid& ModelObject::uuid() const
+{
+    return _id;
 }

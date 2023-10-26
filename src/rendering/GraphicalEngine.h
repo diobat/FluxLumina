@@ -4,6 +4,7 @@
 #include "rendering\mesh.h"
 #include "rendering\texture.h"
 #include "scene/Scene.h"
+#include "rendering/MeshLibrary.hpp"
 
 class GraphicalEngine
 {
@@ -22,8 +23,11 @@ public:
 
 	virtual unsigned int getShaderProgramID(unsigned int shaderIndex) = 0;
 
+	void bindMeshLibrary(std::shared_ptr<MeshLibrary> meshLibrary);
+
 protected:
 	std::vector<std::shared_ptr<Scene>> _scenes;
+	std::shared_ptr<MeshLibrary> _meshLibrary;
 };
 
 

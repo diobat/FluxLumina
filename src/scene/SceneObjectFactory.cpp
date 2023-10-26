@@ -113,10 +113,10 @@ ModelObject &SceneObjectFactory::create_Model(const std::string &modelPath, unsi
 
     load_ModelMeshes(model, modelPath);
 
-    for (auto &one_mesh : model.meshes)
-    {
-        _boundEngine->initializeMesh(one_mesh);
-    }
+    // for (auto &one_mesh : model.meshes)
+    // {
+    //     _boundEngine->initializeMesh(one_mesh);
+    // }
 
     _boundScene->addModel(model_object);
 
@@ -165,6 +165,10 @@ void SceneObjectFactory::processNode(const std::string &path, aiNode *node, cons
         newMeshes.push_back(processMesh(path, mesh, scene));
     }
     
+    for(auto& mesh : newMeshes)
+    {
+        _boundEngine->initializeMesh(mesh);
+    }
     _meshLibrary->addMesh(path, newMeshes);
 
     // after we've processed all of the meshes (if any) we then recursively process each of the children nodes

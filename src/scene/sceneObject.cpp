@@ -44,8 +44,12 @@ const glm::fquat &SceneObject::getRotation()
     return _properties.rotation.getRotation();
 }   
 
-
 void SceneObject::rotate(float x, float y, float z)
 {
     _properties.rotation.rotate(x, y, z);
+}
+
+bool SceneObject::enabled() const
+{
+    return _toRender;
 }

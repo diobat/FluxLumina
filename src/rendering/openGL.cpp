@@ -59,12 +59,14 @@ int openGL::initialize(GLFWwindow* window)
     // Framebuffer Manager initialization
     _frameBuffers = std::make_unique<FBOManager>(_window);
 
-    _shaderPrograms.addShader("Basic.vert", "Basic.frag");
-    _shaderPrograms.addShader("Simple.vert", "Simple.frag");
-    _shaderPrograms.addShader("Basic.vert", "transparency.frag");
-    _shaderPrograms.addShader("Quad.vert", "Quad.frag");
-    _shaderPrograms.addShader("Skybox.vert", "Skybox.frag");
-    _shaderPrograms.addShader("Reflection.vert", "Reflection.frag");
+    _shaderPrograms.addShader("Basic.vert", "Basic.frag");                  //0
+    _shaderPrograms.getShader(0)->addSupportedFeature(E_ShaderProgramFeatures::E_AUTO_INSTANCING);
+    _shaderPrograms.addShader("Simple.vert", "Simple.frag");                //2
+    _shaderPrograms.addShader("Basic.vert", "transparency.frag");           //3
+    _shaderPrograms.getShader(2)->addSupportedFeature(E_ShaderProgramFeatures::E_TRANSPARENCY);
+    _shaderPrograms.addShader("Quad.vert", "Quad.frag");                    //4
+    _shaderPrograms.addShader("Skybox.vert", "Skybox.frag");                //5
+    _shaderPrograms.addShader("Reflection.vert", "Reflection.frag");        //6
     _shaderPrograms.use(0);
 
     // Add uniform buffers to the shaders
@@ -102,12 +104,49 @@ void openGL::renderFrame(std::shared_ptr<Scene> scene)
     }
 
     // Draw models
-    for(int i(0); i<_shaderPrograms.size(); i++)
+std::set <unsigned int> shaderIndexes = _shaderPrograms.getShaderIndexesPerFeature();
+    std::set <unsigned int> shaderIndexesWithInstancing = _shaderPrograms.getShaderIndexesPerFeature(E_ShaderProgramFeatures::E_AUTO_INSTANCING);
+    std::set<unsigned int> shaderIndexesTotal;
+    std::merge(shaderIndexes.begin(), shaderIndexes.end(), shaderIndexesWithInstancing.begin(), shaderIndexesWithInstancing.end(), std::inserter(shaderIndexesTotal, shaderIndexesTotal.begin()));
+
+    // Opaque Models
+    for(unsigned int shaderIndex : shaderIndexesTotal)
     {
-        _shaderPrograms.use(i);   
-        // Render all the non-transparent models
+                    // Activate shader
+        _shaderPrograms.use(shaderIndex);
+
+        // Go down the instancing path if the shader supports it
+        if(_shaderPrograms.getShader(shaderIndex)->isFeatureSupported(E_ShaderProgramFeatures::E_AUTO_INSTANCING))
+        {
+            _instancingManager.setupInstancing(_shaderPrograms.getShader(shaderIndex)->getProgramId(), scene);
+            renderInstancedMeshes();
+            _instancingManager.resetInstancingGroups();
+        }
+        else // Else just render on a per-model basis
+        {
+            for (auto model : scene->getModels(_shaderPrograms.getShader(shaderIndex)->getProgramId()))
+            {
+                renderModel(*model);
+            }
+        }
+
+
+    }
+
+    // Instanced Opaque Models
+
+    // Skybox
+// TO DO
+
+    // Transparent Models
+
+for(unsigned int shaderIndex : _shaderPrograms.getShaderIndexesPerFeature(E_ShaderProgramFeatures::E_TRANSPARENCY))
+    {
+        // Activate shader
+        _shaderPrograms.use(shaderIndex);
         std::map<float, std::shared_ptr<ModelObject>> sortedTransparentModels;
-        for (auto model : scene->getModels(_shaderPrograms.getShader(i)->getProgramId()))
+        
+        for (auto model : scene->getModels(_shaderPrograms.getShader(shaderIndex)->getProgramId()))
         {
             if(model->getModel()->hasTransparency())
             {
@@ -145,6 +184,52 @@ void openGL::renderModel(ModelObject &model)
         glBindVertexArray(0);
 
         glBindTexture(GL_TEXTURE_2D, 0); // Unbind texture
+    }
+}
+
+void openGL::renderInstancedMeshes()
+{
+    
+    for(auto& instancingGroup : _instancingManager.getInstancingGroups())
+    {
+        auto& mesh = _meshLibrary->getMesh(instancingGroup.first);
+        auto& modelMatrices = instancingGroup.second.transforms();
+
+        // Model matrices setup
+
+        // vertex buffer object
+        unsigned int modelMatricesVBO;
+        glGenBuffers(1, &modelMatricesVBO);
+        glBindBuffer(GL_ARRAY_BUFFER, modelMatricesVBO);
+        glBufferData(GL_ARRAY_BUFFER, modelMatrices.size() * sizeof(glm::mat4), &modelMatrices[0], GL_STATIC_DRAW);
+
+        glBindVertexArray(mesh.VAO);
+        std::size_t vec4Size = sizeof(glm::vec4);
+        glEnableVertexAttribArray(4);
+        glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)0);
+        glEnableVertexAttribArray(5);
+        glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(vec4Size));
+        glEnableVertexAttribArray(6);
+        glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(2 * vec4Size));
+        glEnableVertexAttribArray(7);
+        glVertexAttribPointer(7, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(3 * vec4Size));
+
+        glVertexAttribDivisor(4, 1);
+        glVertexAttribDivisor(5, 1);
+        glVertexAttribDivisor(6, 1);
+        glVertexAttribDivisor(7, 1);
+
+        // Unbind the VBO
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+        // Draw the instances
+        glDrawElementsInstanced(GL_TRIANGLES, mesh._indices.size(), GL_UNSIGNED_INT, 0, modelMatrices.size());
+
+        // Unbind the VAO
+        glBindVertexArray(0);
+
+        // Delete the VBO
+        glDeleteBuffers(1, &modelMatricesVBO);
     }
 }
 

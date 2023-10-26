@@ -12,11 +12,9 @@
 #include "scene\ModelContents.h"
 #include "scene\Skybox.h"
 
-namespace
-{
-	unsigned int _sceneIDCounter = 0;
-}
-
+// Third-party headers
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_generators.hpp>
 struct LightContents
 {
 	std::vector<std::shared_ptr<DirectionalLight>> directionalLights;
@@ -59,7 +57,7 @@ private:
 
 	unsigned int activeCameraID;
 
-	unsigned int _id;
+	boost::uuids::uuid _id;
 
 	SceneContents _objects;
 
