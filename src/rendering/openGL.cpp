@@ -179,8 +179,8 @@ void openGL::renderModel(ModelObject &model)
         bindTextures(one_mesh);
         
         // draw mesh
-        glBindVertexArray(one_mesh.VAO);
-        glDrawElements(GL_TRIANGLES, one_mesh._indices.size(), GL_UNSIGNED_INT, 0);
+        glBindVertexArray(one_mesh->VAO);
+        glDrawElements(GL_TRIANGLES, one_mesh->_indices.size(), GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
 
         glBindTexture(GL_TEXTURE_2D, 0); // Unbind texture
@@ -203,7 +203,7 @@ void openGL::renderInstancedMeshes()
         glBindBuffer(GL_ARRAY_BUFFER, modelMatricesVBO);
         glBufferData(GL_ARRAY_BUFFER, modelMatrices.size() * sizeof(glm::mat4), &modelMatrices[0], GL_STATIC_DRAW);
 
-        glBindVertexArray(mesh.VAO);
+        glBindVertexArray(mesh->VAO);
         std::size_t vec4Size = sizeof(glm::vec4);
         glEnableVertexAttribArray(4);
         glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)0);
@@ -222,8 +222,11 @@ void openGL::renderInstancedMeshes()
         // Unbind the VBO
         glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+        // Textures
+        bindTextures(mesh);
+
         // Draw the instances
-        glDrawElementsInstanced(GL_TRIANGLES, mesh._indices.size(), GL_UNSIGNED_INT, 0, modelMatrices.size());
+        glDrawElementsInstanced(GL_TRIANGLES, mesh->_indices.size(), GL_UNSIGNED_INT, 0, modelMatrices.size());
 
         // Unbind the VAO
         glBindVertexArray(0);
@@ -350,20 +353,20 @@ void openGL::resizeWindow(GLFWwindow* window, int width, int height)
     }
 }
 
-void openGL::initializeMesh(Mesh& mesh)
+void openGL::initializeMesh(std::shared_ptr<Mesh>& mesh)
 {
 
     // create buffers/arrays
-    glGenVertexArrays(1, &mesh.VAO);
-    glGenBuffers(1, &mesh.VBO);
-    glGenBuffers(1, &mesh.EBO);
+    glGenVertexArrays(1, &mesh->VAO);
+    glGenBuffers(1, &mesh->VBO);
+    glGenBuffers(1, &mesh->EBO);
 
-    glBindVertexArray(mesh.VAO);
+    glBindVertexArray(mesh->VAO);
     // load data into vertex buffers
-    glBindBuffer(GL_ARRAY_BUFFER, mesh.VBO);
-    glBufferData(GL_ARRAY_BUFFER, mesh._vertices.size() * sizeof(Vertex), &mesh._vertices[0], GL_STATIC_DRAW);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh._indices.size() * sizeof(unsigned int), &mesh._indices[0], GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, mesh->VBO);
+    glBufferData(GL_ARRAY_BUFFER, mesh->_vertices.size() * sizeof(Vertex), &mesh->_vertices[0], GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh->_indices.size() * sizeof(unsigned int), &mesh->_indices[0], GL_STATIC_DRAW);
 
     // set the vertex attribute pointers
     // vertex Positions
@@ -399,7 +402,7 @@ void openGL::initializeTexture(Texture& texture)
     glGenerateMipmap(GL_TEXTURE_2D);
 }   
 
-void openGL::bindTextures(Mesh& mesh)
+void openGL::bindTextures(std::shared_ptr<Mesh> mesh)
 {
     unsigned int diffuseNr = 0;
     unsigned int specularNr = 0;
@@ -408,24 +411,24 @@ void openGL::bindTextures(Mesh& mesh)
     _shaderPrograms.setUniformInt("sampleFromDiffuse", 0);
     _shaderPrograms.setUniformInt("sampleFromSpecular", 0);
 
-    if (mesh._textures.size() == 0)
+    if (mesh->_textures.size() == 0)
     {
         return;
     }
 
     int imageUnitSpace;
 
-    for (int i = 0; i < mesh._textures.size(); i++)
+    for (int i = 0; i < mesh->_textures.size(); i++)
     {
 
-        switch (mesh._textures[i]._type)
+        switch (mesh->_textures[i]._type)
         {
         case DIFFUSE:
             imageUnitSpace = 0;
             _shaderPrograms.setUniformInt("sampleFromDiffuse", 1);
             _shaderPrograms.setUniformInt("material.diffuse", imageUnitSpace + diffuseNr);
             glActiveTexture(GL_TEXTURE0 + imageUnitSpace + diffuseNr);
-            glBindTexture(GL_TEXTURE_2D, mesh._textures[i]._id);
+            glBindTexture(GL_TEXTURE_2D, mesh->_textures[i]._id);
             diffuseNr++;
             break;
         case SPECULAR:
@@ -434,7 +437,7 @@ void openGL::bindTextures(Mesh& mesh)
             _shaderPrograms.setUniformInt("material.specular", imageUnitSpace + specularNr);
             _shaderPrograms.setUniformFloat("material.shininess", 0.5);
             glActiveTexture(GL_TEXTURE0 + imageUnitSpace + specularNr);
-            glBindTexture(GL_TEXTURE_2D, mesh._textures[i]._id);
+            glBindTexture(GL_TEXTURE_2D, mesh->_textures[i]._id);
             specularNr++;
             break;
         case NORMAL:
@@ -447,7 +450,7 @@ void openGL::bindTextures(Mesh& mesh)
             imageUnitSpace = 80;
             _shaderPrograms.setUniformInt("cubemap", imageUnitSpace + cubemapNr);
             glActiveTexture(GL_TEXTURE0 + imageUnitSpace + cubemapNr);
-            glBindTexture(GL_TEXTURE_CUBE_MAP, mesh._textures[i]._id);
+            glBindTexture(GL_TEXTURE_CUBE_MAP, mesh->_textures[i]._id);
             cubemapNr++;
             break;
         default:

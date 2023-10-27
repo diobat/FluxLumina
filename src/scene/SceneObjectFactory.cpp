@@ -153,7 +153,7 @@ void SceneObjectFactory::load_ModelMeshes(Model& model, const std::string& path)
 // processes a node in a recursive fashion. Processes each individual mesh located at the node and repeats this process on its children nodes (if any).
 void SceneObjectFactory::processNode(const std::string &path, aiNode *node, const aiScene *scene)
 {
-    std::vector<Mesh> newMeshes;
+    std::vector<std::shared_ptr<Mesh>> newMeshes;
 
     // process each mesh located at the current node
     for (unsigned int i = 0; i < node->mNumMeshes; i++)
@@ -179,7 +179,7 @@ void SceneObjectFactory::processNode(const std::string &path, aiNode *node, cons
 
 }
 
-Mesh SceneObjectFactory::processMesh(const std::string &path, aiMesh *mesh, const aiScene *scene)
+std::shared_ptr<Mesh> SceneObjectFactory::processMesh(const std::string &path, aiMesh *mesh, const aiScene *scene)
 {
     // data to fill
     std::vector<Vertex> vertices;
@@ -273,7 +273,7 @@ Mesh SceneObjectFactory::processMesh(const std::string &path, aiMesh *mesh, cons
 
     }
     // return a mesh object created from the extracted mesh data
-    return Mesh(vertices, indices, textures, hasTransparency);
+    return std::make_shared<Mesh>(Mesh(vertices, indices, textures, hasTransparency));
 }
 
 std::vector<Texture> SceneObjectFactory::loadMaterialTextures(const std::string &path, aiMaterial *mat, aiTextureType type)

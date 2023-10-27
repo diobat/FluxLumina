@@ -32,11 +32,11 @@ void InstancingManager::setupInstancing(unsigned int shaderIndex, std::shared_pt
         }
         for(auto& mesh : modelObject->getModel()->meshes)
         {
-            if (_instancingGroups.find(mesh._id) == _instancingGroups.end())
+            if (_instancingGroups.find(mesh->_id) == _instancingGroups.end())
             {
-                _instancingGroups[mesh._id] = InstancingGroup();
+                _instancingGroups[mesh->_id] = InstancingGroup();
             }
-            _instancingGroups[mesh._id].modelObjects.push_back(modelObject);
+            _instancingGroups[mesh->_id].modelObjects.push_back(modelObject);
         }
     }
 }   

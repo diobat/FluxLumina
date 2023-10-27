@@ -137,7 +137,7 @@ int main(void)
 
     auto& cube = factory.create_Model("res/models/cube/cube.obj", 5);
     std::vector<Texture> cubeTextures = {scene->getSkybox().getCubemap()->getTexture()};
-    cube.getModel()->meshes[0].attachTexture(cubeTextures);
+    cube.getModel()->meshes[0]->attachTexture(cubeTextures);
     cube.setPosition({10.0f, 10.0f, 10.0f});
     
     // Lights   

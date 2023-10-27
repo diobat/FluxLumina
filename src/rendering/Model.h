@@ -3,6 +3,7 @@
 // Standard headers
 #include <string>
 #include <vector>
+#include <memory>
 
 // First-party headers
 #include "Mesh.h"
@@ -11,7 +12,7 @@ class Model
 {
 public:
     
-    std::vector<Mesh> meshes;
+    std::vector<std::shared_ptr<Mesh>> meshes;
     bool hasTransparency() const;
 
     /*  Model Data */

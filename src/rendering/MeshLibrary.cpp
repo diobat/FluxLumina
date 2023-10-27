@@ -1,23 +1,23 @@
 #include "rendering\MeshLibrary.hpp"
 
 
-void MeshLibrary::addMesh(const std::string& name, const std::vector<Mesh>& mesh)
+void MeshLibrary::addMesh(const std::string& name, const std::vector<std::shared_ptr<Mesh>>& mesh)
 {
     _meshes[Math::calculateHash(name)].insert(_meshes[Math::calculateHash(name)].end(), mesh.begin(), mesh.end());
 }
 
-const std::vector<Mesh>& MeshLibrary::getMeshes(const std::string& name)
+std::vector<std::shared_ptr<Mesh>> MeshLibrary::getMeshes(const std::string& name)
 {
     return _meshes[Math::calculateHash(name)];
 }
 
-const Mesh& MeshLibrary::getMesh(boost::uuids::uuid id) const
+std::shared_ptr<Mesh> MeshLibrary::getMesh(boost::uuids::uuid id) const
 {
     for (auto& mesh : _meshes)
     {
         for (auto& m : mesh.second)
         {
-            if (m._id == id)
+            if (m->_id == id)
             {
                 return m;
             }

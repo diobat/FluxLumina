@@ -40,7 +40,7 @@ public:
     ModelObject &create_Model(const std::string &modelPath, unsigned int shader = 0, bool flipUVs = false);
     void load_ModelMeshes(Model& model, std::string const &path);
     void processNode(const std::string &path, aiNode* node, const aiScene* scene);
-    Mesh processMesh(const std::string &path, aiMesh *mesh, const aiScene *scene);
+    std::shared_ptr<Mesh> processMesh(const std::string &path, aiMesh *mesh, const aiScene *scene);
     std::vector<Texture> loadMaterialTextures(const std::string &path, aiMaterial *mat, aiTextureType type);
 
     // Creating lights

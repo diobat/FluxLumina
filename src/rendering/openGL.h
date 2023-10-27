@@ -40,9 +40,9 @@ public:
 	void disable(GLuint feature);
 
 	// Models
-	void initializeMesh(Mesh& mesh) override;
+	void initializeMesh(std::shared_ptr<Mesh>& mesh) override;
 	void initializeTexture(Texture& texture) override;
-	void bindTextures(Mesh &mesh);
+	void bindTextures(std::shared_ptr<Mesh> mesh);
 	void renderModel(ModelObject &model);
 	void renderInstancedMeshes();
 
