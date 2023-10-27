@@ -61,6 +61,9 @@ public:
 	void initializeSkybox(Skybox &skybox, const std::array<Texture, 6>& textures) override;
 	void renderSkybox(Skybox &skybox);
 
+	// Instancing
+	void initializeInstanceManager(std::shared_ptr<Scene> scene);
+
 private:
 	void allLightsSetup(const LightContents &lights);
 	void lightSetup(unsigned int shaderIndex, const DirectionalLight &light);

@@ -26,7 +26,7 @@ std::shared_ptr<Mesh> MeshLibrary::getMesh(boost::uuids::uuid id) const
     throw std::runtime_error("MeshLibrary::getMesh() - Mesh not found");
 }
 
-std::vector<Texture>& MeshLibrary::getLoadedTextures()
+const std::vector<Texture>& MeshLibrary::getLoadedTextures()
 {
     return _loadedTextures;
 }
@@ -34,4 +34,9 @@ std::vector<Texture>& MeshLibrary::getLoadedTextures()
 bool MeshLibrary::isMeshLoaded(const std::string& name)
 {
     return _meshes.find(Math::calculateHash(name)) != _meshes.end();
+}
+
+void MeshLibrary::addTexture(const Texture& texture)
+{
+    _loadedTextures.push_back(texture);
 }

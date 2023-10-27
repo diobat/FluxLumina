@@ -12,7 +12,7 @@
 namespace
 {
 
-    std::vector<Texture> loadedTextures;
+    //std::vector<Texture> loadedTextures;
 
     bool flipUVsOnLoad = false;
 
@@ -279,6 +279,7 @@ std::shared_ptr<Mesh> SceneObjectFactory::processMesh(const std::string &path, a
 std::vector<Texture> SceneObjectFactory::loadMaterialTextures(const std::string &path, aiMaterial *mat, aiTextureType type)
 {
     std::vector<Texture> materialTextures;
+    const auto& loadedTextures = _meshLibrary->getLoadedTextures();
 
     for(unsigned int i = 0; i < mat->GetTextureCount(type); i++)
     {
@@ -304,7 +305,7 @@ std::vector<Texture> SceneObjectFactory::loadMaterialTextures(const std::string 
 
             _boundEngine->initializeTexture(texture);
             materialTextures.push_back(texture);
-            loadedTextures.push_back(texture);
+            _meshLibrary->addTexture(texture);
         }
     }
     return materialTextures;

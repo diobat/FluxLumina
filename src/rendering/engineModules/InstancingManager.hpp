@@ -20,20 +20,26 @@
 #include <boost/uuid/uuid.hpp>
 
 
-struct InstancingGroup
+class InstancingGroup
 {
+public:
+    ~InstancingGroup();
     std::vector<std::weak_ptr<ModelObject>> modelObjects;
+    std::shared_ptr<Mesh> mesh;
     std::vector<glm::mat4> transforms() const;
+    unsigned int VBO;
 };
 
 class InstancingManager
 {
 public:
     void setupInstancing(unsigned int shaderIndex, std::shared_ptr<Scene> scene);
-    const std::map<boost::uuids::uuid, InstancingGroup>& getInstancingGroups() const;
+    const std::unordered_map<std::shared_ptr<Mesh>, InstancingGroup>& getInstancingGroups() const;
     void resetInstancingGroups();
 
 private:
+    void setupInstancingGroup(InstancingGroup& instancingGroup);
+
     // Mesh uuid -> InstancingGroup
-    std::map<boost::uuids::uuid, InstancingGroup> _instancingGroups;
+    std::unordered_map<std::shared_ptr<Mesh>, InstancingGroup> _instancingGroups;
 };

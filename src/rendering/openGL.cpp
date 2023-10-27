@@ -1,5 +1,7 @@
 #include "rendering/openGL.h"
 
+
+
 openGL::openGL()
 {
     ;
@@ -104,7 +106,7 @@ void openGL::renderFrame(std::shared_ptr<Scene> scene)
     }
 
     // Draw models
-std::set <unsigned int> shaderIndexes = _shaderPrograms.getShaderIndexesPerFeature();
+    std::set <unsigned int> shaderIndexes = _shaderPrograms.getShaderIndexesPerFeature();
     std::set <unsigned int> shaderIndexesWithInstancing = _shaderPrograms.getShaderIndexesPerFeature(E_ShaderProgramFeatures::E_AUTO_INSTANCING);
     std::set<unsigned int> shaderIndexesTotal;
     std::merge(shaderIndexes.begin(), shaderIndexes.end(), shaderIndexesWithInstancing.begin(), shaderIndexesWithInstancing.end(), std::inserter(shaderIndexesTotal, shaderIndexesTotal.begin()));
@@ -112,15 +114,13 @@ std::set <unsigned int> shaderIndexes = _shaderPrograms.getShaderIndexesPerFeatu
     // Opaque Models
     for(unsigned int shaderIndex : shaderIndexesTotal)
     {
-                    // Activate shader
+        // Activate shader
         _shaderPrograms.use(shaderIndex);
 
         // Go down the instancing path if the shader supports it
         if(_shaderPrograms.getShader(shaderIndex)->isFeatureSupported(E_ShaderProgramFeatures::E_AUTO_INSTANCING))
         {
-            _instancingManager.setupInstancing(_shaderPrograms.getShader(shaderIndex)->getProgramId(), scene);
             renderInstancedMeshes();
-            _instancingManager.resetInstancingGroups();
         }
         else // Else just render on a per-model basis
         {
@@ -136,7 +136,7 @@ std::set <unsigned int> shaderIndexes = _shaderPrograms.getShaderIndexesPerFeatu
     // Instanced Opaque Models
 
     // Skybox
-// TO DO
+    // TO DO
 
     // Transparent Models
 
@@ -152,10 +152,6 @@ for(unsigned int shaderIndex : _shaderPrograms.getShaderIndexesPerFeature(E_Shad
             {
                 float distance = glm::length(scene->getActiveCamera()->getPosition() - conversion::toVec3(model->getPosition()));
                 sortedTransparentModels[distance] = model;
-            }
-            else
-            {
-                renderModel(*model);
             }
         }
         // Render all the transparent models (from in decreasing distance to the camera)
@@ -189,51 +185,19 @@ void openGL::renderModel(ModelObject &model)
 
 void openGL::renderInstancedMeshes()
 {
-    
     for(auto& instancingGroup : _instancingManager.getInstancingGroups())
     {
-        auto& mesh = _meshLibrary->getMesh(instancingGroup.first);
-        auto& modelMatrices = instancingGroup.second.transforms();
-
-        // Model matrices setup
-
-        // vertex buffer object
-        unsigned int modelMatricesVBO;
-        glGenBuffers(1, &modelMatricesVBO);
-        glBindBuffer(GL_ARRAY_BUFFER, modelMatricesVBO);
-        glBufferData(GL_ARRAY_BUFFER, modelMatrices.size() * sizeof(glm::mat4), &modelMatrices[0], GL_STATIC_DRAW);
-
-        glBindVertexArray(mesh->VAO);
-        std::size_t vec4Size = sizeof(glm::vec4);
-        glEnableVertexAttribArray(4);
-        glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)0);
-        glEnableVertexAttribArray(5);
-        glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(vec4Size));
-        glEnableVertexAttribArray(6);
-        glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(2 * vec4Size));
-        glEnableVertexAttribArray(7);
-        glVertexAttribPointer(7, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(3 * vec4Size));
-
-        glVertexAttribDivisor(4, 1);
-        glVertexAttribDivisor(5, 1);
-        glVertexAttribDivisor(6, 1);
-        glVertexAttribDivisor(7, 1);
-
-        // Unbind the VBO
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-
+        // Bind the VAO
+        glBindVertexArray(instancingGroup.second.mesh->VAO);
+        
         // Textures
-        bindTextures(mesh);
+        bindTextures(instancingGroup.second.mesh);
 
         // Draw the instances
-        glDrawElementsInstanced(GL_TRIANGLES, mesh->_indices.size(), GL_UNSIGNED_INT, 0, modelMatrices.size());
-
-        // Unbind the VAO
-        glBindVertexArray(0);
-
-        // Delete the VBO
-        glDeleteBuffers(1, &modelMatricesVBO);
+        glDrawElementsInstanced(GL_TRIANGLES, instancingGroup.second.mesh->_indices.size(), GL_UNSIGNED_INT, 0, instancingGroup.second.modelObjects.size());
     }
+    // Unbind the VAO
+    glBindVertexArray(0);
 }
 
 void openGL::cameraSetup(std::shared_ptr<Scene> scene)
@@ -554,3 +518,10 @@ void openGL::renderSkybox(Skybox& skybox)
     //glDepthMask(GL_TRUE);
 
 }
+
+void openGL::initializeInstanceManager(std::shared_ptr<Scene> scene)
+{
+    _instancingManager.resetInstancingGroups();
+    _instancingManager.setupInstancing(_shaderPrograms.getShader(0)->getProgramId(), _scenes[0]);
+}
+
