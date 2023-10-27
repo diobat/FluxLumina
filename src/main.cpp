@@ -5,6 +5,7 @@
 #include "rendering/openGLContext.h"
 #include "rendering/openGL.h"
 #include "scene/SceneObjectFactory.h"
+#include "util/Logger.hpp"
 
 // Third-party includes
 #include <memory>
@@ -24,6 +25,7 @@ void update(openGL& graphicalEngine, std::vector<std::shared_ptr<Scene>> scenes,
 
     while (!glfwWindowShouldClose(graphicalEngine.getWindowPtr()))
     {
+        Logger::Instance().tic();
         /* Update game time value */
         newTime  = static_cast<float>(glfwGetTime());
         deltaTime = newTime - gameTime - startTime;
@@ -33,7 +35,7 @@ void update(openGL& graphicalEngine, std::vector<std::shared_ptr<Scene>> scenes,
         glfwSetWindowTitle(graphicalEngine.getWindowPtr(), windowTitle.c_str());
 
         graphicalEngine.renderFrame(scenes[0]);
-
+        
         /* Swap front and back buffers */
         glfwSwapBuffers(graphicalEngine.getWindowPtr());
 
@@ -91,28 +93,27 @@ int main(void)
     // auto &window3 = factory.create_Model("res/models/window/window.obj", 2);
     // window3.setPosition({-10.0f, 10.0f, 6.0f});
 
-    // ModelObject &ground = factory.create_Model("res/models/ground.obj", 0);
-    // ground.setPosition({0.0f, -0.5f, 0.0f});
+    ModelObject &ground = factory.create_Model("res/models/ground.obj", 0);
+    ground.setPosition({0.0f, -0.5f, 0.0f});
 
-    // ModelObject& mothership = factory.create_Model("res/models/Mothership/Mothership.obj", 0);
-    // mothership.setPosition({0.0f, 10.0f, 7.5f});
-    // mothership.setScale(0.001f);
+    ModelObject& mothership = factory.create_Model("res/models/Mothership/Mothership.obj", 0);
+    mothership.setPosition({0.0f, 10.0f, 7.5f});
+    mothership.setScale(0.001f);
 
-    // ModelObject& backpack = factory.create_Model("res/models/backpack/backpack.obj", 0, true);
-    // backpack.setPosition({0.0f, 3.0f, -7.5f});
+    ModelObject& backpack = factory.create_Model("res/models/backpack/backpack.obj", 0, true);
+    backpack.setPosition({0.0f, 3.0f, -7.5f});
 
 
-    int width = 40;
-    int height = 40;
+    int width = 500;
+    int height = 500;
 
     for(int i(0); i < width * height; ++i)
     {
-        auto& statueN = factory.create_Model("res/models/Statue/12330_Statue_v1_L2.obj", 0);
-        statueN.setPosition({(i % width) * 2.0f - width, 30.0f, (i / width) * 2.0f - height});
-        statueN.rotate(-90.0f, 0.0f, 0.0f);
-        statueN.setScale(0.01f);
+        auto& statueN = factory.create_Model("res/models/cube/cube.obj", 0);
+        statueN.setPosition({((i % width) * 2.0f) * 10.0f, 15.0f, ((i / width) * 2.0f) * 10.0f});
+        //statueN.rotate(-90.0f, 0.0f, 0.0f);
+        statueN.setScale(5.0f);
     }
-
 
     auto& statue = factory.create_Model("./res/models/Statue/12330_Statue_v1_L2.obj", 1);
     statue.setPosition({0.0f, 0.0f, 5.0f});
@@ -134,8 +135,8 @@ int main(void)
     statue4.rotate(-90.0f, 0.0f, 0.0f);
     statue4.setScale(0.01f);
 
-    // auto& grass = factory.create_Model("res/models/grassSquare/grassSquare.obj", 2);
-    // grass.setPosition({10.0f, 1.0f, 10.0f});
+    auto& grass = factory.create_Model("res/models/grassSquare/grassSquare.obj", 2);
+    grass.setPosition({10.0f, 1.0f, 10.0f});
 
     auto& cube = factory.create_Model("res/models/cube/cube.obj", 5);
     std::vector<Texture> cubeTextures = {scene->getSkybox().getCubemap()->getTexture()};

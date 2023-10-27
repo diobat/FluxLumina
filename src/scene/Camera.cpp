@@ -6,7 +6,7 @@ Camera::Camera() :
 	_rotation(glm::pi<float>() / 2.0f, 0.0f),
 	_direction(0.0f, 0.0f, -1.0f),
 	_nearPlane(0.1f),
-	_farPlane(1000.0f),
+	_farPlane(5000.0f),
 	_height(768),
 	_width(1024),
 	_fov(70.0f),

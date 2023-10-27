@@ -1,6 +1,6 @@
 #include "rendering/openGL.h"
 
-
+#include "util/Logger.hpp"
 
 openGL::openGL()
 {
@@ -81,6 +81,7 @@ int openGL::initialize(GLFWwindow* window)
 // Next step is to encapsulate this in a method that also handles Framebuffer changes
 void openGL::renderFrame(std::shared_ptr<Scene> scene)
 {
+
     // Bind the proper FBO
     _frameBuffers->bindProperFBOFromScene(scene);
 
@@ -92,18 +93,8 @@ void openGL::renderFrame(std::shared_ptr<Scene> scene)
     cameraSetup(scene);
 
     // Light
+    _shaderPrograms.use(0);
     allLightsSetup(scene->getAllLights());
-
-    // Draw Skybox
-    if (scene->getSkybox().getCubemap() != nullptr)
-    {
-        auto ZZview = glm::mat4(glm::mat3(scene->getActiveCamera()->getViewMatrix())); // remove translation from the view matrix
-        auto ZZprojection = scene->getActiveCamera()->getProjectionMatrix();
-        _shaderPrograms.use(4);
-        _shaderPrograms.setUniformMat4(4, "view", ZZview);
-        _shaderPrograms.setUniformMat4(4, "projection", ZZprojection);
-        renderSkybox(scene->getSkybox());
-    }
 
     // Draw models
     std::set <unsigned int> shaderIndexes = _shaderPrograms.getShaderIndexesPerFeature();
@@ -129,18 +120,21 @@ void openGL::renderFrame(std::shared_ptr<Scene> scene)
                 renderModel(*model);
             }
         }
-
-
     }
 
-    // Instanced Opaque Models
-
-    // Skybox
-    // TO DO
+    // Draw Skybox
+    if (scene->getSkybox().getCubemap() != nullptr)
+    {
+        auto ZZview = glm::mat4(glm::mat3(scene->getActiveCamera()->getViewMatrix())); // remove translation from the view matrix
+        auto ZZprojection = scene->getActiveCamera()->getProjectionMatrix();
+        _shaderPrograms.use(4);
+        _shaderPrograms.setUniformMat4(4, "view", ZZview);
+        _shaderPrograms.setUniformMat4(4, "projection", ZZprojection);
+        renderSkybox(scene->getSkybox());
+    }
 
     // Transparent Models
-
-for(unsigned int shaderIndex : _shaderPrograms.getShaderIndexesPerFeature(E_ShaderProgramFeatures::E_TRANSPARENCY))
+    for(unsigned int shaderIndex : _shaderPrograms.getShaderIndexesPerFeature(E_ShaderProgramFeatures::E_TRANSPARENCY))
     {
         // Activate shader
         _shaderPrograms.use(shaderIndex);

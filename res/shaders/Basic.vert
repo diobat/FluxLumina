@@ -16,18 +16,20 @@ layout(std140) uniform mvp_camera
 	mat4 view;
 	mat4 projection;
 };
-uniform mat4 model;
+//uniform mat4 model;
 
 // Output
 out vec3 objectColor;
 out vec3 Normal;
 out vec2 TexCoords;
 out vec3 FragPos;
+out mat4 model;
 
 void main()
 {
 	gl_Position = projection * view * instanceMatrix * vec4(aPosition, 1.0f);
 
+	model = instanceMatrix;
 	objectColor = aObjectColor;
 	Normal = aNormal;
 	TexCoords = aTexCoords;

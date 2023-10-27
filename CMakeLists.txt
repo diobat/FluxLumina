@@ -60,12 +60,14 @@ add_library(GLAD "thirdparty/glad.c")
 #Boost
 set(Boost_USE_STATIC_LIBS ON) 
 set(Boost_USE_MULTITHREADED ON)  
-set(Boost_USE_STATIC_RUNTIME ON) 
+set(Boost_USE_STATIC_RUNTIME OFF) 
 
-# set(BOOST_ROOT X:/software/boost_1_82_0)
+#set(BOOST_ROOT X:/software/boost_1_82_0)
+#set(BOOST_LIBRARYDIR X:/software/boost_1_82_0)
 # Set Boost root folder as BOOST_ROOT environment variable or this will fail
-find_package(Boost REQUIRED) 
+find_package(Boost 1.82.0 REQUIRED COMPONENTS log date_time)
 message(STATUS "Found BOOST in ${Boost_INCLUDE_DIR}")
+#message(STATUS "Boost libraries: ${Boost_LIBRARIES}")
 
 # Put all libraries into a variable
 set(LIBS glfw3 opengl32 assimp STB_IMAGE GLAD ${Boost_LIBRARIES})
@@ -78,7 +80,7 @@ include_directories(
 )
 
 # Define the link libraries
-target_link_libraries(${PROJECT_NAME} ${LIBS})
+target_link_libraries(${PROJECT_NAME} ${LIBS} ${Boost_LIBRARIES})
 
 #set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 source_group(TREE ${CMAKE_SOURCE_DIR} FILES ${HEADER_FILES} ${SOURCE_FILES})

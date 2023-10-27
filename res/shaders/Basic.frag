@@ -111,7 +111,6 @@ vec3 calcDirLight(DirLight light, vec3 normal, vec3 viewDir)
 	return (ambient + diffuse + specular);
 }
 
-
 vec3 calcPointLight(PointLight light, vec3 normal, vec3 FragPos, vec3 viewDir)
 {
 	vec3 diffTex = vec3(0.0);
