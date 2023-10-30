@@ -64,7 +64,7 @@ int openGL::initialize(GLFWwindow* window)
     _shaderPrograms.addShader("Basic.vert", "Basic.frag");                  //0
     _shaderPrograms.getShader(0)->addSupportedFeature(E_ShaderProgramFeatures::E_AUTO_INSTANCING);
     _shaderPrograms.addShader("Simple.vert", "Simple.frag");                //2
-    _shaderPrograms.addShader("Basic.vert", "transparency.frag");           //3
+    _shaderPrograms.addShader("Simple.vert", "transparency.frag");           //3
     _shaderPrograms.getShader(2)->addSupportedFeature(E_ShaderProgramFeatures::E_TRANSPARENCY);
     _shaderPrograms.addShader("Quad.vert", "Quad.frag");                    //4
     _shaderPrograms.addShader("Skybox.vert", "Skybox.frag");                //5

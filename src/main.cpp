@@ -84,14 +84,14 @@ int main(void)
 
     // Scene objects 
 
-    // auto &window1 = factory.create_Model("res/models/window/window.obj", 2);
-    // window1.setPosition({-10.0f, 10.0f, 10.0f});
+    auto &window1 = factory.create_Model("res/models/window/window.obj", 2);
+    window1.setPosition({-10.0f, 10.0f, 10.0f});
 
-    // auto &window2 = factory.create_Model("res/models/window/window.obj", 2);
-    // window2.setPosition({-10.0f, 10.0f, 8.0f});
+    auto &window2 = factory.create_Model("res/models/window/window.obj", 2);
+    window2.setPosition({-10.0f, 10.0f, 8.0f});
 
-    // auto &window3 = factory.create_Model("res/models/window/window.obj", 2);
-    // window3.setPosition({-10.0f, 10.0f, 6.0f});
+    auto &window3 = factory.create_Model("res/models/window/window.obj", 2);
+    window3.setPosition({-10.0f, 10.0f, 6.0f});
 
     ModelObject &ground = factory.create_Model("res/models/ground.obj", 0);
     ground.setPosition({0.0f, -0.5f, 0.0f});
