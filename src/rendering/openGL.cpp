@@ -43,6 +43,9 @@ int openGL::initialize(GLFWwindow* window)
     // Enable face culling
     glEnable(GL_CULL_FACE);
 
+    // Enable 16xMSAA
+    glEnable(GL_MULTISAMPLE);
+
     // Enable depth test
     glEnable(GL_DEPTH_TEST);
     // Accept fragment if it closer to the camera than the former one
