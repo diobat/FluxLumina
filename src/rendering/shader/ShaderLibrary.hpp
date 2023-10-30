@@ -7,10 +7,10 @@
 #include <unordered_map>
 
 // First-Party Headers
-#include "rendering/shader/ShaderLibraryContents.h"
-#include "rendering/shader/Shader.h"
-#include "rendering/shader/UniformBuffer.h"
-#include "Scene/Scene.h"
+#include "rendering/shader/ShaderLibraryContents.hpp"
+#include "rendering/shader/Shader.hpp"
+#include "rendering/shader/UniformBuffer.hpp"
+#include "Scene/Scene.hpp"
 
 // Third-Party Headers
 #include <glad/glad.h>

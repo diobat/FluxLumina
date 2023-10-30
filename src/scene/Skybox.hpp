@@ -4,7 +4,7 @@
 #include <memory>
 
 // First party
-#include "rendering/Cubemap.h"
+#include "rendering/Cubemap.hpp"
 
 
 

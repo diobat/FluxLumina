@@ -1,14 +1,14 @@
 #pragma once
 
 // GLFW incldues
-#include "rendering/GLFW_Wrapper.h"
+#include "rendering/GLFW_Wrapper.hpp"
 
 // STL includes
 #include <array>
 #include <vector>
 
 // First-party includes
-#include "rendering/Texture.h"
+#include "rendering/Texture.hpp"
 
 enum E_AttachmentType
 {

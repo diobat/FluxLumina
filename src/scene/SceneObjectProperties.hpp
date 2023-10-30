@@ -4,7 +4,7 @@
 #include <array>
 
 // First-party headers
-#include "util/Rotation.h"
+#include "util/Rotation.hpp"
 
 struct SceneObjectProperties
 {

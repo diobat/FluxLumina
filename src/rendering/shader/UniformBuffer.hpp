@@ -1,7 +1,7 @@
 #pragma once
 
 // GLFW include
-#include "rendering/GLFW_Wrapper.h"
+#include "rendering/GLFW_Wrapper.hpp"
 
 // Debug Glm includes
 #include <glm/glm.hpp>
@@ -14,8 +14,8 @@
 #include <algorithm>
 
 // First party includes
-#include "util/Arithmetic.h"
-#include "rendering/shader/ShaderLibraryContents.h"
+#include "util/Arithmetic.hpp"
+#include "rendering/shader/ShaderLibraryContents.hpp"
 
 
 namespace

@@ -1,4 +1,4 @@
-#include "scene/SceneObject.h"
+#include "scene/SceneObject.hpp"
 
 namespace
 {

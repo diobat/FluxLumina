@@ -5,7 +5,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 // First party includes
-#include "scene/SceneObjectProperties.h"
+#include "scene/SceneObjectProperties.hpp"
 
 class ModelMatrixProvider
 {

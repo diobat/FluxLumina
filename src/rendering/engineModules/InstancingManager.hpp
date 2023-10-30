@@ -1,16 +1,16 @@
 #pragma once
 
 // GLFW include
-#include "rendering/GLFW_Wrapper.h"
+#include "rendering/GLFW_Wrapper.hpp"
 
 // GLM - Math is a gateway science
 #define  GLM_FORCE_RADIANS
 #include <glm/glm.hpp>
 
 // First party includes
-#include "rendering/Mesh.h"
-#include "scene/ModelObject.h"
-#include "scene/Scene.h"
+#include "rendering/Mesh.hpp"
+#include "scene/ModelObject.hpp"
+#include "scene/Scene.hpp"
 
 // STD library includes
 #include <map>

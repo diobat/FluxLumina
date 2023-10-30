@@ -1,4 +1,4 @@
-#include "rendering/shader/UniformBuffer.h"
+#include "rendering/shader/UniformBuffer.hpp"
 
 #include <set>
 

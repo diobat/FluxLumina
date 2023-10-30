@@ -1,4 +1,4 @@
-#include "scene/ModelMatrixProvider.h"
+#include "scene/ModelMatrixProvider.hpp"
 
 ModelMatrixProvider::ModelMatrixProvider(const SceneObjectProperties& source)   :
     _sourceData(source),

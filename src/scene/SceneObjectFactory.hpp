@@ -1,13 +1,13 @@
 #pragma once
 
 // First-party includes
-#include "scene/Scene.h"
-#include "scene/SceneObject.h"
-#include "rendering/GraphicalEngine.h"
-#include "scene/ModelObject.h"
-#include "scene/Camera.h"
-#include "scene/LightSource.h"
-#include "rendering/Cubemap.h"
+#include "scene/Scene.hpp"
+#include "scene/SceneObject.hpp"
+#include "rendering/GraphicalEngine.hpp"
+#include "scene/ModelObject.hpp"
+#include "scene/Camera.hpp"
+#include "scene/LightSource.hpp"
+#include "rendering/Cubemap.hpp"
 #include "rendering/MeshLibrary.hpp"
 
 // STD library includes

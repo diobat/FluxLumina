@@ -4,7 +4,7 @@
 #include <array>
 
 // First party
-#include "rendering/Texture.h"
+#include "rendering/Texture.hpp"
 
 enum E_CUBEMAP_FACES : unsigned int
 {

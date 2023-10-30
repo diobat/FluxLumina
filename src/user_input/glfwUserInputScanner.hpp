@@ -5,10 +5,10 @@
 #include <map>
 
 // GLFW includes
-#include "rendering/GLFW_Wrapper.h"
+#include "rendering/GLFW_Wrapper.hpp"
 
 // First-party includes
-#include "scene/Scene.h"
+#include "scene/Scene.hpp"
 
 namespace UserInput
 {

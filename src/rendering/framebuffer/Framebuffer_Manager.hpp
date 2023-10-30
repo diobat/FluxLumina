@@ -8,8 +8,8 @@
 #include <vector>
 
 // First party includes
-#include "rendering/framebuffer/FBO.h"
-#include "scene/Scene.h"
+#include "rendering/framebuffer/FBO.hpp"
+#include "scene/Scene.hpp"
 
 class FBOManager
 {

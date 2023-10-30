@@ -1,7 +1,7 @@
 #pragma once
 
 // GLFW include
-#include "rendering/GLFW_Wrapper.h"
+#include "rendering/GLFW_Wrapper.hpp"
 
 // STD library includes
 #include <iostream>

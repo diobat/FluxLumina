@@ -1,4 +1,4 @@
-#include "GraphicalEngine.h"
+#include "GraphicalEngine.hpp"
 
 GraphicalEngine::GraphicalEngine()
 {

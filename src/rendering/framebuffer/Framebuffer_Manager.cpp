@@ -1,4 +1,4 @@
-#include "rendering/framebuffer/Framebuffer_Manager.h"
+#include "rendering/framebuffer/Framebuffer_Manager.hpp"
 
 FBOManager::FBOManager(GLFWwindow *window) : 
     _currentFBOIndex(-1),

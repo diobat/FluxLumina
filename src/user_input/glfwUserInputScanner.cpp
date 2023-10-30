@@ -1,4 +1,4 @@
-#include "user_input/glfwUserInputScanner.h"
+#include "user_input/glfwUserInputScanner.hpp"
 
 //Because openGL runs in C code it has no idea what classes and this-> are.
 //Its much more convoluted to implement callbacks as non-member functions but 

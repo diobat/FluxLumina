@@ -1,4 +1,4 @@
-#include "rendering/framebuffer/FBO.h"
+#include "rendering/framebuffer/FBO.hpp"
 
 
 FBO::FBO(unsigned int width, unsigned int height) : 

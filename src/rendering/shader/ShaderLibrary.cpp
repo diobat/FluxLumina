@@ -1,5 +1,4 @@
-#include "rendering/shader/ShaderLibrary.h"
-#include "rendering/shader/UniformBufferTemplate.h"
+#include "rendering/shader/ShaderLibrary.hpp"
 #include <stdexcept>
 
 

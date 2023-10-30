@@ -5,7 +5,7 @@
 #include <memory>
 
 // First-Party Headers
-#include "rendering/shader/Shader.h"
+#include "rendering/shader/Shader.hpp"
 
 
 class ShaderLibraryContents

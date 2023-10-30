@@ -9,8 +9,6 @@
 #include <string>
 #include <set>
 
-
-
 enum class E_ShaderProgramFeatures
 {
     E_AUTO_INSTANCING,

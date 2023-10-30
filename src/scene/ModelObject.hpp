@@ -1,11 +1,11 @@
 #pragma once
 
 // First-party includes
-#include "scene/sceneObject.h"
-#include "rendering/texture.h"
-#include "rendering/model.h"
-#include "util/Listener.h"
-#include "scene/ModelMatrixProvider.h"
+#include "scene/sceneObject.hpp"
+#include "rendering/texture.hpp"
+#include "rendering/model.hpp"
+#include "util/Listener.hpp"
+#include "scene/ModelMatrixProvider.hpp"
 
 // Third-party headers
 #include <boost/uuid/uuid.hpp>

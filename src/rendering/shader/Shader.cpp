@@ -1,8 +1,4 @@
-/** 
- * Copyright (C) 2018 Tomasz Ga�aj
- **/
-
-#include "rendering/shader/Shader.h"
+#include "rendering/shader/Shader.hpp"
 
 #include <glm\gtc\type_ptr.hpp>
 #include <fstream>

@@ -3,7 +3,7 @@
 #include <glad/glad.h> // holds all OpenGL type declarations
 #include <glm/glm.hpp>
 #include <vector>
-#include <rendering/texture.h>
+#include <rendering/texture.hpp>
 
 // Third-party headers
 #include <boost/uuid/uuid.hpp>

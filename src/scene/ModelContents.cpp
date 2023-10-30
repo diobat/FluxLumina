@@ -1,4 +1,4 @@
-#include "scene/ModelContents.h"
+#include "scene/ModelContents.hpp"
 
 
 void ModelContents::addModel(std::shared_ptr<ModelObject> model)

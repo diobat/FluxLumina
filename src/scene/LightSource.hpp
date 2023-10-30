@@ -1,8 +1,8 @@
 #pragma once
 
 // First-party includes
-#include <scene/sceneObject.h>
-#include "rendering/model.h"
+#include <scene/SceneObject.hpp>
+#include "rendering/Model.hpp"
 
 // STD includes
 #include <memory>

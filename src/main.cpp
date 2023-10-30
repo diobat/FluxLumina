@@ -1,10 +1,10 @@
 // Purpose: Entry point of the program.
 
 // First-party includes
-#include "rendering/GLFW_Wrapper.h"
-#include "rendering/openGLContext.h"
-#include "rendering/openGL.h"
-#include "scene/SceneObjectFactory.h"
+#include "rendering/GLFW_Wrapper.hpp"
+#include "rendering/openGLContext.hpp"
+#include "rendering/openGL.hpp"
+#include "scene/SceneObjectFactory.hpp"
 #include "util/Logger.hpp"
 
 // Third-party includes
@@ -109,10 +109,10 @@ int main(void)
 
     for(int i(0); i < width * height; ++i)
     {
-        auto& statueN = factory.create_Model("res/models/cube/cube.obj", 0);
-        statueN.setPosition({((i % width) * 2.0f) * 10.0f, 15.0f, ((i / width) * 2.0f) * 10.0f});
-        //statueN.rotate(-90.0f, 0.0f, 0.0f);
-        statueN.setScale(5.0f);
+        auto& cubeN = factory.create_Model("res/models/cube/cube.obj", 0);
+        cubeN.setPosition({((i % width) * 2.0f) * 10.0f, -15.0f, ((i / width) * 2.0f) * 10.0f});
+        cubeN.rotate(45.0f, 45.0f, 45.0f);
+        cubeN.setScale(5.0f);
     }
 
     auto& statue = factory.create_Model("./res/models/Statue/12330_Statue_v1_L2.obj", 1);

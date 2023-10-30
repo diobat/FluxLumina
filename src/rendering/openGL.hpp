@@ -4,7 +4,7 @@
 #include <iostream>
 
 // GLFW include
-#include "rendering/GLFW_Wrapper.h"
+#include "rendering/GLFW_Wrapper.hpp"
 
 // GLM - Math is a gateway science
 #define  GLM_FORCE_RADIANS
@@ -13,13 +13,13 @@
 #include <glm/gtc/type_ptr.hpp>
 
 // First party includes
-#include "rendering/GraphicalEngine.h"
-#include "rendering/shader/ShaderLibrary.h"
-#include "rendering/texture.h"
-#include "rendering/framebuffer/Framebuffer_Manager.h"
+#include "rendering/GraphicalEngine.hpp"
+#include "rendering/shader/ShaderLibrary.hpp"
+#include "rendering/texture.hpp"
+#include "rendering/framebuffer/Framebuffer_Manager.hpp"
 #include "rendering/engineModules/InstancingManager.hpp"
-#include "user_input/glfwUserInputScanner.h"
-#include "util/Arithmetic.h"
+#include "user_input/glfwUserInputScanner.hpp"
+#include "util/Arithmetic.hpp"
 
 class openGL : public GraphicalEngine
 {

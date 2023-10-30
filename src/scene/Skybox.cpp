@@ -1,4 +1,4 @@
-#include "scene/Skybox.h"
+#include "scene/Skybox.hpp"
 
 Skybox::Skybox()    :
     _cubeMap(nullptr)

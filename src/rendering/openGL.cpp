@@ -1,4 +1,4 @@
-#include "rendering/openGL.h"
+#include "rendering/openGL.hpp"
 
 #include "util/Logger.hpp"
 

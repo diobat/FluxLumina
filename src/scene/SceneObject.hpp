@@ -5,7 +5,7 @@
 #include <array>
 
 // First-party headers
-#include "scene/SceneObjectProperties.h"
+#include "scene/SceneObjectProperties.hpp"
 
 // Third-party headers
 #include <boost/uuid/uuid.hpp>

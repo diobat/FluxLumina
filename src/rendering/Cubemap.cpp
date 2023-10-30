@@ -1,4 +1,4 @@
-#include "rendering/Cubemap.h"
+#include "rendering/Cubemap.hpp"
 #include <algorithm>
 
 

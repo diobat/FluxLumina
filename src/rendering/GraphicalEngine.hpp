@@ -1,9 +1,9 @@
 #pragma once
 
 // First-party includes
-#include "rendering\mesh.h"
-#include "rendering\texture.h"
-#include "scene/Scene.h"
+#include "rendering\mesh.hpp"
+#include "rendering\texture.hpp"
+#include "scene/Scene.hpp"
 #include "rendering/MeshLibrary.hpp"
 
 class GraphicalEngine

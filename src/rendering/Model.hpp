@@ -6,7 +6,7 @@
 #include <memory>
 
 // First-party headers
-#include "Mesh.h"
+#include "Mesh.hpp"
 
 class Model
 {

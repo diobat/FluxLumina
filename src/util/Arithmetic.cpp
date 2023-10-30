@@ -1,4 +1,4 @@
-#include "util/arithmetic.h"
+#include "util/Arithmetic.hpp"
 
 
 namespace Math

@@ -1,6 +1,6 @@
-#include "util/Rotation.h"
+#include "util/Rotation.hpp"
 
-#include <util/Arithmetic.h>
+#include <util/Arithmetic.hpp>
 
 
 Rotation::Rotation()

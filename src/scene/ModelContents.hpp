@@ -6,7 +6,7 @@
 #include <unordered_map>
 
 //	First Party includes
-#include "scene/ModelObject.h"
+#include "scene/ModelObject.hpp"
 
 class ModelContents
 {

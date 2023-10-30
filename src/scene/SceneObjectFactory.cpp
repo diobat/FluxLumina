@@ -1,4 +1,4 @@
-#include "scene/SceneObjectFactory.h"
+#include "scene/SceneObjectFactory.hpp"
 
 #include "helpers/RootDir.h"
 

@@ -1,7 +1,7 @@
-#include "scene/LightSource.h"
+#include "scene/LightSource.hpp"
 
 // Project includes
-#include "util/Arithmetic.h"
+#include "util/Arithmetic.hpp"
 
 LightSource::LightSource(float intensity, const std::array<float, 3>& color, const std::array<float, 3>& attenuationFactors)  :
     _intensity(intensity),
