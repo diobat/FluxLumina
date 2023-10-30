@@ -1,5 +1,3 @@
-// Purpose: Entry point of the program.
-
 // First-party includes
 #include "rendering/GLFW_Wrapper.hpp"
 #include "rendering/openGLContext.hpp"
@@ -138,13 +136,12 @@ int main(void)
     auto& grass = factory.create_Model("res/models/grassSquare/grassSquare.obj", 2);
     grass.setPosition({10.0f, 1.0f, 10.0f});
 
-    auto& cube = factory.create_Model("res/models/cube/cube.obj", 5);
+    auto& cube = factory.create_Model("res/models/cube/cubeBlank.obj", 5);
     std::vector<Texture> cubeTextures = {scene->getSkybox().getCubemap()->getTexture()};
     cube.getModel()->meshes[0]->attachTexture(cubeTextures);
     cube.setPosition({10.0f, 10.0f, 10.0f});
     
     // Lights   
-
     auto light = factory.create_LightSource( E_LightType::POINT_LIGHT);
     light->setPosition({5.0f, 5.0f, -5.0f});
     light->setAttenuationFactors({1.0f, 0.09f, 0.032f});
@@ -158,12 +155,15 @@ int main(void)
     light4->setPosition({0.0f, 10.0f, 0.0f});
     light4->pointAt({0.0f, 0.0f, 0.0f});
 
+    // Scene setup
     std::vector<std::shared_ptr<Scene>> scenes;
     scenes.push_back(scene);
 
     // User Input handler
     std::shared_ptr<UserInput::glfwKeyboardScanner> userInput = std::make_shared<UserInput::glfwKeyboardScanner>(graphicalEngine.getWindowPtr());
     userInput->bindToScene(scene);
+
+    // Begin main loop
     update(graphicalEngine, scenes, userInput);
 
     glfwTerminate();

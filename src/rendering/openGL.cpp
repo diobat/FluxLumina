@@ -40,6 +40,9 @@ int openGL::initialize(GLFWwindow* window)
     glClearColor(0.6784f, 0.8f, 1.0f, 1.0f);
     glViewport(0, 0, _width, _height);
 
+    // Enable face culling
+    glEnable(GL_CULL_FACE);
+
     // Enable depth test
     glEnable(GL_DEPTH_TEST);
     // Accept fragment if it closer to the camera than the former one
@@ -63,12 +66,12 @@ int openGL::initialize(GLFWwindow* window)
 
     _shaderPrograms.addShader("Basic.vert", "Basic.frag");                  //0
     _shaderPrograms.getShader(0)->addSupportedFeature(E_ShaderProgramFeatures::E_AUTO_INSTANCING);
-    _shaderPrograms.addShader("Simple.vert", "Simple.frag");                //2
-    _shaderPrograms.addShader("Simple.vert", "transparency.frag");           //3
+    _shaderPrograms.addShader("Simple.vert", "Simple.frag");                //1
+    _shaderPrograms.addShader("Simple.vert", "transparency.frag");          //2
     _shaderPrograms.getShader(2)->addSupportedFeature(E_ShaderProgramFeatures::E_TRANSPARENCY);
-    _shaderPrograms.addShader("Quad.vert", "Quad.frag");                    //4
-    _shaderPrograms.addShader("Skybox.vert", "Skybox.frag");                //5
-    _shaderPrograms.addShader("Reflection.vert", "Reflection.frag");        //6
+    _shaderPrograms.addShader("Quad.vert", "Quad.frag");                    //3
+    _shaderPrograms.addShader("Skybox.vert", "Skybox.frag");                //4
+    _shaderPrograms.addShader("Reflection.vert", "Reflection.frag");        //5
     _shaderPrograms.use(0);
 
     // Add uniform buffers to the shaders
