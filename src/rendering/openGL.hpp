@@ -18,6 +18,7 @@
 #include "rendering/texture.hpp"
 #include "rendering/framebuffer/Framebuffer_Manager.hpp"
 #include "rendering/engineModules/InstancingManager.hpp"
+#include "rendering/engineModules/LightManager.hpp"
 #include "user_input/glfwUserInputScanner.hpp"
 #include "util/Arithmetic.hpp"
 
@@ -65,10 +66,6 @@ public:
 	void initializeInstanceManager(std::shared_ptr<Scene> scene);
 
 private:
-	void allLightsSetup(const LightContents &lights);
-	void lightSetup(unsigned int shaderIndex, const DirectionalLight &light);
-	void lightSetup(unsigned int shaderIndex, const PointLight &light);
-	void lightSetup(unsigned int shaderIndex, const SpotLight &light);
 
 	void cameraSetup(std::shared_ptr<Scene> scene);
 
@@ -76,14 +73,14 @@ private:
 	GLFWwindow* _window;
 	int _width, _height;
 
-	// Scene
-	std::shared_ptr<UserInput::glfwKeyboardScanner> _userInput;
-
 	// Framebuffer
 	std::unique_ptr<FBOManager> _frameBuffers;
 
 	// Shaders
 	ShaderLibrary _shaderPrograms;
+
+	// Lights
+	LightLibrary _lightLibrary;
 
 	//Instancing
 	InstancingManager _instancingManager;

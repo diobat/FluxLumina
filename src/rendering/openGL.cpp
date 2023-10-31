@@ -46,6 +46,9 @@ int openGL::initialize(GLFWwindow* window)
     // Enable 16xMSAA
     glEnable(GL_MULTISAMPLE);
 
+    // Enable Gamma Correction
+    //glEnable(GL_FRAMEBUFFER_SRGB); 
+
     // Enable depth test
     glEnable(GL_DEPTH_TEST);
     // Accept fragment if it closer to the camera than the former one
@@ -100,7 +103,8 @@ void openGL::renderFrame(std::shared_ptr<Scene> scene)
 
     // Light
     _shaderPrograms.use(0);
-    allLightsSetup(scene->getAllLights());
+    _lightLibrary.prepare(_shaderPrograms, scene->getAllLights());
+
 
     // Draw models
     std::set <unsigned int> shaderIndexes = _shaderPrograms.getShaderIndexesPerFeature();
@@ -218,92 +222,6 @@ void openGL::cameraSetup(std::shared_ptr<Scene> scene)
     _shaderPrograms.getUniformBuffer("viewPosBlock").update(cameraPosition);
 }
 
-void openGL::allLightsSetup(const LightContents &lights)
-{
-    
-    auto directionalLights = lights.directionalLights;
-    _shaderPrograms.setUniformInt("numDirLights", directionalLights.size());
-    for(unsigned int i(0); i<directionalLights.size(); ++i)
-    {
-        lightSetup(i, *directionalLights[i]);
-    }
-
-    auto pointLights = lights.pointLights;
-    _shaderPrograms.setUniformInt("numPointLights", pointLights.size());
-    for(unsigned int i(0); i<pointLights.size(); ++i)
-    {
-        lightSetup(i, *pointLights[i]);
-    }
-
-    auto spotLights = lights.spotLights;
-    _shaderPrograms.setUniformInt("numSpotLights", spotLights.size());
-    for(unsigned int i(0); i<spotLights.size(); ++i)
-    {
-        lightSetup(i, *spotLights[i]);
-    }
-
-}
-
-void openGL::lightSetup(unsigned int lightIndex, const DirectionalLight &light)
-{
-    // Direction
-    glm::vec3 direction = conversion::toVec3(light.getDirection());
-    _shaderPrograms.setUniformVec3("dirLight[" + std::to_string(lightIndex) + "].direction", direction);
-
-    // Color
-    glm::vec3 color = conversion::toVec3(light.getColor());
-    _shaderPrograms.setUniformVec3("dirLight[" + std::to_string(lightIndex) + "].ambient", color);
-    _shaderPrograms.setUniformVec3("dirLight[" + std::to_string(lightIndex) + "].diffuse", color);
-    _shaderPrograms.setUniformVec3("dirLight[" + std::to_string(lightIndex) + "].specular", color);
-}
-
-void openGL::lightSetup(unsigned int lightIndex, const PointLight &light)
-{
-    // Position
-    glm::vec3 position = conversion::toVec3(light.getPosition());
-    _shaderPrograms.setUniformVec3("pointLight[" + std::to_string(lightIndex) + "].position", position);
-
-    // Color
-    glm::vec3 color = conversion::toVec3(light.getColor());
-    _shaderPrograms.setUniformVec3("pointLight[" + std::to_string(lightIndex) + "].ambient", color);
-    _shaderPrograms.setUniformVec3("pointLight[" + std::to_string(lightIndex) + "].diffuse", color);
-    _shaderPrograms.setUniformVec3("pointLight[" + std::to_string(lightIndex) + "].specular", color);
-
-    // Attenuation factors
-    const std::array<float, 3>& attFactors = light.getAttenuationFactors();
-    _shaderPrograms.setUniformFloat("pointLight[" + std::to_string(lightIndex) + "].constant", attFactors[0]);
-    _shaderPrograms.setUniformFloat("pointLight[" + std::to_string(lightIndex) + "].linear", attFactors[1]);
-    _shaderPrograms.setUniformFloat("pointLight[" + std::to_string(lightIndex) + "].quadratic", attFactors[2]);
-}
-
-void openGL::lightSetup(unsigned int lightIndex, const SpotLight &light)
-{
-    // Position
-    glm::vec3 position = conversion::toVec3(light.getPosition());
-    _shaderPrograms.setUniformVec3("spotLight[" + std::to_string(lightIndex) + "].position", position);
-
-    // Direction
-    glm::vec3 direction = conversion::toVec3(light.getDirection());
-    _shaderPrograms.setUniformVec3("spotLight[" + std::to_string(lightIndex) + "].direction", direction);
-
-    // Color
-    glm::vec3 color = conversion::toVec3(light.getColor());
-    _shaderPrograms.setUniformVec3("spotLight[" + std::to_string(lightIndex) + "].ambient", color);
-    _shaderPrograms.setUniformVec3("spotLight[" + std::to_string(lightIndex) + "].diffuse", color);
-    _shaderPrograms.setUniformVec3("spotLight[" + std::to_string(lightIndex) + "].specular", color);
-
-    // Attenuation factors
-    const std::array<float, 3>& attFactors = light.getAttenuationFactors();
-    _shaderPrograms.setUniformFloat("spotLight[" + std::to_string(lightIndex) + "].constant", attFactors[0]);
-    _shaderPrograms.setUniformFloat("spotLight[" + std::to_string(lightIndex) + "].linear", attFactors[1]);
-    _shaderPrograms.setUniformFloat("spotLight[" + std::to_string(lightIndex) + "].quadratic", attFactors[2]);
-
-    // Cutoff
-    std::array<float, 2> cutoff = light.getCutoff();
-    _shaderPrograms.setUniformFloat("spotLight[" + std::to_string(lightIndex) + "].innerCutOff", glm::cos(glm::radians(cutoff[0])));
-    _shaderPrograms.setUniformFloat("spotLight[" + std::to_string(lightIndex) + "].outerCutOff", glm::cos(glm::radians(cutoff[1])));
-}
-
 void openGL::resizeWindow(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
@@ -399,7 +317,7 @@ void openGL::bindTextures(std::shared_ptr<Mesh> mesh)
             imageUnitSpace = 20;
             _shaderPrograms.setUniformInt("sampleFromSpecular", 1);
             _shaderPrograms.setUniformInt("material.specular", imageUnitSpace + specularNr);
-            _shaderPrograms.setUniformFloat("material.shininess", 0.5);
+            _shaderPrograms.setUniformFloat("material.shininess", 4.5f);
             glActiveTexture(GL_TEXTURE0 + imageUnitSpace + specularNr);
             glBindTexture(GL_TEXTURE_2D, mesh->_textures[i]._id);
             specularNr++;
