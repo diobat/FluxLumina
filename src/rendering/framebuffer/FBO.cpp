@@ -191,3 +191,62 @@ unsigned int RenderBufferFBO::addStencilAttachment()
     return rb_id;
 }
 
+
+ShadowDepthFBO::ShadowDepthFBO(unsigned int width, unsigned int height) : 
+    FBO(width, height)
+{
+    _colorAttachmentIDs.clear();
+    _stencilAttachmentID = -1;
+}
+
+ShadowDepthFBO::~ShadowDepthFBO()
+{
+    if(_depthAttachmentID != -1)
+    {
+        glDeleteTextures(1, &_depthAttachmentID);
+    }
+
+    glDeleteFramebuffers(1, &_id);
+}
+
+void ShadowDepthFBO::addAttachment(E_AttachmentType type)
+{
+    glBindFramebuffer(GL_FRAMEBUFFER, _id);
+
+    switch(type)
+    {
+        case E_AttachmentType::COLOR:
+            break;
+        case E_AttachmentType::DEPTH:
+            _depthAttachmentID = addDepthAttachment();
+            break;
+        case E_AttachmentType::STENCIL:
+            break;
+        default:
+            break;
+    }
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+unsigned int ShadowDepthFBO::addDepthAttachment()
+{
+        unsigned int textureId;
+        glGenTextures(1, &textureId);
+        glBindTexture(GL_TEXTURE_2D, textureId);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, getOriginalSize()[0], getOriginalSize()[1], 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, textureId, 0);
+
+        glDrawBuffer(GL_NONE);  // Framebuffers have a colorbuffer requirement, but we don't need it. In order to guarantee that at least a Depth buffer is created, we need to specify GL_NONE as the colorbuffer inside this function.
+        glReadBuffer(GL_NONE);
+
+        return textureId;
+}
+
+

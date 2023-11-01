@@ -67,22 +67,39 @@ int openGL::initialize(GLFWwindow* window)
     glfwSetWindowSizeCallback(_window, func);
     // End window resize code
 
-    // Framebuffer Manager initialization
-    _frameBuffers = std::make_unique<FBOManager>(_window);
+    //
 
-    _shaderPrograms.addShader("Basic.vert", "Basic.frag");                  //0
-    _shaderPrograms.getShader(0)->addSupportedFeature(E_ShaderProgramFeatures::E_AUTO_INSTANCING);
-    _shaderPrograms.addShader("Simple.vert", "Simple.frag");                //1
-    _shaderPrograms.addShader("Simple.vert", "transparency.frag");          //2
-    _shaderPrograms.getShader(2)->addSupportedFeature(E_ShaderProgramFeatures::E_TRANSPARENCY);
-    _shaderPrograms.addShader("Quad.vert", "Quad.frag");                    //3
-    _shaderPrograms.addShader("Skybox.vert", "Skybox.frag");                //4
-    _shaderPrograms.addShader("Reflection.vert", "Reflection.frag");        //5
-    _shaderPrograms.use(0);
+
+    // Framebuffer Manager initialization
+    _frameBuffers = std::make_shared<FBOManager>(_window);
+
+    // Shader Library initialization
+    _shaderPrograms = std::make_shared<ShaderLibrary>();
+
+    _shaderPrograms->addShader("Basic.vert", "Basic.frag");                  //0
+    _shaderPrograms->getShader(0)->addSupportedFeature(E_ShaderProgramFeatures::E_AUTO_INSTANCING);
+    _shaderPrograms->addShader("Simple.vert", "Simple.frag");                //1
+    _shaderPrograms->addShader("Simple.vert", "transparency.frag");          //2
+    _shaderPrograms->getShader(2)->addSupportedFeature(E_ShaderProgramFeatures::E_TRANSPARENCY);
+    _shaderPrograms->addShader("Quad.vert", "Quad.frag");                    //3
+    _shaderPrograms->addShader("Skybox.vert", "Skybox.frag");                //4
+    _shaderPrograms->addShader("Reflection.vert", "Reflection.frag");        //5
+    _shaderPrograms->addShader("ShadowMap.vert", "ShadowMap.frag");          //6
+    _shaderPrograms->getShader(6)->addSupportedFeature(E_ShaderProgramFeatures::E_SHADOW_MAPPING);
+    _shaderPrograms->use(0);
 
     // Add uniform buffers to the shaders
-    _shaderPrograms.createUniformBuffer("mvp_camera");
-    _shaderPrograms.createUniformBuffer("viewPosBlock");
+    _shaderPrograms->createUniformBuffer("mvp_camera");
+    _shaderPrograms->createUniformBuffer("viewPosBlock");
+
+    // Initialize LightManager
+    _lightLibrary = std::make_shared<LightLibrary>();
+    _lightLibrary->bindFramebufferManager(_frameBuffers);
+    _lightLibrary->bindShaderLibrary(_shaderPrograms);
+
+
+    // Initialize Instancing Manager
+    _instancingManager = std::make_shared<InstancingManager>();
 
     return 1;
 }
@@ -91,24 +108,24 @@ int openGL::initialize(GLFWwindow* window)
 void openGL::renderFrame(std::shared_ptr<Scene> scene)
 {
 
-    // Bind the proper FBO
-    _frameBuffers->bindProperFBOFromScene(scene);
-
-    // Reset color and depth buffers 
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
     // Camera
-    _shaderPrograms.use(0);
+    _shaderPrograms->use(0);
     cameraSetup(scene);
 
     // Light
-    _shaderPrograms.use(0);
-    _lightLibrary.prepare(_shaderPrograms, scene->getAllLights());
+    _shaderPrograms->use(0);
+    _lightLibrary->prepare(scene->getAllLights());
+    _lightLibrary->alignShadowMaps(scene);
+    _lightLibrary->renderShadowMaps(scene);
 
+    // Bind the proper FBO
+    _frameBuffers->bindProperFBOFromScene(scene);
+    // Reset color and depth buffers 
+    _frameBuffers->clearAll();
 
     // Draw models
-    std::set <unsigned int> shaderIndexes = _shaderPrograms.getShaderIndexesPerFeature();
-    std::set <unsigned int> shaderIndexesWithInstancing = _shaderPrograms.getShaderIndexesPerFeature(E_ShaderProgramFeatures::E_AUTO_INSTANCING);
+    std::set <unsigned int> shaderIndexes = _shaderPrograms->getShaderIndexesPerFeature();
+    std::set <unsigned int> shaderIndexesWithInstancing = _shaderPrograms->getShaderIndexesPerFeature(E_ShaderProgramFeatures::E_AUTO_INSTANCING);
     std::set<unsigned int> shaderIndexesTotal;
     std::merge(shaderIndexes.begin(), shaderIndexes.end(), shaderIndexesWithInstancing.begin(), shaderIndexesWithInstancing.end(), std::inserter(shaderIndexesTotal, shaderIndexesTotal.begin()));
 
@@ -116,16 +133,16 @@ void openGL::renderFrame(std::shared_ptr<Scene> scene)
     for(unsigned int shaderIndex : shaderIndexesTotal)
     {
         // Activate shader
-        _shaderPrograms.use(shaderIndex);
+        _shaderPrograms->use(shaderIndex);
 
         // Go down the instancing path if the shader supports it
-        if(_shaderPrograms.getShader(shaderIndex)->isFeatureSupported(E_ShaderProgramFeatures::E_AUTO_INSTANCING))
+        if(_shaderPrograms->getShader(shaderIndex)->isFeatureSupported(E_ShaderProgramFeatures::E_AUTO_INSTANCING))
         {
             renderInstancedMeshes();
         }
         else // Else just render on a per-model basis
         {
-            for (auto model : scene->getModels(_shaderPrograms.getShader(shaderIndex)->getProgramId()))
+            for (auto model : scene->getModels(_shaderPrograms->getShader(shaderIndex)->getProgramId()))
             {
                 renderModel(*model);
             }
@@ -137,20 +154,20 @@ void openGL::renderFrame(std::shared_ptr<Scene> scene)
     {
         auto ZZview = glm::mat4(glm::mat3(scene->getActiveCamera()->getViewMatrix())); // remove translation from the view matrix
         auto ZZprojection = scene->getActiveCamera()->getProjectionMatrix();
-        _shaderPrograms.use(4);
-        _shaderPrograms.setUniformMat4(4, "view", ZZview);
-        _shaderPrograms.setUniformMat4(4, "projection", ZZprojection);
+        _shaderPrograms->use(4);
+        _shaderPrograms->setUniformMat4(4, "view", ZZview);
+        _shaderPrograms->setUniformMat4(4, "projection", ZZprojection);
         renderSkybox(scene->getSkybox());
     }
 
     // Transparent Models
-    for(unsigned int shaderIndex : _shaderPrograms.getShaderIndexesPerFeature(E_ShaderProgramFeatures::E_TRANSPARENCY))
+    for(unsigned int shaderIndex : _shaderPrograms->getShaderIndexesPerFeature(E_ShaderProgramFeatures::E_TRANSPARENCY))
     {
         // Activate shader
-        _shaderPrograms.use(shaderIndex);
+        _shaderPrograms->use(shaderIndex);
         std::map<float, std::shared_ptr<ModelObject>> sortedTransparentModels;
         
-        for (auto model : scene->getModels(_shaderPrograms.getShader(shaderIndex)->getProgramId()))
+        for (auto model : scene->getModels(_shaderPrograms->getShader(shaderIndex)->getProgramId()))
         {
             if(model->getModel()->hasTransparency())
             {
@@ -172,7 +189,7 @@ void openGL::renderFrame(std::shared_ptr<Scene> scene)
 void openGL::renderModel(ModelObject &model)
 {
 
-    _shaderPrograms.setUniformMat4("model", model.getModelMatrix());
+    _shaderPrograms->setUniformMat4("model", model.getModelMatrix());
 
     for (auto &one_mesh : model.getModel()->meshes)
     {
@@ -189,7 +206,7 @@ void openGL::renderModel(ModelObject &model)
 
 void openGL::renderInstancedMeshes()
 {
-    for(auto& instancingGroup : _instancingManager.getInstancingGroups())
+    for(auto& instancingGroup : _instancingManager->getInstancingGroups())
     {
         // Bind the VAO
         glBindVertexArray(instancingGroup.second.mesh->VAO);
@@ -218,8 +235,8 @@ void openGL::cameraSetup(std::shared_ptr<Scene> scene)
         scene->getActiveCamera()->getPosition()
     };
 
-    _shaderPrograms.getUniformBuffer("mvp_camera").update(mvp);
-    _shaderPrograms.getUniformBuffer("viewPosBlock").update(cameraPosition);
+    _shaderPrograms->getUniformBuffer("mvp_camera").update(mvp);
+    _shaderPrograms->getUniformBuffer("viewPosBlock").update(cameraPosition);
 }
 
 void openGL::resizeWindow(GLFWwindow* window, int width, int height)
@@ -290,8 +307,8 @@ void openGL::bindTextures(std::shared_ptr<Mesh> mesh)
     unsigned int specularNr = 0;
     unsigned int cubemapNr = 0;
 
-    _shaderPrograms.setUniformInt("sampleFromDiffuse", 0);
-    _shaderPrograms.setUniformInt("sampleFromSpecular", 0);
+    _shaderPrograms->setUniformInt("sampleFromDiffuse", 0);
+    _shaderPrograms->setUniformInt("sampleFromSpecular", 0);
 
     if (mesh->_textures.size() == 0)
     {
@@ -307,17 +324,17 @@ void openGL::bindTextures(std::shared_ptr<Mesh> mesh)
         {
         case DIFFUSE:
             imageUnitSpace = 0;
-            _shaderPrograms.setUniformInt("sampleFromDiffuse", 1);
-            _shaderPrograms.setUniformInt("material.diffuse", imageUnitSpace + diffuseNr);
+            _shaderPrograms->setUniformInt("sampleFromDiffuse", 1);
+            _shaderPrograms->setUniformInt("material.diffuse", imageUnitSpace + diffuseNr);
             glActiveTexture(GL_TEXTURE0 + imageUnitSpace + diffuseNr);
             glBindTexture(GL_TEXTURE_2D, mesh->_textures[i]._id);
             diffuseNr++;
             break;
         case SPECULAR:
             imageUnitSpace = 20;
-            _shaderPrograms.setUniformInt("sampleFromSpecular", 1);
-            _shaderPrograms.setUniformInt("material.specular", imageUnitSpace + specularNr);
-            _shaderPrograms.setUniformFloat("material.shininess", 4.5f);
+            _shaderPrograms->setUniformInt("sampleFromSpecular", 1);
+            _shaderPrograms->setUniformInt("material.specular", imageUnitSpace + specularNr);
+            _shaderPrograms->setUniformFloat("material.shininess", 4.5f);
             glActiveTexture(GL_TEXTURE0 + imageUnitSpace + specularNr);
             glBindTexture(GL_TEXTURE_2D, mesh->_textures[i]._id);
             specularNr++;
@@ -330,7 +347,7 @@ void openGL::bindTextures(std::shared_ptr<Mesh> mesh)
             break;
         case CUBEMAP:
             imageUnitSpace = 80;
-            _shaderPrograms.setUniformInt("cubemap", imageUnitSpace + cubemapNr);
+            _shaderPrograms->setUniformInt("cubemap", imageUnitSpace + cubemapNr);
             glActiveTexture(GL_TEXTURE0 + imageUnitSpace + cubemapNr);
             glBindTexture(GL_TEXTURE_CUBE_MAP, mesh->_textures[i]._id);
             cubemapNr++;
@@ -345,7 +362,7 @@ void openGL::bindTextures(std::shared_ptr<Mesh> mesh)
 
 unsigned int openGL::getShaderProgramID(unsigned int shaderIndex)
 {
-    return _shaderPrograms.getShader(shaderIndex)->getProgramId();
+    return _shaderPrograms->getShader(shaderIndex)->getProgramId();
 }
 
 std::shared_ptr<FBO> openGL::addFBO(E_AttachmentFormat format, int width, int height)
@@ -439,7 +456,7 @@ void openGL::renderSkybox(Skybox& skybox)
 
 void openGL::initializeInstanceManager(std::shared_ptr<Scene> scene)
 {
-    _instancingManager.resetInstancingGroups();
-    _instancingManager.setupInstancing(_shaderPrograms.getShader(0)->getProgramId(), _scenes[0]);
+    _instancingManager->resetInstancingGroups();
+    _instancingManager->setupInstancing(_shaderPrograms->getShader(0)->getProgramId(), _scenes[0]);
 }
 

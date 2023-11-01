@@ -25,6 +25,9 @@ std::shared_ptr<FBO> FBOManager::addFBO(E_AttachmentFormat format, int width, in
         case RENDERBUFFER:
             fbo = std::make_shared<RenderBufferFBO>(width, height);
             break;
+        case SHADOW_DEPTH:
+            fbo = std::make_shared<ShadowDepthFBO>(width, height);
+            break;
         default:
             break;
     }
@@ -118,6 +121,26 @@ void FBOManager::bindProperFBOFromScene(std::shared_ptr<Scene> scene)
     }
 
     bindFBO(getFBOIndex(_fboSceneMap[scene]));
+}
+
+void FBOManager::clearAll()
+{
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+}
+
+void FBOManager::clearColor()
+{
+    glClear(GL_COLOR_BUFFER_BIT);
+}
+
+void FBOManager::clearDepth()
+{
+    glClear(GL_DEPTH_BUFFER_BIT);
+}
+
+void FBOManager::clearStencil()
+{
+    glClear(GL_STENCIL_BUFFER_BIT);
 }
 
 bool FBOManager::isFrameBufferComplete(unsigned int fboIndex) const

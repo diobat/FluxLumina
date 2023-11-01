@@ -74,14 +74,14 @@ private:
 	int _width, _height;
 
 	// Framebuffer
-	std::unique_ptr<FBOManager> _frameBuffers;
+	std::shared_ptr<FBOManager> _frameBuffers;
 
 	// Shaders
-	ShaderLibrary _shaderPrograms;
+	std::shared_ptr<ShaderLibrary> _shaderPrograms;
 
 	// Lights
-	LightLibrary _lightLibrary;
+	std::shared_ptr<LightLibrary> _lightLibrary;
 
 	//Instancing
-	InstancingManager _instancingManager;
+	std::shared_ptr<InstancingManager> _instancingManager;
 };

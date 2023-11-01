@@ -31,6 +31,11 @@ public:
 
     void bindProperFBOFromScene(std::shared_ptr<Scene> scene);
 
+    void clearAll();
+    void clearColor();
+    void clearDepth();
+    void clearStencil();
+
     bool isFrameBufferComplete(std::shared_ptr<FBO>) const;
     bool isFrameBufferComplete(unsigned int fboIndex) const;
 
