@@ -97,7 +97,7 @@ void ShadowMap::alignShadowMap(std::shared_ptr<LightSource> light)
         glm::vec3 observed_point = conversion::toVec3(light_spot->getPosition()) + conversion::toVec3(light_spot->getDirection());
 
 
-        _lightSpaceMatrix = glm::perspective(light_spot->getCutoff()[1]*1.2f, 1.0f, zNear, zFar) * glm::lookAt(
+        _lightSpaceMatrix = glm::perspective(light_spot->getCutoff()[1]*1.25f, 1.0f, zNear, zFar) * glm::lookAt(
             conversion::toVec3(light_spot->getPosition()), 
             observed_point, 
             glm::vec3(0.0f, 1.0f, 0.0f)
