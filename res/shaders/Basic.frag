@@ -41,10 +41,12 @@ float quadratic;
 };
 
 // Inputs from the vertex shader
-in vec3 objectColor;
-in vec3 Normal;	
-in vec2 TexCoords;
-in vec3 FragPos;
+in VertexOutput{
+	vec3 objectColor;
+vec3 Normal;
+vec2 TexCoords;
+vec3 FragPos;
+} FragmentIn;
 
 //////////////////////////
 // Uniforms
@@ -80,21 +82,21 @@ vec3 calcDirLight(DirLight light, vec3 normal, vec3 viewDir)
 	vec3 specTex = vec3(0.0);
 
 	if(sampleFromDiffuse == 1)
-		diffTex = vec3(texture(material.diffuse, TexCoords));
+		diffTex = vec3(texture(material.diffuse, FragmentIn.TexCoords));
 	else
-		diffTex = objectColor;
+		diffTex = FragmentIn.objectColor;
 
 	if(sampleFromSpecular == 1)
-		specTex = vec3(texture(material.specular, TexCoords));
+		specTex = vec3(texture(material.specular, FragmentIn.TexCoords));
 	else
-		specTex = objectColor;
+		specTex = FragmentIn.objectColor;
 
 	vec3 lightDir = normalize(-light.direction);
 	// Diffuse shading
 	float diff = max(dot(normal, lightDir), 0.0);
 	// Specular shading
 	vec3 halfwayDir = normalize(lightDir + viewDir);
-	float spec = pow(max(dot(Normal, halfwayDir), 0.0), material.shininess);
+	float spec = pow(max(dot(normal, halfwayDir), 0.0), material.shininess);
 	// Combine results
 	vec3 ambient = light.ambient * diffTex;
 	vec3 diffuse = light.diffuse * diff * diffTex;
@@ -108,21 +110,21 @@ vec3 calcPointLight(PointLight light, vec3 normal, vec3 FragPos, vec3 viewDir)
 	vec3 specTex = vec3(0.0);
 
 	if(sampleFromDiffuse == 1)
-		diffTex = vec3(texture(material.diffuse, TexCoords));
+		diffTex = vec3(texture(material.diffuse, FragmentIn.TexCoords));
 	else
-		diffTex = objectColor;
+		diffTex = FragmentIn.objectColor;
 
 	if(sampleFromSpecular == 1)
-		specTex = vec3(texture(material.specular, TexCoords));
+		specTex = vec3(texture(material.specular, FragmentIn.TexCoords));
 	else
-		specTex = objectColor;
+		specTex = FragmentIn.objectColor;
 
 	vec3 lightDir = normalize(light.position - FragPos);
 	// Diffuse shading
 	float diff = max(dot(normal, lightDir), 0.0);
 	// Specular shading
 	vec3 halfwayDir = normalize(lightDir + viewDir);
-	float spec = pow(max(dot(Normal, halfwayDir), 0.0), material.shininess);
+	float spec = pow(max(dot(normal, halfwayDir), 0.0), material.shininess);
 	// Attenuation
 	float distance = length(light.position - FragPos);
 	float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));
@@ -143,14 +145,14 @@ vec3 calcSpotLight(SpotLight light, vec3 normal, vec3 FragPos, vec3 viewDir)
 	vec3 specTex = vec3(0.0);
 
 	if(sampleFromDiffuse == 1)
-		diffTex = vec3(texture(material.diffuse, TexCoords));
+		diffTex = vec3(texture(material.diffuse, FragmentIn.TexCoords));
 	else
-		diffTex = objectColor;
+		diffTex = FragmentIn.objectColor;
 
 	if(sampleFromSpecular == 1)
-		specTex = vec3(texture(material.specular, TexCoords));
+		specTex = vec3(texture(material.specular, FragmentIn.TexCoords));
 	else
-		specTex = objectColor;
+		specTex = FragmentIn.objectColor;
 
 	vec3 lightDir = normalize(light.position - FragPos);
 
@@ -162,7 +164,7 @@ vec3 calcSpotLight(SpotLight light, vec3 normal, vec3 FragPos, vec3 viewDir)
 	float diff = max(dot(normal, lightDir), 0.0);
 	// Specular shading
 	vec3 halfwayDir = normalize(lightDir + viewDir);
-	float spec = pow(max(dot(Normal, halfwayDir), 0.0), material.shininess);
+	float spec = pow(max(dot(normal, halfwayDir), 0.0), material.shininess);
 	// Attenuation
 	float distance = length(light.position - FragPos);
 	float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));
@@ -182,8 +184,8 @@ void main()
 	vec3 totalLight = vec3(0.0);
 
 	// Calculate common input arguments for all the light calculations
-	vec3 norm = normalize(Normal);
-	vec3 viewDir = normalize(viewPos - FragPos);
+	vec3 norm = normalize(FragmentIn.Normal);
+	vec3 viewDir = normalize(viewPos - FragmentIn.FragPos);
 	// 1 - Directional Lights
 	for(int i = 0; i < numDirLights; i++)
 	{
@@ -192,12 +194,12 @@ void main()
 	// 2 - Point Lights
 	for(int i = 0; i < numPointLights; i++)
 	{
-		totalLight += calcPointLight(pointLight[i], norm, FragPos, viewDir);
+		totalLight += calcPointLight(pointLight[i], norm, FragmentIn.FragPos, viewDir);
 	}
 	// 3 - Spot light
 	for(int i = 0; i < numSpotLights; i++)
 	{
-		totalLight += calcSpotLight(spotLight[i], norm, FragPos, viewDir);
+		totalLight += calcSpotLight(spotLight[i], norm, FragmentIn.FragPos, viewDir);
 	}
 
 	fragColor = vec4(totalLight, 1.0);
