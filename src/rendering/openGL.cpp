@@ -67,8 +67,6 @@ int openGL::initialize(GLFWwindow* window)
     glfwSetWindowSizeCallback(_window, func);
     // End window resize code
 
-    //
-
 
     // Framebuffer Manager initialization
     _frameBuffers = std::make_shared<FBOManager>(_window);
@@ -114,14 +112,19 @@ void openGL::renderFrame(std::shared_ptr<Scene> scene)
 
     // Light
     _shaderPrograms->use(0);
-    _lightLibrary->prepare(scene->getAllLights());
     _lightLibrary->alignShadowMaps(scene);
     _lightLibrary->renderShadowMaps(scene);
+    _shaderPrograms->use(0);
+    _lightLibrary->prepare(scene->getAllLights());
+
 
     // Bind the proper FBO
     _frameBuffers->bindProperFBOFromScene(scene);
     // Reset color and depth buffers 
     _frameBuffers->clearAll();
+
+    // Adjust ViewPort
+    glViewport(0, 0, _width, _height);
 
     // Draw models
     std::set <unsigned int> shaderIndexes = _shaderPrograms->getShaderIndexesPerFeature();
@@ -241,6 +244,8 @@ void openGL::cameraSetup(std::shared_ptr<Scene> scene)
 
 void openGL::resizeWindow(GLFWwindow* window, int width, int height)
 {
+    _width = width;
+    _height = height;
     glViewport(0, 0, width, height);
 
     for(auto scene : _scenes)
@@ -325,17 +330,17 @@ void openGL::bindTextures(std::shared_ptr<Mesh> mesh)
         case DIFFUSE:
             imageUnitSpace = 0;
             _shaderPrograms->setUniformInt("sampleFromDiffuse", 1);
-            _shaderPrograms->setUniformInt("material.diffuse", imageUnitSpace + diffuseNr);
-            glActiveTexture(GL_TEXTURE0 + imageUnitSpace + diffuseNr);
+            _shaderPrograms->setUniformInt("material.diffuse", 0);
+            glActiveTexture(GL_TEXTURE0 + 0);
             glBindTexture(GL_TEXTURE_2D, mesh->_textures[i]._id);
             diffuseNr++;
             break;
         case SPECULAR:
             imageUnitSpace = 20;
             _shaderPrograms->setUniformInt("sampleFromSpecular", 1);
-            _shaderPrograms->setUniformInt("material.specular", imageUnitSpace + specularNr);
+            _shaderPrograms->setUniformInt("material.specular", 1);
             _shaderPrograms->setUniformFloat("material.shininess", 4.5f);
-            glActiveTexture(GL_TEXTURE0 + imageUnitSpace + specularNr);
+            glActiveTexture(GL_TEXTURE0 + 1);
             glBindTexture(GL_TEXTURE_2D, mesh->_textures[i]._id);
             specularNr++;
             break;

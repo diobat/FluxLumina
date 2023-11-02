@@ -29,11 +29,13 @@ public:
 
 	std::shared_ptr<FBO> getShadowMap() const;
 	const glm::mat4& getLightSpaceMatrix() const;
+	void setDimensions(unsigned int width, unsigned int height);
 private:
 	void setLightType(E_LightType type);
 	void setShadowBuffer(std::shared_ptr<FBO> shadowMap);
 	glm::mat4 _lightSpaceMatrix;
 	std::weak_ptr<FBO> _shadowDepthBuffer;
+	unsigned int _bufferWidth, _bufferHeight;
 	E_LightType _lightType;
 };
 

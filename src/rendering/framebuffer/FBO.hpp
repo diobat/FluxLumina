@@ -40,6 +40,7 @@ public:
     unsigned int getStencilAttachmentID() const { return _stencilAttachmentID; }
 
     std::vector<Texture> getTextures() const;
+    unsigned int getDepthTextureID() const;
 
 protected:
     unsigned int addColorAttachment();
