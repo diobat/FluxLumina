@@ -92,6 +92,9 @@ float ShadowCalculation(int index, vec4 posLightSpace, vec3 normal, vec3 lightDi
 	float bias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.005);  // Removes shadow acne
 	float shadow = currentDepth - bias > closestDepth ? 1.0 : 0.0;
 
+    if(projCoords.z > 1.0)
+        shadow = 0.0;
+
 	return shadow;
 }
 

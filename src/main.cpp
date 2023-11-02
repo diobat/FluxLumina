@@ -83,13 +83,13 @@ int main(void)
     // Scene objects 
 
     auto &window1 = factory.create_Model("res/models/window/window.obj", 2);
-    window1.setPosition({-10.0f, 10.0f, 10.0f});
+    window1.setPosition({-20.0f, 10.0f, -20.0f});
 
     auto &window2 = factory.create_Model("res/models/window/window.obj", 2);
-    window2.setPosition({-10.0f, 10.0f, 8.0f});
+    window2.setPosition({-20.0f, 10.0f, -18.0f});
 
     auto &window3 = factory.create_Model("res/models/window/window.obj", 2);
-    window3.setPosition({-10.0f, 10.0f, 6.0f});
+    window3.setPosition({-20.0f, 10.0f, -16.0f});
 
     ModelObject &ground = factory.create_Model("res/models/ground.obj", 0);
     ground.setPosition({0.0f, -0.5f, 0.0f});
@@ -139,7 +139,7 @@ int main(void)
     auto& cube = factory.create_Model("res/models/cube/cubeBlank.obj", 5);
     std::vector<Texture> cubeTextures = {scene->getSkybox().getCubemap()->getTexture()};
     cube.getModel()->meshes[0]->attachTexture(cubeTextures);
-    cube.setPosition({10.0f, 10.0f, 10.0f});
+    cube.setPosition({20.0f, 10.0f, 20.0f});
     
     // Lights
     auto light_A = factory.create_LightSource( E_LightType::POINT_LIGHT);
