@@ -78,7 +78,7 @@ out vec4 fragColor;
 
 // Helper functions
 
-float ShadowCalculation(int index, vec4 posLightSpace)
+float ShadowCalculation(int index, vec4 posLightSpace, vec3 normal, vec3 lightDir)
 {
 	// Perspective division
 	vec3 projCoords = posLightSpace.xyz / posLightSpace.w;
@@ -89,7 +89,8 @@ float ShadowCalculation(int index, vec4 posLightSpace)
 	// Get depth of current fragment from light's perspective
 	float currentDepth = projCoords.z;
 	// Check whether current frag pos is in shadow
-	float shadow = currentDepth > closestDepth ? 1.0 : 0.0;
+	float bias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.005);  // Removes shadow acne
+	float shadow = currentDepth - bias > closestDepth ? 1.0 : 0.0;
 
 	return shadow;
 }
@@ -194,8 +195,9 @@ vec3 calcSpotLight(int i, SpotLight light, vec3 normal, vec3 FragPos, vec3 viewD
 	diffuse *= attenuation * intensity;
 	specular *= attenuation * intensity;
 	
-	float shadow = ShadowCalculation(i, LightSpaceFragmentIn.Spotlight[i]);
-	return (ambient + (1.0 - shadow) * (diffuse + specular) );
+	float shadow = ShadowCalculation(i, LightSpaceFragmentIn.Spotlight[i], normal, lightDir);
+	//return (ambient + (1.0 - shadow) * (diffuse + specular) );
+	return ( (1.0 - shadow) * (diffuse + specular) );
 }
 
 void main()

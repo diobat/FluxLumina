@@ -97,7 +97,7 @@ void ShadowMap::alignShadowMap(std::shared_ptr<LightSource> light)
         glm::vec3 observed_point = conversion::toVec3(light_spot->getPosition()) + conversion::toVec3(light_spot->getDirection());
 
 
-        _lightSpaceMatrix = glm::perspective(light_spot->getCutoff()[1], 1.0f, zNear, zFar) * glm::lookAt(
+        _lightSpaceMatrix = glm::perspective(light_spot->getCutoff()[1]*1.2f, 1.0f, zNear, zFar) * glm::lookAt(
             conversion::toVec3(light_spot->getPosition()), 
             observed_point, 
             glm::vec3(0.0f, 1.0f, 0.0f)
@@ -251,8 +251,8 @@ void LightLibrary::lightSetup(unsigned int lightIndex, const SpotLight &light)
     }
     ShadowMap& shaMap = _shadowMaps[light._id];
     shaders->setUniformMat4("lightSpaceMatrix[" + std::to_string(lightIndex) + "]", shaMap.getLightSpaceMatrix());
-    shaders->setUniformInt("spotLight[" + std::to_string(lightIndex) + "].shadowMap", 5);    
-    glActiveTexture(GL_TEXTURE0 + 5);
+    shaders->setUniformInt("spotLight[" + std::to_string(lightIndex) + "].shadowMap", 5 + lightIndex);    
+    glActiveTexture(GL_TEXTURE0 + 5 + lightIndex);
     glBindTexture(GL_TEXTURE_2D, shaMap.getShadowMap()->getDepthTextureID());
     glActiveTexture(GL_TEXTURE0);
 }

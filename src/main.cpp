@@ -113,7 +113,7 @@ int main(void)
     //     cubeN.setScale(5.0f);
     // }
 
-    auto& statue = factory.create_Model("res/models/Statue/12330_Statue_v1_L2.obj", 1);
+    auto& statue = factory.create_Model("res/models/Statue/12330_Statue_v1_L2.obj", 0);
     statue.setPosition({0.0f, 0.0f, 5.0f});
     statue.rotate(-90.0f, 0.0f, 0.0f);
     statue.setScale(0.01f);
@@ -123,7 +123,7 @@ int main(void)
     statue2.rotate(-90.0f, 0.0f, 0.0f);
     statue2.setScale(0.01f);
 
-    auto &statue3 = factory.create_Model("res/models/Statue/12330_Statue_v1_L2.obj", 1);
+    auto &statue3 = factory.create_Model("res/models/Statue/12330_Statue_v1_L2.obj", 0);
     statue3.setPosition({-5.0f, 0.0f, 0.0f});
     statue3.rotate(-90.0f, 0.0f, 0.0f);
     statue3.setScale(0.01f);
@@ -141,20 +141,47 @@ int main(void)
     cube.getModel()->meshes[0]->attachTexture(cubeTextures);
     cube.setPosition({10.0f, 10.0f, 10.0f});
     
-    // Lights   
-    // auto light = factory.create_LightSource( E_LightType::POINT_LIGHT);
-    // light->setPosition({5.0f, 5.0f, -5.0f});
-    // light->setAttenuationFactors({1.0f, 0.09f, 0.032f});
+    // Lights
+    auto light_A = factory.create_LightSource( E_LightType::POINT_LIGHT);
+    light_A->setPosition({15.0f, 5.0f, 15.0f});
+    light_A->setAttenuationFactors({1.0f, 0.09f, 0.032f});
 
-    // auto light2 = factory.create_LightSource( E_LightType::POINT_LIGHT);
-    // light2->setPosition({-15.0f, 5.0f, -5.0f});
-    // light2->setAttenuationFactors({1.0f, 0.09f, 0.032f});
+    auto light_B = factory.create_LightSource( E_LightType::POINT_LIGHT);
+    light_B->setPosition({-15.0f, 5.0f, 15.0f});
+    light_B->setAttenuationFactors({1.0f, 0.09f, 0.032f});
+
+    auto light_C = factory.create_LightSource( E_LightType::POINT_LIGHT);
+    light_C->setPosition({15.0f, 5.0f, -15.0f});
+    light_C->setAttenuationFactors({1.0f, 0.09f, 0.032f});
+
+    auto light_D = factory.create_LightSource( E_LightType::POINT_LIGHT);
+    light_D->setPosition({-15.0f, 5.0f, -15.0f});
+    light_D->setAttenuationFactors({1.0f, 0.09f, 0.032f});
 
     auto light3 = factory.create_LightSource( E_LightType::SPOT_LIGHT);
     auto light4 = std::dynamic_pointer_cast<SpotLight>(light3);
     light4->setCutoff(18.5f);
     light4->setPosition({0.0f, 10.0f, 0.0f});
-    light4->pointAt(statue2.getPosition());
+    light4->pointAt(statue.getPosition());
+
+    auto light5 = factory.create_LightSource( E_LightType::SPOT_LIGHT);
+    auto light6 = std::dynamic_pointer_cast<SpotLight>(light5);
+    light6->setCutoff(18.5f);
+    light6->setPosition({0.0f, 10.0f, 0.0f});
+    light6->pointAt(statue2.getPosition());
+
+    auto light7 = factory.create_LightSource( E_LightType::SPOT_LIGHT);
+    auto light8 = std::dynamic_pointer_cast<SpotLight>(light7);
+    light8->setCutoff(18.5f);
+    light8->setPosition({0.0f, 10.0f, 0.0f});
+    light8->pointAt(statue3.getPosition());
+
+    auto light9 = factory.create_LightSource( E_LightType::SPOT_LIGHT);
+    auto light10 = std::dynamic_pointer_cast<SpotLight>(light9);
+    light10->setCutoff(18.5f);
+    light10->setPosition({0.0f, 10.0f, 0.0f});
+    light10->pointAt(statue4.getPosition());
+
     //light4->pointAt({1.0f, 0.0f, 0.0f});
 
     // auto& cube5 = factory.create_Model("res/models/cube/cubeBlank.obj", 0);
