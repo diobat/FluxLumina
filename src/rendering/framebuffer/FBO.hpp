@@ -19,9 +19,10 @@ enum E_AttachmentType
 
 enum E_AttachmentFormat
 {
-    TEXTURE,        // Color = Texture  | Depth = Texture       | Stencil = Texture
-    RENDERBUFFER,   // Color = Texture  | Depth = Renderbuffer  | Stencil = Renderbuffer
-    SHADOW_DEPTH    // Color = None     | Depth = Texture       | Stencil = None
+    TEXTURE,                // Color = Texture  | Depth = Texture       | Stencil = Texture
+    RENDERBUFFER,           // Color = Texture  | Depth = Renderbuffer  | Stencil = Renderbuffer
+    SHADOW_DEPTH,           // Color = None     | Depth = Texture       | Stencil = None
+    SHADOW_DEPTH_CUBE       // Color = None     | Depth = Cubemap       | Stencil = None
 };
 
 class FBO
@@ -89,4 +90,14 @@ public:
     unsigned int addDepthAttachment();
 };
 
-    
+
+class ShadowDepthCubeFBO : public FBO
+{
+public:
+    ShadowDepthCubeFBO(unsigned int width, unsigned int height);
+    ~ShadowDepthCubeFBO();
+
+    void addAttachment(E_AttachmentType type) override;
+    unsigned int addDepthAttachment();
+};
+

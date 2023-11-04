@@ -264,3 +264,70 @@ unsigned int ShadowDepthFBO::addDepthAttachment()
 }
 
 
+ShadowDepthCubeFBO::ShadowDepthCubeFBO(unsigned int width, unsigned int height) : 
+    FBO(width, height)
+{
+    _colorAttachmentIDs.clear();
+    _stencilAttachmentID = -1;
+    _depthAttachmentID = -1;
+}
+
+ShadowDepthCubeFBO::~ShadowDepthCubeFBO()
+{
+    if(_depthAttachmentID != -1)
+    {
+        glDeleteTextures(1, &_depthAttachmentID);
+    }
+
+    glDeleteFramebuffers(1, &_id);
+}
+
+void ShadowDepthCubeFBO::addAttachment(E_AttachmentType type)
+{
+    glBindFramebuffer(GL_FRAMEBUFFER, _id);
+
+    switch(type)
+    {
+        case E_AttachmentType::COLOR:
+            break;
+        case E_AttachmentType::DEPTH:
+            _depthAttachmentID = addDepthAttachment();
+            break;
+        case E_AttachmentType::STENCIL:
+            break;
+        default:
+            break;
+    }
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+unsigned int ShadowDepthCubeFBO::addDepthAttachment()
+{
+    if(_depthAttachmentID != -1)
+    {
+        glDeleteTextures(1, &_depthAttachmentID);
+    }
+
+    unsigned int textureId;
+    glGenTextures(1, &textureId);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, textureId);
+
+    for(unsigned int i = 0; i < 6; ++i)
+    {
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT, getOriginalSize()[0], getOriginalSize()[1], 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    }
+
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST); 
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);   
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);   
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);  
+    
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, textureId, 0);
+
+    glDrawBuffer(GL_NONE);  // Framebuffers have a colorbuffer requirement, but we don't need it. In order to guarantee that at least a Depth buffer is created, we need to specify GL_NONE as the colorbuffer inside this function.
+    glReadBuffer(GL_NONE);
+
+    return textureId;
+}
