@@ -70,3 +70,50 @@ void Logger::resetDrawCalls()
     drawCalls = 0;
     instancedDrawCalls = 0;
 }
+
+void Logger::logGLErrors(const std::string &msg)
+{
+    return;
+    bool firstTime = true;
+    GLenum glError;
+    do
+    {
+        glError = glGetError();
+
+        switch(glError)
+        {
+            case GL_NO_ERROR:
+                if(firstTime)
+                {
+                    BOOST_LOG_TRIVIAL(info) << msg << " GL_NO_ERROR";    
+                }
+                break;
+            case GL_INVALID_ENUM:
+                BOOST_LOG_TRIVIAL(warning) << msg << " GL_INVALID_ENUM";
+                break;
+            case GL_INVALID_VALUE:
+                BOOST_LOG_TRIVIAL(warning) << msg << " GL_INVALID_VALUE";
+                break;
+            case GL_INVALID_OPERATION:
+                BOOST_LOG_TRIVIAL(warning) << msg << " GL_INVALID_OPERATION";
+                break;
+            case GL_INVALID_FRAMEBUFFER_OPERATION:
+                BOOST_LOG_TRIVIAL(warning) << msg << " GL_INVALID_FRAMEBUFFER_OPERATION";
+                break;
+            case GL_OUT_OF_MEMORY:
+                BOOST_LOG_TRIVIAL(warning) << msg << " GL_OUT_OF_MEMORY";
+                break;
+            case GL_STACK_UNDERFLOW:
+                BOOST_LOG_TRIVIAL(warning) << msg << " GL_STACK_UNDERFLOW";
+                break;
+            case GL_STACK_OVERFLOW:
+                BOOST_LOG_TRIVIAL(warning) << msg << " GL_STACK_OVERFLOW";
+                break;
+            default:
+                break;
+        }
+
+        firstTime = false;
+
+    }while(glError != GL_NO_ERROR);
+}

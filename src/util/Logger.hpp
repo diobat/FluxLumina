@@ -2,6 +2,8 @@
 
 #define BOOST_USE_WINAPI_VERSION 0x0601     // Must be here or doesn't compile, blame boost
 
+#include "rendering/GLFW_Wrapper.hpp"
+
 #include <boost/log/common.hpp>
 #include <boost/log/core.hpp>
 #include <boost/log/trivial.hpp>
@@ -30,6 +32,8 @@ public:
     void drawCall(int numInstances = 1);
     void instancedDrawCall(int numInstances = 1);
     void resetDrawCalls();
+
+    void logGLErrors(const std::string& msg = "");
 
 private:
     Logger();
