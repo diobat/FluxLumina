@@ -34,6 +34,9 @@ void update(openGL& graphicalEngine, std::vector<std::shared_ptr<Scene>> scenes,
 
         graphicalEngine.renderFrame(scenes[0]);
         
+        // Check and log errors
+        Logger::Instance().logGLErrors("Main Loop:");        
+       
         /* Swap front and back buffers */
         glfwSwapBuffers(graphicalEngine.getWindowPtr());
 
@@ -80,18 +83,21 @@ int main(void)
          "res/models/skybox/front.jpg",
          "res/models/skybox/back.jpg"});
 
-    // Scene objects 
+    GLint texture_units;
+    glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &texture_units);
+    std::cout << "Max texture units: " << texture_units << std::endl;
 
+    // Scene objects 
     auto &window1 = factory.create_Model("res/models/window/window.obj", 2);
-    window1.setPosition({-20.0f, 10.0f, -20.0f});
+    window1.setPosition({-16.0f, 10.0f, -20.0f});
 
     auto &window2 = factory.create_Model("res/models/window/window.obj", 2);
-    window2.setPosition({-20.0f, 10.0f, -18.0f});
+    window2.setPosition({-16.0f, 10.0f, -18.0f});
 
     auto &window3 = factory.create_Model("res/models/window/window.obj", 2);
-    window3.setPosition({-20.0f, 10.0f, -16.0f});
+    window3.setPosition({-16.0f, 10.0f, -16.0f});
 
-    ModelObject &ground = factory.create_Model("res/models/ground.obj", 0);
+    ModelObject &ground = factory.create_Model("res/models/ground2.obj", 0);
     ground.setPosition({0.0f, -0.5f, 0.0f});
 
     // ModelObject& mothership = factory.create_Model("res/models/Mothership/Mothership.obj", 0);
@@ -99,7 +105,7 @@ int main(void)
     // mothership.setScale(0.001f);
 
     ModelObject& backpack = factory.create_Model("res/models/backpack/backpack.obj", 0, true);
-    backpack.setPosition({10.0f, 3.0f, -7.5f});
+    backpack.setPosition({15.0f, 3.0f, -16.5f});
 
 
     int width = 700;
@@ -139,23 +145,23 @@ int main(void)
     auto& cube = factory.create_Model("res/models/cube/cubeBlank.obj", 5);
     std::vector<Texture> cubeTextures = {scene->getSkybox().getCubemap()->getTexture()};
     cube.getModel()->meshes[0]->attachTexture(cubeTextures);
-    cube.setPosition({20.0f, 10.0f, 20.0f});
+    cube.setPosition({18.0f, 10.0f, 18.0f});
     
     // Lights
     auto light_A = factory.create_LightSource( E_LightType::POINT_LIGHT);
-    light_A->setPosition({15.0f, 5.0f, 15.0f});
+    light_A->setPosition({13.0f, 5.0f, 13.0f});
     light_A->setAttenuationFactors({1.0f, 0.09f, 0.032f});
 
     auto light_B = factory.create_LightSource( E_LightType::POINT_LIGHT);
-    light_B->setPosition({-15.0f, 5.0f, 15.0f});
+    light_B->setPosition({-13.0f, 5.0f, 13.0f});
     light_B->setAttenuationFactors({1.0f, 0.09f, 0.032f});
 
     auto light_C = factory.create_LightSource( E_LightType::POINT_LIGHT);
-    light_C->setPosition({15.0f, 5.0f, -15.0f});
+    light_C->setPosition({13.0f, 5.0f, -13.0f});
     light_C->setAttenuationFactors({1.0f, 0.09f, 0.032f});
 
     auto light_D = factory.create_LightSource( E_LightType::POINT_LIGHT);
-    light_D->setPosition({-15.0f, 5.0f, -15.0f});
+    light_D->setPosition({-13.0f, 5.0f, -13.0f});
     light_D->setAttenuationFactors({1.0f, 0.09f, 0.032f});
 
     auto light3 = factory.create_LightSource( E_LightType::SPOT_LIGHT);

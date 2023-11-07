@@ -87,6 +87,8 @@ public:
     ~ShadowDepthFBO();
 
     void addAttachment(E_AttachmentType type) override;
+
+private:
     unsigned int addDepthAttachment();
 };
 
@@ -98,6 +100,8 @@ public:
     ~ShadowDepthCubeFBO();
 
     void addAttachment(E_AttachmentType type) override;
+
+private:
     unsigned int addDepthAttachment();
 };
 

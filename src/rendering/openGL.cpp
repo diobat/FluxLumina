@@ -75,7 +75,7 @@ int openGL::initialize(GLFWwindow* window)
     _shaderPrograms = std::make_shared<ShaderLibrary>();
 
     _shaderPrograms->addShader("Basic.vert", "Basic.frag");                  //0
-    _shaderPrograms->getShader(0)->addSupportedFeature(E_ShaderProgramFeatures::E_AUTO_INSTANCING);
+    //_shaderPrograms->getShader(0)->addSupportedFeature(E_ShaderProgramFeatures::E_AUTO_INSTANCING);
     _shaderPrograms->addShader("Simple.vert", "Simple.frag");                //1
     _shaderPrograms->addShader("Simple.vert", "transparency.frag");          //2
     _shaderPrograms->getShader(2)->addSupportedFeature(E_ShaderProgramFeatures::E_TRANSPARENCY);
@@ -84,6 +84,8 @@ int openGL::initialize(GLFWwindow* window)
     _shaderPrograms->addShader("Reflection.vert", "Reflection.frag");        //5
     _shaderPrograms->addShader("ShadowMap.vert", "ShadowMap.frag");          //6
     _shaderPrograms->getShader(6)->addSupportedFeature(E_ShaderProgramFeatures::E_SHADOW_MAPPING);
+    _shaderPrograms->addShader("ShadowCubeMap.vert", "ShadowCubeMap.frag", "ShadowCubeMap.geom");      //7
+    _shaderPrograms->getShader(7)->addSupportedFeature(E_ShaderProgramFeatures::E_SHADOW_CUBE_MAPPING);
     _shaderPrograms->use(0);
 
     // Add uniform buffers to the shaders
@@ -95,7 +97,6 @@ int openGL::initialize(GLFWwindow* window)
     _lightLibrary->bindFramebufferManager(_frameBuffers);
     _lightLibrary->bindShaderLibrary(_shaderPrograms);
 
-
     // Initialize Instancing Manager
     _instancingManager = std::make_shared<InstancingManager>();
 
@@ -105,7 +106,6 @@ int openGL::initialize(GLFWwindow* window)
 // Next step is to encapsulate this in a method that also handles Framebuffer changes
 void openGL::renderFrame(std::shared_ptr<Scene> scene)
 {
-
     // Camera
     _shaderPrograms->use(0);
     cameraSetup(scene);
@@ -116,7 +116,6 @@ void openGL::renderFrame(std::shared_ptr<Scene> scene)
     _lightLibrary->renderShadowMaps(scene);
     _shaderPrograms->use(0);
     _lightLibrary->prepare(scene->getAllLights());
-
 
     // Bind the proper FBO
     _frameBuffers->bindProperFBOFromScene(scene);
@@ -147,12 +146,12 @@ void openGL::renderFrame(std::shared_ptr<Scene> scene)
         {
             for (auto model : scene->getModels(_shaderPrograms->getShader(shaderIndex)->getProgramId()))
             {
-                renderModel(*model);
+                renderModel(*model);   
             }
         }
     }
 
-    // Draw Skybox
+    //Draw Skybox
     if (scene->getSkybox().getCubemap() != nullptr)
     {
         auto ZZview = glm::mat4(glm::mat3(scene->getActiveCamera()->getViewMatrix())); // remove translation from the view matrix
@@ -215,7 +214,7 @@ void openGL::renderInstancedMeshes()
         glBindVertexArray(instancingGroup.second.mesh->VAO);
         
         // Textures
-        bindTextures(instancingGroup.second.mesh);
+        bindTextures(instancingGroup.second.mesh); 
 
         // Draw the instances
         glDrawElementsInstanced(GL_TRIANGLES, instancingGroup.second.mesh->_indices.size(), GL_UNSIGNED_INT, 0, instancingGroup.second.modelObjects.size());
@@ -330,17 +329,17 @@ void openGL::bindTextures(std::shared_ptr<Mesh> mesh)
         case DIFFUSE:
             imageUnitSpace = 0;
             _shaderPrograms->setUniformInt("sampleFromDiffuse", 1);
-            _shaderPrograms->setUniformInt("material.diffuse", 0);
-            glActiveTexture(GL_TEXTURE0 + 0);
+            _shaderPrograms->setUniformInt("material.diffuse", 1);
+            glActiveTexture(GL_TEXTURE0 + 1);
             glBindTexture(GL_TEXTURE_2D, mesh->_textures[i]._id);
             diffuseNr++;
             break;
         case SPECULAR:
             imageUnitSpace = 20;
             _shaderPrograms->setUniformInt("sampleFromSpecular", 1);
-            _shaderPrograms->setUniformInt("material.specular", 1);
+            _shaderPrograms->setUniformInt("material.specular", 2);
             _shaderPrograms->setUniformFloat("material.shininess", 4.5f);
-            glActiveTexture(GL_TEXTURE0 + 1);
+            glActiveTexture(GL_TEXTURE0 + 2);
             glBindTexture(GL_TEXTURE_2D, mesh->_textures[i]._id);
             specularNr++;
             break;
@@ -352,8 +351,8 @@ void openGL::bindTextures(std::shared_ptr<Mesh> mesh)
             break;
         case CUBEMAP:
             imageUnitSpace = 80;
-            _shaderPrograms->setUniformInt("cubemap", imageUnitSpace + cubemapNr);
-            glActiveTexture(GL_TEXTURE0 + imageUnitSpace + cubemapNr);
+            _shaderPrograms->setUniformInt("cubemap", 3);
+            glActiveTexture(GL_TEXTURE0 + 3);
             glBindTexture(GL_TEXTURE_CUBE_MAP, mesh->_textures[i]._id);
             cubemapNr++;
             break;
@@ -439,6 +438,7 @@ void openGL::initializeSkybox(Skybox &skybox, const std::array<Texture, 6>& text
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
     glBindTexture(GL_TEXTURE_CUBE_MAP, 0); // Unbind texture
+
 }
 
 void openGL::renderSkybox(Skybox& skybox)
@@ -449,11 +449,13 @@ void openGL::renderSkybox(Skybox& skybox)
     glDepthFunc(GL_LEQUAL);
 
     glBindVertexArray(cubemap->VAO);
-    glActiveTexture(GL_TEXTURE0);
+    _shaderPrograms->setUniformInt("skyboxCube", 30);
+    glActiveTexture(GL_TEXTURE0 + 30);
     glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap->getTexture()._id);
     glDrawArrays(GL_TRIANGLES, 0, 36);
     glBindVertexArray(0);
 
+    glActiveTexture(GL_TEXTURE0);
     glDepthFunc(GL_LESS);
     //glDepthMask(GL_TRUE);
 

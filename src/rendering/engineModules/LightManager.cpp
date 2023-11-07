@@ -5,7 +5,7 @@
 
 namespace
 {
-    E_LightType getType(const LightSource& light)
+    E_LightType getLightType(const LightSource& light)
     {
         if(dynamic_cast<const DirectionalLight*>(&light))
         {
@@ -77,31 +77,55 @@ void ShadowMap::alignShadowMap(std::shared_ptr<LightSource> light)
 
    // Calculate light space transform
 
-    float zNear = 1.0f;
-    float zFar = 100.0f;
+    _nearPlane = 0.1f;
+    _farPlane = 100.0f;
 
-    light->getPosition();
+    glm::vec3 observed_point;
+    float fov;
+
+    glm::mat4 perMat;
+    glm::vec3 posVec;
+
    switch(_lightType)
    {
     case E_LightType::DIRECTIONAL_LIGHT:
-        _lightSpaceMatrix = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, zNear, zFar) * glm::lookAt(
-            conversion::toVec3(light->getPosition()) * 100.0f, 
-            glm::vec3(0.0f, 0.0f, 0.0f), 
-            glm::vec3(0.0f, 1.0f, 0.0f)
-            );
         break;	
     case E_LightType::POINT_LIGHT:
+
+        fov = glm::radians(90.0f);
+
+        perMat = glm::perspective(fov, 1.0f, _nearPlane, _farPlane);
+        posVec = conversion::toVec3(light_point->getPosition());
+
+        // Right face
+        observed_point = posVec + glm::vec3( 1.0f, 0.0f, 0.0f);
+        _lightSpaceMatrix.push_back(perMat*glm::lookAt(posVec,observed_point,glm::vec3(0.0f,-1.0f, 0.0f)));
+        // Left face
+        observed_point = posVec + glm::vec3(-1.0f, 0.0f, 0.0f);
+        _lightSpaceMatrix.push_back(perMat*glm::lookAt(posVec,observed_point,glm::vec3(0.0f,-1.0f, 0.0f)));
+        // Top face
+        observed_point = posVec + glm::vec3( 0.0f, 1.0f, 0.0f);
+        _lightSpaceMatrix.push_back(perMat*glm::lookAt(posVec,observed_point,glm::vec3(0.0f, 0.0f, 1.0f)));
+        // Bottom face
+        observed_point = posVec + glm::vec3( 0.0f,-1.0f, 0.0f);
+        _lightSpaceMatrix.push_back(perMat*glm::lookAt(posVec,observed_point,glm::vec3(0.0f, 0.0f,-1.0f)));
+        // Front face
+        observed_point = posVec + glm::vec3( 0.0f, 0.0f, 1.0f);
+        _lightSpaceMatrix.push_back(perMat*glm::lookAt(posVec,observed_point,glm::vec3(0.0f,-1.0f, 0.0f)));
+        // Back face
+        observed_point = posVec + glm::vec3( 0.0f, 0.0f,-1.0f);
+        _lightSpaceMatrix.push_back(perMat*glm::lookAt(posVec,observed_point,glm::vec3(0.0f,-1.0f, 0.0f)));
         break;
+
     case E_LightType::SPOT_LIGHT:
+        fov = light_spot->getCutoff()[1]*1.25f;
+        perMat = glm::perspective(fov, 1.0f, _nearPlane, _farPlane);
+        posVec = conversion::toVec3(light_spot->getPosition());
+        observed_point = posVec + conversion::toVec3(light_spot->getDirection());
 
-        glm::vec3 observed_point = conversion::toVec3(light_spot->getPosition()) + conversion::toVec3(light_spot->getDirection());
+        glm::mat4 lightSpaceMatrix = perMat * glm::lookAt(posVec,observed_point,glm::vec3(0.0f, 1.0f, 0.0f));
+        _lightSpaceMatrix.push_back(lightSpaceMatrix);
 
-
-        _lightSpaceMatrix = glm::perspective(light_spot->getCutoff()[1]*1.25f, 1.0f, zNear, zFar) * glm::lookAt(
-            conversion::toVec3(light_spot->getPosition()), 
-            observed_point, 
-            glm::vec3(0.0f, 1.0f, 0.0f)
-            );
         break;    
    } 
 }
@@ -111,9 +135,9 @@ std::shared_ptr<FBO> ShadowMap::getShadowMap() const
     return _shadowDepthBuffer.lock();
 }
 
-const glm::mat4& ShadowMap::getLightSpaceMatrix() const
+const glm::mat4& ShadowMap::getLightSpaceMatrix(unsigned int index) const
 {
-    return _lightSpaceMatrix;
+    return _lightSpaceMatrix[index];
 }
 
 void ShadowMap::setLightType(E_LightType type)
@@ -213,6 +237,21 @@ void LightLibrary::lightSetup(unsigned int lightIndex, const PointLight &light)
     shaders->setUniformFloat("pointLight[" + std::to_string(lightIndex) + "].constant", attFactors[0]);
     shaders->setUniformFloat("pointLight[" + std::to_string(lightIndex) + "].linear", attFactors[1]);
     shaders->setUniformFloat("pointLight[" + std::to_string(lightIndex) + "].quadratic", attFactors[2]);
+
+    // Shadow Maps - Light Space Matrix
+
+    if(_shadowMaps.find(light._id) == _shadowMaps.end())
+    {
+        throw std::runtime_error("Shadow map not found");
+    }
+    ShadowMap& shaMap = _shadowMaps[light._id];
+    shaders->setUniformFloat("pointLight[" + std::to_string(lightIndex) + "].farPlane", shaMap._farPlane);
+    shaders->setUniformInt("pointLight[" + std::to_string(lightIndex) + "].shadowMap", 15 + lightIndex);
+
+    glActiveTexture(GL_TEXTURE0 + 15 + lightIndex);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, shaMap.getShadowMap()->getDepthTextureID());
+    glActiveTexture(GL_TEXTURE0);
+
 }
 
 void LightLibrary::lightSetup(unsigned int lightIndex, const SpotLight &light)
@@ -250,8 +289,10 @@ void LightLibrary::lightSetup(unsigned int lightIndex, const SpotLight &light)
         throw std::runtime_error("Shadow map not found");
     }
     ShadowMap& shaMap = _shadowMaps[light._id];
-    shaders->setUniformMat4("lightSpaceMatrix[" + std::to_string(lightIndex) + "]", shaMap.getLightSpaceMatrix());
-    shaders->setUniformInt("spotLight[" + std::to_string(lightIndex) + "].shadowMap", 5 + lightIndex);    
+    shaders->setUniformMat4("spotLightSpaceMatrix[" + std::to_string(lightIndex) + "]", shaMap.getLightSpaceMatrix());
+    shaders->setUniformInt("spotLight[" + std::to_string(lightIndex) + "].shadowMap", 5 + lightIndex);
+
+
     glActiveTexture(GL_TEXTURE0 + 5 + lightIndex);
     glBindTexture(GL_TEXTURE_2D, shaMap.getShadowMap()->getDepthTextureID());
     glActiveTexture(GL_TEXTURE0);
@@ -263,7 +304,7 @@ void LightLibrary::alignShadowMaps(std::shared_ptr<Scene> scene)
 
     std::vector<std::shared_ptr<LightSource>> allLightSources;
     // allLightSources.insert(allLightSources.end(), lights.directionalLights.begin(), lights.directionalLights.end());
-    //allLightSources.insert(allLightSources.end(), lights.pointLights.begin(), lights.pointLights.end());
+    allLightSources.insert(allLightSources.end(), lights.pointLights.begin(), lights.pointLights.end());
     allLightSources.insert(allLightSources.end(), lights.spotLights.begin(), lights.spotLights.end());
 
     auto framebuffers = _framebufferManager.lock();
@@ -281,22 +322,58 @@ void LightLibrary::alignShadowMaps(std::shared_ptr<Scene> scene)
         }
         if(!matchFound)
         {
-            auto FBO = framebuffers->addFBO(E_AttachmentFormat::SHADOW_DEPTH, 2048, 2048);
-            FBO->addAttachment(E_AttachmentType::DEPTH);
+            std::shared_ptr<FBO> fbo;
             ShadowMap shadowMap;
-            shadowMap.setLightType(getType(*light));
-            shadowMap.setShadowBuffer(FBO);
+            unsigned int shadowMapHeight = 2048, shadowMapWidth = 2048;
+            switch (getLightType(*light))
+            {
+                case E_LightType::POINT_LIGHT:
+                    fbo = framebuffers->addFBO(E_AttachmentFormat::SHADOW_DEPTH_CUBE, shadowMapHeight, shadowMapWidth);
+                    shadowMap.setLightType(E_LightType::POINT_LIGHT);
+                    break;
+                case E_LightType::SPOT_LIGHT:
+                    fbo = framebuffers->addFBO(E_AttachmentFormat::SHADOW_DEPTH, shadowMapHeight, shadowMapWidth);
+                    shadowMap.setLightType(E_LightType::SPOT_LIGHT);
+                    break;
+            }
+
+            fbo->addAttachment(E_AttachmentType::DEPTH);
+            shadowMap.setShadowBuffer(fbo);
             shadowMap.alignShadowMap(light);
-            shadowMap.setDimensions(2048, 2048);
+            shadowMap.setDimensions(shadowMapHeight, shadowMapWidth);
             _shadowMaps.insert(std::make_pair(light->_id, shadowMap));
         }
     }
-
 }
 
 void LightLibrary::renderShadowMaps(std::shared_ptr<Scene> scene)
 {
+    auto lights = scene->getAllLights();
 
+    std::vector<std::shared_ptr<LightSource>> allLightSources;
+    //allLightSources.insert(allLightSources.end(), lights.directionalLights.begin(), lights.directionalLights.end());
+    allLightSources.insert(allLightSources.end(), lights.pointLights.begin(), lights.pointLights.end());
+    allLightSources.insert(allLightSources.end(), lights.spotLights.begin(), lights.spotLights.end());
+
+    int count = 0;
+
+    for(auto& light : allLightSources)
+    {
+        switch (getLightType(*light))
+        {
+            case E_LightType::POINT_LIGHT:
+                renderCubeShadowMap(scene, light);
+                break;
+
+            case E_LightType::SPOT_LIGHT:
+                renderTextureShadowMap(scene, light);
+                break;
+        }
+    }
+}
+
+void LightLibrary::renderTextureShadowMap(std::shared_ptr<Scene> scene, std::shared_ptr<LightSource> light)
+{
     auto shaders = _shaderLibrary.lock();
     auto framebuffers = _framebufferManager.lock();
 
@@ -304,51 +381,109 @@ void LightLibrary::renderShadowMaps(std::shared_ptr<Scene> scene)
     {
         throw std::runtime_error("Shader Library not bound");
     }
-
-    auto lights = scene->getAllLights();
-
-    std::vector<std::shared_ptr<LightSource>> allLightSources;
-    //allLightSources.insert(allLightSources.end(), lights.directionalLights.begin(), lights.directionalLights.end());
-    //allLightSources.insert(allLightSources.end(), lights.pointLights.begin(), lights.pointLights.end());
-    allLightSources.insert(allLightSources.end(), lights.spotLights.begin(), lights.spotLights.end());
+    if(framebuffers == nullptr)
+    {
+        throw std::runtime_error("Framebuffer Manager not bound");
+    }
 
     // Activate the proper shader
     auto shadowMapperShaders = shaders->getShaderIndexesPerFeature(E_ShaderProgramFeatures::E_SHADOW_MAPPING);
-    shaders->use(*shadowMapperShaders.begin());  
-
-    for(auto& light : allLightSources)
+    if(shaders->getActiveShaderIndex() != *shadowMapperShaders.begin())
     {
-        if(_shadowMaps.find(light->_id) == _shadowMaps.end())
-        {
-            throw std::runtime_error("Shadow map not found");
-        }
-
-        ShadowMap& shaMap = _shadowMaps[light->_id];
-
-        shaders->setUniformMat4("lightSpaceMatrix", shaMap.getLightSpaceMatrix());
-        auto FBO_INDEX = framebuffers->getFBOIndex(shaMap.getShadowMap());
-        glViewport(0, 0, shaMap._bufferWidth, shaMap._bufferHeight);
-        framebuffers->bindFBO(FBO_INDEX);
-        framebuffers->clearDepth();
-
-
-            for (auto& model_vector : scene->getAllModels().getAllModels())
-            {
-                for(auto model : model_vector.second)
-                {
-                    shaders->setUniformMat4("model", model->getModelMatrix());
-
-
-                    for (auto &one_mesh : model->getModel()->meshes)
-                    {
-                        glBindVertexArray(one_mesh->VAO);
-                        glDrawElements(GL_TRIANGLES, one_mesh->_indices.size(), GL_UNSIGNED_INT, 0);
-                        glBindVertexArray(0);
-                    }
-                }
-            }
-        framebuffers->unbindFBO();
+       shaders->use(*shadowMapperShaders.begin());  
     }
 
+    if(_shadowMaps.find(light->_id) == _shadowMaps.end())
+    {
+        throw std::runtime_error("Shadow map not found");
+    }
+
+    ShadowMap& shaMap = _shadowMaps[light->_id];
+
+    shaders->setUniformMat4("lightSpaceMatrix", shaMap.getLightSpaceMatrix());
+
+    auto FBO_INDEX = framebuffers->getFBOIndex(shaMap.getShadowMap());
+    glViewport(0, 0, shaMap._bufferWidth, shaMap._bufferHeight);
+    framebuffers->bindFBO(FBO_INDEX);
+    framebuffers->clearDepth();
+
+    // Render loop
+    for (auto& model_vector : scene->getAllModels().getAllModels())
+    {
+        for(auto model : model_vector.second)
+        {
+            shaders->setUniformMat4("model", model->getModelMatrix());
+
+            for (auto &one_mesh : model->getModel()->meshes)
+            {
+                glBindVertexArray(one_mesh->VAO);
+                glDrawElements(GL_TRIANGLES, one_mesh->_indices.size(), GL_UNSIGNED_INT, 0);
+                glBindVertexArray(0);
+            }
+        }
+    }
+
+    framebuffers->unbindFBO();
 }
 
+void LightLibrary::renderCubeShadowMap(std::shared_ptr<Scene> scene, std::shared_ptr<LightSource> light)
+{
+    auto shaders = _shaderLibrary.lock();
+    auto framebuffers = _framebufferManager.lock();
+    if(shaders == nullptr)
+    {
+        throw std::runtime_error("Shader Library not bound");
+    }
+    if(framebuffers == nullptr)
+    {
+        throw std::runtime_error("Framebuffer Manager not bound");
+    }
+
+    // Activate the proper shader
+    auto shadowMapperShaders = shaders->getShaderIndexesPerFeature(E_ShaderProgramFeatures::E_SHADOW_CUBE_MAPPING);
+    if(shaders->getActiveShaderIndex() != *shadowMapperShaders.begin())
+    {
+       shaders->use(*shadowMapperShaders.begin());  
+    }
+
+    // Check if the light about to be rendered has an allocated framebuffer
+    if(_shadowMaps.find(light->_id) == _shadowMaps.end())
+    {
+        throw std::runtime_error("Shadow map not found");
+    }
+
+    ShadowMap& shaMap = _shadowMaps[light->_id];
+
+    auto light_point_position = light->getPosition();
+
+    shaders->setUniformVec3("lightPos", conversion::toVec3(light->getPosition()));
+    shaders->setUniformFloat("far_plane", shaMap._farPlane);
+    
+    for(unsigned int i(0); i<6; ++i)
+    {
+        shaders->setUniformMat4("lightSpaceMatrix[" + std::to_string(i) + "]", shaMap.getLightSpaceMatrix(i));
+    }
+
+    auto FBO_INDEX = framebuffers->getFBOIndex(shaMap.getShadowMap());
+    glViewport(0, 0, shaMap._bufferWidth, shaMap._bufferHeight);
+    framebuffers->bindFBO(FBO_INDEX);
+    framebuffers->clearDepth();
+
+    // Render loop
+    for (auto& model_vector : scene->getAllModels().getAllModels())
+    {
+        for(auto model : model_vector.second)
+        {
+            shaders->setUniformMat4("model", model->getModelMatrix());
+
+            for (auto &one_mesh : model->getModel()->meshes)
+            {
+                glBindVertexArray(one_mesh->VAO);
+                glDrawElements(GL_TRIANGLES, one_mesh->_indices.size(), GL_UNSIGNED_INT, 0);
+                glBindVertexArray(0);
+            }
+        }
+    }
+    framebuffers->unbindFBO();
+
+}   

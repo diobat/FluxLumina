@@ -10,6 +10,7 @@
 #include "scene/Scene.hpp"
 #include "rendering/shader/ShaderLibrary.hpp"
 #include "rendering/framebuffer/Framebuffer_Manager.hpp"
+#include "util/Logger.hpp"
 
 // STL headers
 #include <unordered_map>
@@ -28,14 +29,15 @@ public:
 	void alignShadowMap(std::shared_ptr<LightSource> light);
 
 	std::shared_ptr<FBO> getShadowMap() const;
-	const glm::mat4& getLightSpaceMatrix() const;
+	const glm::mat4& getLightSpaceMatrix(unsigned int index = 0) const;
 	void setDimensions(unsigned int width, unsigned int height);
 private:
 	void setLightType(E_LightType type);
 	void setShadowBuffer(std::shared_ptr<FBO> shadowMap);
-	glm::mat4 _lightSpaceMatrix;
+	std::vector<glm::mat4> _lightSpaceMatrix;
 	std::weak_ptr<FBO> _shadowDepthBuffer;
 	unsigned int _bufferWidth, _bufferHeight;
+	float _nearPlane, _farPlane;
 	E_LightType _lightType;
 };
 
@@ -55,6 +57,9 @@ private:
 	void lightSetup(unsigned int lightIndex, const DirectionalLight &light);
 	void lightSetup(unsigned int lightIndex, const PointLight &light);
 	void lightSetup(unsigned int lightIndex, const SpotLight &light);
+
+	void renderTextureShadowMap(std::shared_ptr<Scene> scene, std::shared_ptr<LightSource> light);
+	void renderCubeShadowMap(std::shared_ptr<Scene> scene, std::shared_ptr<LightSource> light);
 
 	std::weak_ptr<FBOManager> _framebufferManager;
 	std::weak_ptr<ShaderLibrary> _shaderLibrary;

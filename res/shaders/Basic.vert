@@ -17,7 +17,8 @@ layout(std140) uniform mvp_camera
 	mat4 projection;
 };
 uniform int numSpotLights;
-uniform mat4 lightSpaceMatrix[20];
+uniform mat4 spotLightSpaceMatrix[10];
+uniform mat4 model;
 
 // Output
 out VertexOutput{
@@ -28,21 +29,21 @@ out VertexOutput{
 } VertexOut;
 
 out LightSpaceVertexOutput{
-	vec4 Spotlight[20];
+	vec4 Spotlight[10];
 } LightSpaceVertexOut;
 
 void main()
 {
-	gl_Position = projection * view * instanceMatrix * vec4(aPosition, 1.0f);
+	gl_Position = projection * view * model * vec4(aPosition, 1.0f);
 
 	VertexOut.objectColor = aObjectColor;
 	VertexOut.Normal = aNormal;
 	VertexOut.TexCoords = aTexCoords;
 	VertexOut.FragPos = vec3(instanceMatrix * vec4(aPosition, 1.0f));
 
+	// Vertex position in worldspace of light i = lightSpaceMatrix * vertex position in worldspace
 	for(int i = 0; i < numSpotLights; i++)
 	{
-		// Vertex position in worldspace of light i = lightSpaceMatrix * vertex position in worldspace
-		LightSpaceVertexOut.Spotlight[i] = lightSpaceMatrix[i] * vec4(VertexOut.FragPos, 1.0f);
+		LightSpaceVertexOut.Spotlight[i] = spotLightSpaceMatrix[i] * vec4(VertexOut.FragPos, 1.0f);
 	}
 }

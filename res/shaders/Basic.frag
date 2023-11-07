@@ -21,6 +21,8 @@ vec3 specular;
 float constant;
 float linear;
 float quadratic;
+float farPlane;
+samplerCube shadowMap;
 };
 
 struct SpotLight{
@@ -46,7 +48,7 @@ vec3 FragPos;
 } FragmentIn;
 
 in LightSpaceVertexOutput{
-	vec4 Spotlight[20];
+	vec4 Spotlight[10];
 } LightSpaceFragmentIn;
 
 //////////////////////////
@@ -63,10 +65,10 @@ uniform int numDirLights;
 uniform DirLight dirLight[3];
 // Point lights
 uniform int numPointLights;
-uniform PointLight pointLight[20];
+uniform PointLight pointLight[10];
 // Spot lights
 uniform int numSpotLights;
-uniform SpotLight spotLight[20];
+uniform SpotLight spotLight[10];
 
 layout(std140) uniform viewPosBlock
 {
@@ -77,8 +79,24 @@ layout(std140) uniform viewPosBlock
 out vec4 fragColor;
 
 // Helper functions
+float PointLightShadowCalculation(int index, vec3 fragPos)
+{
+	// Get vector between fragment position and light position
+	vec3 fragToLight = fragPos - pointLight[index].position;
+	// Distance between closest fragment and light source
+	float closestDepth = texture(pointLight[index].shadowMap, fragToLight).r;
+	// It is currently in linear range between [0,1]. Re-transform back to original value
+	closestDepth *= pointLight[index].farPlane;
+	// Get current linear depth as the length between the fragment and light position
+	float currentDepth = length(fragToLight);
+	// Calculate bias (based on depth map resolution and slope)
+	float bias = 0.05;
+	// Check whether current frag pos is in shadow
+	float shadow = currentDepth - bias > closestDepth ? 1.0 : 0.0;
+	return shadow;
+}
 
-float ShadowCalculation(int index, vec4 posLightSpace, vec3 normal, vec3 lightDir)
+float SpotLightShadowCalculation(int index, vec4 posLightSpace, vec3 normal, vec3 lightDir)
 {
 	// Perspective division
 	vec3 projCoords = posLightSpace.xyz / posLightSpace.w;
@@ -88,8 +106,9 @@ float ShadowCalculation(int index, vec4 posLightSpace, vec3 normal, vec3 lightDi
 	float closestDepth = texture(spotLight[index].shadowMap, projCoords.xy).r;
 	// Get depth of current fragment from light's perspective
 	float currentDepth = projCoords.z;
+ 	// Remove shadow acne by adding a bias
+	float bias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.005); 
 	// Check whether current frag pos is in shadow
-	float bias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.005);  // Removes shadow acne
 	float shadow = currentDepth - bias > closestDepth ? 1.0 : 0.0;
 
     if(projCoords.z > 1.0)
@@ -126,7 +145,7 @@ vec3 calcDirLight(DirLight light, vec3 normal, vec3 viewDir)
 	return (ambient + diffuse + specular);
 }
 
-vec3 calcPointLight(PointLight light, vec3 normal, vec3 FragPos, vec3 viewDir)
+vec3 calcPointLight(int i, PointLight light, vec3 normal, vec3 FragPos, vec3 viewDir)
 {
 	vec3 diffTex = vec3(0.0);
 	vec3 specTex = vec3(0.0);
@@ -157,7 +176,10 @@ vec3 calcPointLight(PointLight light, vec3 normal, vec3 FragPos, vec3 viewDir)
 	ambient *= attenuation;
 	diffuse *= attenuation;
 	specular *= attenuation;
-	return (ambient + diffuse + specular);
+
+	// Calculate shadow
+	float shadow = PointLightShadowCalculation(i, FragmentIn.FragPos);
+	return ( (1.0 - shadow) * (diffuse + specular));
 }
 
 vec3 calcSpotLight(int i, SpotLight light, vec3 normal, vec3 FragPos, vec3 viewDir)
@@ -198,8 +220,8 @@ vec3 calcSpotLight(int i, SpotLight light, vec3 normal, vec3 FragPos, vec3 viewD
 	diffuse *= attenuation * intensity;
 	specular *= attenuation * intensity;
 	
-	float shadow = ShadowCalculation(i, LightSpaceFragmentIn.Spotlight[i], normal, lightDir);
-	//return (ambient + (1.0 - shadow) * (diffuse + specular) );
+	// Calculate shadow
+	float shadow = SpotLightShadowCalculation(i, LightSpaceFragmentIn.Spotlight[i], normal, lightDir);
 	return ( (1.0 - shadow) * (diffuse + specular) );
 }
 
@@ -218,7 +240,7 @@ void main()
 	// 2 - Point Lights
 	for(int i = 0; i < numPointLights; i++)
 	{
-		totalLight += calcPointLight(pointLight[i], norm, FragmentIn.FragPos, viewDir);
+		totalLight += calcPointLight(i , pointLight[i], norm, FragmentIn.FragPos, viewDir);
 	}
 	// 3 - Spot light
 	for(int i = 0; i < numSpotLights; i++)

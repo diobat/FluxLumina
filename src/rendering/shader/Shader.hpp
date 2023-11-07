@@ -13,7 +13,9 @@ enum class E_ShaderProgramFeatures
 {
     E_AUTO_INSTANCING,
     E_TRANSPARENCY,
-    E_SHADOW_MAPPING
+    E_SHADOW_MAPPING,
+    E_SHADOW_CUBE_MAPPING,
+    E_SKYBOX
 };
 
 

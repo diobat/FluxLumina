@@ -28,6 +28,9 @@ std::shared_ptr<FBO> FBOManager::addFBO(E_AttachmentFormat format, int width, in
         case SHADOW_DEPTH:
             fbo = std::make_shared<ShadowDepthFBO>(width, height);
             break;
+        case SHADOW_DEPTH_CUBE:
+            fbo = std::make_shared<ShadowDepthCubeFBO>(width, height);
+            break;
         default:
             break;
     }
