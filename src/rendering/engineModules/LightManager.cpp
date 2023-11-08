@@ -77,8 +77,8 @@ void ShadowMap::alignShadowMap(std::shared_ptr<LightSource> light)
 
    // Calculate light space transform
 
-    _nearPlane = 0.1f;
-    _farPlane = 100.0f;
+    _nearPlane = 1.0f;
+
 
     glm::vec3 observed_point;
     float fov;
@@ -92,6 +92,7 @@ void ShadowMap::alignShadowMap(std::shared_ptr<LightSource> light)
         break;	
     case E_LightType::POINT_LIGHT:
 
+        _farPlane = 1000.0f;
         fov = glm::radians(90.0f);
 
         perMat = glm::perspective(fov, 1.0f, _nearPlane, _farPlane);
@@ -118,6 +119,7 @@ void ShadowMap::alignShadowMap(std::shared_ptr<LightSource> light)
         break;
 
     case E_LightType::SPOT_LIGHT:
+        _farPlane = 1000.0f;
         fov = light_spot->getCutoff()[1]*1.25f;
         perMat = glm::perspective(fov, 1.0f, _nearPlane, _farPlane);
         posVec = conversion::toVec3(light_spot->getPosition());
@@ -292,7 +294,6 @@ void LightLibrary::lightSetup(unsigned int lightIndex, const SpotLight &light)
     shaders->setUniformMat4("spotLightSpaceMatrix[" + std::to_string(lightIndex) + "]", shaMap.getLightSpaceMatrix());
     shaders->setUniformInt("spotLight[" + std::to_string(lightIndex) + "].shadowMap", 5 + lightIndex);
 
-
     glActiveTexture(GL_TEXTURE0 + 5 + lightIndex);
     glBindTexture(GL_TEXTURE_2D, shaMap.getShadowMap()->getDepthTextureID());
     glActiveTexture(GL_TEXTURE0);
@@ -412,7 +413,7 @@ void LightLibrary::renderTextureShadowMap(std::shared_ptr<Scene> scene, std::sha
     {
         for(auto model : model_vector.second)
         {
-            shaders->setUniformMat4("model", model->getModelMatrix());
+            shaders->setUniformMat4("shadowModel", model->getModelMatrix());
 
             for (auto &one_mesh : model->getModel()->meshes)
             {

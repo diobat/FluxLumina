@@ -18,7 +18,6 @@ layout(std140) uniform mvp_camera
 };
 uniform int numSpotLights;
 uniform mat4 spotLightSpaceMatrix[10];
-//uniform mat4 model;
 
 // Output
 out VertexOutput{

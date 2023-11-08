@@ -78,22 +78,39 @@ layout(std140) uniform viewPosBlock
 // Outputs
 out vec4 fragColor;
 
+// array of offset direction for sampling
+vec3 gridSamplingDisk[20] = vec3[]
+(
+   vec3(1, 1,  1), vec3( 1, -1,  1), vec3(-1, -1,  1), vec3(-1, 1,  1), 
+   vec3(1, 1, -1), vec3( 1, -1, -1), vec3(-1, -1, -1), vec3(-1, 1, -1),
+   vec3(1, 1,  0), vec3( 1, -1,  0), vec3(-1, -1,  0), vec3(-1, 1,  0),
+   vec3(1, 0,  1), vec3(-1,  0,  1), vec3( 1,  0, -1), vec3(-1, 0, -1),
+   vec3(0, 1,  1), vec3( 0, -1,  1), vec3( 0, -1, -1), vec3( 0, 1, -1)
+);
+
 // Helper functions
 float PointLightShadowCalculation(int index, vec3 fragPos)
 {
-	// Get vector between fragment position and light position
-	vec3 fragToLight = fragPos - pointLight[index].position;
-	// Distance between closest fragment and light source
-	float closestDepth = texture(pointLight[index].shadowMap, fragToLight).r;
-	// It is currently in linear range between [0,1]. Re-transform back to original value
-	closestDepth *= pointLight[index].farPlane;
-	// Get current linear depth as the length between the fragment and light position
-	float currentDepth = length(fragToLight);
-	// Calculate bias (based on depth map resolution and slope)
-	float bias = 0.05;
-	// Check whether current frag pos is in shadow
-	float shadow = currentDepth - bias > closestDepth ? 1.0 : 0.0;
-	return shadow;
+	// get vector between fragment position and light position
+    vec3 fragToLight = fragPos - pointLight[index].position;
+    // now get current linear depth as the length between the fragment and light position
+    float currentDepth = length(fragToLight);
+
+    float shadow = 0.0;
+    float bias = 0.15;
+    int samples = 20;
+    float viewDistance = length(viewPos - fragPos);
+    float diskRadius = (1.0 + (viewDistance / pointLight[index].farPlane)) / 25.0;
+    for(int i = 0; i < samples; ++i)
+    {
+        float closestDepth = texture(pointLight[index].shadowMap, fragToLight + gridSamplingDisk[i] * diskRadius).r;
+        closestDepth *= pointLight[index].farPlane;   // undo mapping [0;1]
+        if(currentDepth - bias > closestDepth)
+            shadow += 1.0;
+    }
+    shadow /= float(samples);
+
+    return shadow;
 }
 
 float SpotLightShadowCalculation(int index, vec4 posLightSpace, vec3 normal, vec3 lightDir)
