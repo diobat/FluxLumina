@@ -18,7 +18,7 @@ layout(std140) uniform mvp_camera
 };
 uniform int numSpotLights;
 uniform mat4 spotLightSpaceMatrix[10];
-uniform mat4 model;
+//uniform mat4 model;
 
 // Output
 out VertexOutput{
@@ -34,7 +34,7 @@ out LightSpaceVertexOutput{
 
 void main()
 {
-	gl_Position = projection * view * model * vec4(aPosition, 1.0f);
+	gl_Position = projection * view * instanceMatrix * vec4(aPosition, 1.0f);
 
 	VertexOut.objectColor = aObjectColor;
 	VertexOut.Normal = aNormal;

@@ -260,6 +260,8 @@ unsigned int ShadowDepthFBO::addDepthAttachment()
     glDrawBuffer(GL_NONE);  // Framebuffers have a colorbuffer requirement, but we don't need it. In order to guarantee that at least a Depth buffer is created, we need to specify GL_NONE as the colorbuffer inside this function.
     glReadBuffer(GL_NONE);
 
+    glBindTexture(GL_TEXTURE_2D, 0);
+
     return textureId;
 }
 
@@ -328,6 +330,8 @@ unsigned int ShadowDepthCubeFBO::addDepthAttachment()
 
     glDrawBuffer(GL_NONE);  // Framebuffers have a colorbuffer requirement, but we don't need it. In order to guarantee that at least a Depth buffer is created, we need to specify GL_NONE as the colorbuffer inside this function.
     glReadBuffer(GL_NONE);
+
+    glBindTexture(GL_TEXTURE_2D, 0);
 
     return textureId;
 }

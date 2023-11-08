@@ -26,8 +26,9 @@ public:
     ~InstancingGroup();
     std::vector<std::weak_ptr<ModelObject>> modelObjects;
     std::shared_ptr<Mesh> mesh;
-    std::vector<glm::mat4> transforms() const;
+    const std::vector<glm::mat4>& transforms();
     unsigned int VBO;
+    std::vector<glm::mat4> _transforms;
 };
 
 class InstancingManager

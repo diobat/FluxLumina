@@ -4,16 +4,16 @@
 /////////////////////////// INSTANCING GROUP
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-std::vector<glm::mat4> InstancingGroup::transforms() const
+const std::vector<glm::mat4>& InstancingGroup::transforms()
 {
-    std::vector<glm::mat4> transforms;
+    _transforms.clear();
 
     for (const auto& modelObject : modelObjects)
     {
-        transforms.push_back(modelObject.lock()->getModelMatrix());
+        _transforms.push_back(modelObject.lock()->getModelMatrix());
     }
 
-    return transforms;
+    return _transforms;
 }
 
 InstancingGroup::~InstancingGroup()
@@ -72,8 +72,8 @@ void InstancingManager::resetInstancingGroups()
 
 void InstancingManager::setupInstancingGroup(InstancingGroup& group)
 {
-        auto& mesh = group.mesh;
-        auto& modelMatrices = group.transforms();
+        std::shared_ptr<Mesh> mesh = group.mesh;
+        const std::vector<glm::mat4>& modelMatrices = group.transforms();
 
         // vertex buffer object
         glGenBuffers(1, &group.VBO);

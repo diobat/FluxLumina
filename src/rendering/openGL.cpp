@@ -75,7 +75,7 @@ int openGL::initialize(GLFWwindow* window)
     _shaderPrograms = std::make_shared<ShaderLibrary>();
 
     _shaderPrograms->addShader("Basic.vert", "Basic.frag");                  //0
-    //_shaderPrograms->getShader(0)->addSupportedFeature(E_ShaderProgramFeatures::E_AUTO_INSTANCING);
+    _shaderPrograms->getShader(0)->addSupportedFeature(E_ShaderProgramFeatures::E_AUTO_INSTANCING);
     _shaderPrograms->addShader("Simple.vert", "Simple.frag");                //1
     _shaderPrograms->addShader("Simple.vert", "transparency.frag");          //2
     _shaderPrograms->getShader(2)->addSupportedFeature(E_ShaderProgramFeatures::E_TRANSPARENCY);

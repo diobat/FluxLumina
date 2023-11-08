@@ -35,7 +35,7 @@ void update(openGL& graphicalEngine, std::vector<std::shared_ptr<Scene>> scenes,
         graphicalEngine.renderFrame(scenes[0]);
         
         // Check and log errors
-        Logger::Instance().logGLErrors("Main Loop:");        
+        //Logger::Instance().logGLErrors("Main Loop:");        
        
         /* Swap front and back buffers */
         glfwSwapBuffers(graphicalEngine.getWindowPtr());
@@ -83,10 +83,6 @@ int main(void)
          "res/models/skybox/front.jpg",
          "res/models/skybox/back.jpg"});
 
-    GLint texture_units;
-    glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &texture_units);
-    std::cout << "Max texture units: " << texture_units << std::endl;
-
     // Scene objects 
     auto &window1 = factory.create_Model("res/models/window/window.obj", 2);
     window1.setPosition({-16.0f, 10.0f, -20.0f});
@@ -107,10 +103,8 @@ int main(void)
     ModelObject& backpack = factory.create_Model("res/models/backpack/backpack.obj", 0, true);
     backpack.setPosition({15.0f, 3.0f, -16.5f});
 
-
     int width = 700;
     int height = 700;
-
     // for(int i(0); i < width * height; ++i)
     // {
     //     auto& cubeN = factory.create_Model("res/models/cube/cube.obj", 0);

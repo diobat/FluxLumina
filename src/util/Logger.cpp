@@ -73,7 +73,6 @@ void Logger::resetDrawCalls()
 
 void Logger::logGLErrors(const std::string &msg)
 {
-    return;
     bool firstTime = true;
     GLenum glError;
     do
