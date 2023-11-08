@@ -55,7 +55,7 @@ void FBOManager::unbindFBO()
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-unsigned int FBOManager::getFBOCount() const
+size_t FBOManager::getFBOCount() const
 {
     return _frameBufferObjects.size();
 }

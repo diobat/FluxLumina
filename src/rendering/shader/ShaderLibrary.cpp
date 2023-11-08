@@ -118,7 +118,7 @@ unsigned int ShaderLibrary::getActiveShaderIndex() const
     return _activeShader;
 }
 
-int ShaderLibrary::size() const
+size_t ShaderLibrary::size() const
 {
     return _shaders.size();
 }

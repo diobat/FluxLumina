@@ -63,7 +63,8 @@ TextureFBO::~TextureFBO()
 
     if(!_colorAttachmentIDs.empty())
     {
-        glDeleteTextures(_colorAttachmentIDs.size(), _colorAttachmentIDs.data());
+        int size = static_cast<int>(_colorAttachmentIDs.size());  
+        glDeleteTextures(size, _colorAttachmentIDs.data());
     }
     if(_depthAttachmentID != -1)
     {

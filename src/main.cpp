@@ -3,7 +3,7 @@
 #include "rendering/openGLContext.hpp"
 #include "rendering/openGL.hpp"
 #include "scene/SceneObjectFactory.hpp"
-#include "util/Logger.hpp"
+//#include "util/Logger.hpp"
 
 // Third-party includes
 #include <memory>
@@ -11,6 +11,7 @@
 
 void update(openGL& graphicalEngine, std::vector<std::shared_ptr<Scene>> scenes, std::shared_ptr<UserInput::glfwKeyboardScanner>& userInput)
 {
+    glEnable(GL_DEBUG_OUTPUT);
     graphicalEngine.initializeInstanceManager(scenes[0]);
 
     float startTime = static_cast<float>(glfwGetTime());
@@ -23,7 +24,6 @@ void update(openGL& graphicalEngine, std::vector<std::shared_ptr<Scene>> scenes,
 
     while (!glfwWindowShouldClose(graphicalEngine.getWindowPtr()))
     {
-        Logger::Instance().tic();
         /* Update game time value */
         newTime  = static_cast<float>(glfwGetTime());
         deltaTime = newTime - gameTime - startTime;
@@ -49,7 +49,6 @@ void update(openGL& graphicalEngine, std::vector<std::shared_ptr<Scene>> scenes,
 
 int main(void)
 {
-
     /// Actual program begins here
 
     GLFWwindow* window = InitializeOpenGLContext();
@@ -85,13 +84,13 @@ int main(void)
 
     // Scene objects 
     auto &window1 = factory.create_Model("res/models/window/window.obj", 2);
-    window1.setPosition({-16.0f, 10.0f, -20.0f});
+    window1.setPosition({-25.0f, 10.0f, -20.0f});
 
     auto &window2 = factory.create_Model("res/models/window/window.obj", 2);
-    window2.setPosition({-16.0f, 10.0f, -18.0f});
+    window2.setPosition({-25.0f, 10.0f, -18.0f});
 
     auto &window3 = factory.create_Model("res/models/window/window.obj", 2);
-    window3.setPosition({-16.0f, 10.0f, -16.0f});
+    window3.setPosition({-25.0f, 10.0f, -16.0f});
 
     ModelObject &ground = factory.create_Model("res/models/ground2.obj", 0);
     ground.setPosition({0.0f, -0.5f, 0.0f});

@@ -1,10 +1,9 @@
 #include "util/Logger.hpp"
 
-
 namespace
 {
     
-    long int timeStart;
+    size_t timeStart;
 
     int drawCalls = 0;
     int instancedDrawCalls = 0;
@@ -48,8 +47,8 @@ void Logger::toc(const std::string& msg)
         return;
     }
 
-    double timeEnd = boost::posix_time::microsec_clock::local_time().time_of_day().total_milliseconds();
-    double timeElapsed = timeEnd - timeStart;
+    size_t timeEnd = boost::posix_time::microsec_clock::local_time().time_of_day().total_milliseconds();
+    size_t timeElapsed = timeEnd - timeStart;
     BOOST_LOG_TRIVIAL(info) << msg << " took " << timeElapsed << " ms";
 }
 

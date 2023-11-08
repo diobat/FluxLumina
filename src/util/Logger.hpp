@@ -1,6 +1,8 @@
 #pragma once
 
 #define BOOST_USE_WINAPI_VERSION 0x0601     // Must be here or doesn't compile, blame boost
+// this is a "temporary fix", 
+// see https://github.com/microsoft/vcpkg/discussions/22762 for more info
 
 #include "rendering/GLFW_Wrapper.hpp"
 
@@ -10,12 +12,6 @@
 #include <boost/log/expressions.hpp>
 #include <boost/log/utility/setup/file.hpp>
 #include <boost/log/sinks.hpp>
-
-struct 
-{
-    /* data */
-};
-
 
 class Logger
 {

@@ -182,22 +182,25 @@ bool LightLibrary::prepare(const LightContents& lights)
     auto shaders = _shaderLibrary.lock();
 
     auto& directionalLights = lights.directionalLights;
-    shaders->setUniformInt("numDirLights", directionalLights.size());
-    for(unsigned int i(0); i<directionalLights.size(); ++i)
+    int directionalLightsCount = static_cast<int>(directionalLights.size()); // We need to cast to int because the uniform is an int, otherwise we'd get a warning
+    shaders->setUniformInt("numDirLights", directionalLightsCount);
+    for(int i(0); i<directionalLightsCount; ++i)
     {
         lightSetup(i, *directionalLights[i]);
     }
 
     auto& pointLights = lights.pointLights;
-    shaders->setUniformInt("numPointLights", pointLights.size());
-    for(unsigned int i(0); i<pointLights.size(); ++i)
+    int pointLightsCount = static_cast<int>(pointLights.size());
+    shaders->setUniformInt("numPointLights", pointLightsCount);
+    for(int i(0); i<pointLightsCount; ++i)
     {
         lightSetup(i, *pointLights[i]);
     }
 
     auto& spotLights = lights.spotLights;
-    shaders->setUniformInt("numSpotLights", spotLights.size());
-    for(unsigned int i(0); i<spotLights.size(); ++i)
+    int spotLightsCount = static_cast<int>(spotLights.size());
+    shaders->setUniformInt("numSpotLights", spotLightsCount);
+    for(int i(0); i<spotLightsCount; ++i)
     {
         lightSetup(i, *spotLights[i]);
     }
@@ -418,7 +421,8 @@ void LightLibrary::renderTextureShadowMap(std::shared_ptr<Scene> scene, std::sha
             for (auto &one_mesh : model->getModel()->meshes)
             {
                 glBindVertexArray(one_mesh->VAO);
-                glDrawElements(GL_TRIANGLES, one_mesh->_indices.size(), GL_UNSIGNED_INT, 0);
+                int numVertexes = static_cast<int>(one_mesh->_indices.size());  // Avoids compiler warning
+                glDrawElements(GL_TRIANGLES, numVertexes, GL_UNSIGNED_INT, 0);
                 glBindVertexArray(0);
             }
         }
@@ -480,7 +484,8 @@ void LightLibrary::renderCubeShadowMap(std::shared_ptr<Scene> scene, std::shared
             for (auto &one_mesh : model->getModel()->meshes)
             {
                 glBindVertexArray(one_mesh->VAO);
-                glDrawElements(GL_TRIANGLES, one_mesh->_indices.size(), GL_UNSIGNED_INT, 0);
+                int numVertexes = static_cast<int>(one_mesh->_indices.size());  // Avoids compiler warning
+                glDrawElements(GL_TRIANGLES, numVertexes, GL_UNSIGNED_INT, 0);  
                 glBindVertexArray(0);
             }
         }

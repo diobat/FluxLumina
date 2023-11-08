@@ -21,7 +21,7 @@ public:
     void bindFBO(unsigned int fboIndex);
     void unbindFBO();
 
-    unsigned int getFBOCount() const;
+    size_t getFBOCount() const;
 
     std::shared_ptr<FBO> getFBO(unsigned int fboIndex) const;
     unsigned int getFBOIndex(std::shared_ptr<FBO> fbo) const;

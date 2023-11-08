@@ -39,7 +39,7 @@ public:
     std::set<unsigned int> getShaderIndexesPerFeature() const;
     std::set<unsigned int> getShaderIndexesPerFeature(E_ShaderProgramFeatures feature) const;
     unsigned int getActiveShaderIndex() const;
-    int size() const;
+    size_t size() const;
 
     void use(unsigned int index);
     void use(const std::string &name);

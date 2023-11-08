@@ -68,8 +68,8 @@ namespace UserInput
 			return;
 		}
 
-		float xPos_delta = xpos - lastMousePos[0];
-		float yPos_delta = ypos - lastMousePos[1];
+		double xPos_delta = xpos - lastMousePos[0];
+		double yPos_delta = ypos - lastMousePos[1];
 
 		if(debugMode)
 		{

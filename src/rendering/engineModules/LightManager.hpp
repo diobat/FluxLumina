@@ -10,7 +10,6 @@
 #include "scene/Scene.hpp"
 #include "rendering/shader/ShaderLibrary.hpp"
 #include "rendering/framebuffer/Framebuffer_Manager.hpp"
-#include "util/Logger.hpp"
 
 // STL headers
 #include <unordered_map>

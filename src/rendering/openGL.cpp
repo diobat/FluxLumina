@@ -1,7 +1,5 @@
 #include "rendering/openGL.hpp"
 
-#include "util/Logger.hpp"
-
 openGL::openGL()
 {
     ;
@@ -190,16 +188,14 @@ void openGL::renderFrame(std::shared_ptr<Scene> scene)
 
 void openGL::renderModel(ModelObject &model)
 {
-
     _shaderPrograms->setUniformMat4("model", model.getModelMatrix());
 
     for (auto &one_mesh : model.getModel()->meshes)
     {
         bindTextures(one_mesh);
-        
-        // draw mesh
         glBindVertexArray(one_mesh->VAO);
-        glDrawElements(GL_TRIANGLES, one_mesh->_indices.size(), GL_UNSIGNED_INT, 0);
+        int vertexCount = static_cast<int>(one_mesh->_indices.size());
+        glDrawElements(GL_TRIANGLES, vertexCount, GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
 
         glBindTexture(GL_TEXTURE_2D, 0); // Unbind texture
@@ -210,14 +206,11 @@ void openGL::renderInstancedMeshes()
 {
     for(auto& instancingGroup : _instancingManager->getInstancingGroups())
     {
-        // Bind the VAO
-        glBindVertexArray(instancingGroup.second.mesh->VAO);
-        
-        // Textures
         bindTextures(instancingGroup.second.mesh); 
-
-        // Draw the instances
-        glDrawElementsInstanced(GL_TRIANGLES, instancingGroup.second.mesh->_indices.size(), GL_UNSIGNED_INT, 0, instancingGroup.second.modelObjects.size());
+        glBindVertexArray(instancingGroup.second.mesh->VAO);
+        int vertexCount = static_cast<int>(instancingGroup.second.mesh->_indices.size());
+        int instanceCount = static_cast<int>(instancingGroup.second.modelObjects.size());
+        glDrawElementsInstanced(GL_TRIANGLES, vertexCount, GL_UNSIGNED_INT, 0, instanceCount);
     }
     // Unbind the VAO
     glBindVertexArray(0);
