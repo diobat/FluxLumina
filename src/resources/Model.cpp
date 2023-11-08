@@ -1,4 +1,4 @@
-#include "rendering\Model.hpp"
+#include "resources\Model.hpp"
 
 
 bool Model::hasTransparency() const

@@ -8,7 +8,7 @@
 #include <glm/glm.hpp>
 
 // First party includes
-#include "rendering/Mesh.hpp"
+#include "resources/Mesh.hpp"
 #include "scene/ModelObject.hpp"
 #include "scene/Scene.hpp"
 

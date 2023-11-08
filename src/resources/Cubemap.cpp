@@ -1,4 +1,4 @@
-#include "rendering/Cubemap.hpp"
+#include "resources/Cubemap.hpp"
 #include <algorithm>
 
 

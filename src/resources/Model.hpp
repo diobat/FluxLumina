@@ -1,12 +1,12 @@
 ﻿#pragma once
 
-// Standard headers
+// STL headers
 #include <string>
 #include <vector>
 #include <memory>
 
 // First-party headers
-#include "Mesh.hpp"
+#include "resources/Mesh.hpp"
 
 class Model
 {

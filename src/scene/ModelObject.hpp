@@ -1,9 +1,9 @@
 #pragma once
 
-// First-party includes
+// First-party headers
 #include "scene/sceneObject.hpp"
-#include "rendering/texture.hpp"
-#include "rendering/model.hpp"
+#include "resources/Texture.hpp"
+#include "resources/Model.hpp"
 #include "util/Listener.hpp"
 #include "scene/ModelMatrixProvider.hpp"
 

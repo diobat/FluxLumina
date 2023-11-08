@@ -1,11 +1,11 @@
 #pragma once
 
-// First-party includes
-#include <scene/SceneObject.hpp>
-#include "rendering/Model.hpp"
-
-// STD includes
+// STL headers
 #include <memory>
+
+// First-party headers
+#include "scene/SceneObject.hpp"
+#include "resources/Model.hpp"
 
 enum E_LightType
 {

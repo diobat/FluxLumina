@@ -1,5 +1,9 @@
 ﻿#pragma once
+
+// STL headers
 #include <string>
+
+// Third-party headers
 #include <glad/glad.h>
 
 enum E_TexureType

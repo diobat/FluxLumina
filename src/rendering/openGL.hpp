@@ -15,7 +15,7 @@
 // First party includes
 #include "rendering/GraphicalEngine.hpp"
 #include "rendering/shader/ShaderLibrary.hpp"
-#include "rendering/texture.hpp"
+#include "resources/Texture.hpp"
 #include "rendering/framebuffer/Framebuffer_Manager.hpp"
 #include "rendering/engineModules/InstancingManager.hpp"
 #include "rendering/engineModules/LightManager.hpp"

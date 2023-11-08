@@ -1,12 +1,10 @@
 #pragma once
 
-// STD
+// STL headers
 #include <memory>
 
-// First party
-#include "rendering/Cubemap.hpp"
-
-
+// First-party headers
+#include "resources/Cubemap.hpp"
 
 class Skybox
 {

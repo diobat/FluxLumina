@@ -1,11 +1,13 @@
 ﻿#pragma once
 
-#include <glad/glad.h> // holds all OpenGL type declarations
-#include <glm/glm.hpp>
+// STL headers
 #include <vector>
-#include <rendering/texture.hpp>
+
+// First-party headers
+#include <resources/Texture.hpp>
 
 // Third-party headers
+#include <glm/glm.hpp>
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 

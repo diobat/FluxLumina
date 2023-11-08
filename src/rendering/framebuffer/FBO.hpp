@@ -8,7 +8,7 @@
 #include <vector>
 
 // First-party includes
-#include "rendering/Texture.hpp"
+#include "resources/Texture.hpp"
 
 enum E_AttachmentType
 {

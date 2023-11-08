@@ -7,9 +7,9 @@
 #include <set>
 
 // First-party includes
-#include "util\Arithmetic.hpp"
-#include "rendering\Mesh.hpp"
-#include "rendering\Texture.hpp"
+#include "util/Arithmetic.hpp"
+#include "resources/Mesh.hpp"
+#include "resources/Texture.hpp"
 
 class MeshLibrary
 {

@@ -1,8 +1,8 @@
 #pragma once
 
 // First-party includes
-#include "rendering\mesh.hpp"
-#include "rendering\texture.hpp"
+#include "resources/Mesh.hpp"
+#include "resources/Texture.hpp"
 #include "scene/Scene.hpp"
 #include "rendering/MeshLibrary.hpp"
 

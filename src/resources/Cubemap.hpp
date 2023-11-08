@@ -1,10 +1,10 @@
 #pragma once
 
-// STD 
+// STL headers
 #include <array>
 
-// First party
-#include "rendering/Texture.hpp"
+// First-party headers
+#include "resources/Texture.hpp"
 
 enum E_CUBEMAP_FACES : unsigned int
 {

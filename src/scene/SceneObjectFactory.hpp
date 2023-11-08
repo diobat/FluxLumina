@@ -1,5 +1,8 @@
 #pragma once
 
+// STL library includes
+#include <iostream>
+
 // First-party includes
 #include "scene/Scene.hpp"
 #include "scene/SceneObject.hpp"
@@ -7,11 +10,8 @@
 #include "scene/ModelObject.hpp"
 #include "scene/Camera.hpp"
 #include "scene/LightSource.hpp"
-#include "rendering/Cubemap.hpp"
+#include "resources/Cubemap.hpp"
 #include "rendering/MeshLibrary.hpp"
-
-// STD library includes
-#include <iostream>
 
 //Third-party includes
 #include <glm/glm.hpp>
