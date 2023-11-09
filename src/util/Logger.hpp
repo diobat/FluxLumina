@@ -23,7 +23,7 @@ public:
     void test();
 
     void tic();
-    void toc(const std::string& msg);
+    void toc(const std::string& msg = "");
 
     void drawCall(int numInstances = 1);
     void instancedDrawCall(int numInstances = 1);
