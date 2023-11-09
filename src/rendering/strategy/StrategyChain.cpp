@@ -19,8 +19,6 @@ void StrategyChain::clear()
 
 void StrategyChain::run()
 {
-
-    int i = 0;
     for (auto& node : _nodes)
     {
         node->run();
