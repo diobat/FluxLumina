@@ -25,8 +25,6 @@
 class openGL : public GraphicalEngine
 {
 public:
-	openGL();
-	~openGL();
 
 	int initialize(GLFWwindow* window);
 
@@ -43,9 +41,10 @@ public:
 	// Models
 	void initializeMesh(std::shared_ptr<Mesh>& mesh) override;
 	void initializeTexture(Texture& texture) override;
-	void bindTextures(std::shared_ptr<Mesh> mesh);
-	void renderModel(ModelObject &model);
-	void renderInstancedMeshes();
+	void bindTextures(std::shared_ptr<Mesh> mesh) override;
+	void renderModel(ModelObject &model) override;
+	void renderInstancedMeshes(std::shared_ptr<InstancingManager> instancingManager = nullptr) override;
+	void renderSkybox(Skybox &skybox) override;
 
 	// Shaders
 	unsigned int getShaderProgramID(unsigned int shaderIndex);
@@ -60,28 +59,15 @@ public:
 
 	// Cubemaps
 	void initializeSkybox(Skybox &skybox, const std::array<Texture, 6>& textures) override;
-	void renderSkybox(Skybox &skybox);
+
 
 	// Instancing
 	void initializeInstanceManager(std::shared_ptr<Scene> scene);
 
 private:
-
 	void cameraSetup(std::shared_ptr<Scene> scene);
 
 	// GLFW window
 	GLFWwindow* _window;
-	int _width, _height;
 
-	// Framebuffer
-	std::shared_ptr<FBOManager> _frameBuffers;
-
-	// Shaders
-	std::shared_ptr<ShaderLibrary> _shaderPrograms;
-
-	// Lights
-	std::shared_ptr<LightLibrary> _lightLibrary;
-
-	//Instancing
-	std::shared_ptr<InstancingManager> _instancingManager;
 };

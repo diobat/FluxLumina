@@ -1,15 +1,5 @@
 #include "rendering/openGL.hpp"
 
-openGL::openGL()
-{
-    ;
-}
-
-openGL::~openGL()
-{
-    glfwTerminate();
-}
-
 GLFWwindow* openGL::getWindowPtr()
 {
     return _window;
@@ -32,11 +22,11 @@ int openGL::initialize(GLFWwindow* window)
     /* Make the window's context current */
     glfwMakeContextCurrent(_window);
 
-    glfwGetWindowSize(_window, &_width, &_height);
+    glfwGetWindowSize(_window, &_viewportWidth, &_viewportHeight);
 
     /* Set the viewport */
     glClearColor(0.6784f, 0.8f, 1.0f, 1.0f);
-    glViewport(0, 0, _width, _height);
+    glViewport(0, 0, _viewportWidth, _viewportHeight);
 
     // Enable face culling
     glEnable(GL_CULL_FACE);
@@ -98,92 +88,97 @@ int openGL::initialize(GLFWwindow* window)
     // Initialize Instancing Manager
     _instancingManager = std::make_shared<InstancingManager>();
 
+    // Initialize rendering strategy
+    _strategyChain = std::make_shared<DefaultStrategyChain>(this);
+
     return 1;
 }
 
 // Next step is to encapsulate this in a method that also handles Framebuffer changes
 void openGL::renderFrame(std::shared_ptr<Scene> scene)
 {
-    // Camera
-    _shaderPrograms->use(0);
-    cameraSetup(scene);
 
-    // Light
-    _shaderPrograms->use(0);
-    _lightLibrary->alignShadowMaps(scene);
-    _lightLibrary->renderShadowMaps(scene);
-    _shaderPrograms->use(0);
-    _lightLibrary->prepare(scene->getAllLights());
+    _strategyChain->run();
+//     // Camera
+//     _shaderPrograms->use(0);
+//     cameraSetup(scene);
 
-    // Bind the proper FBO
-    _frameBuffers->bindProperFBOFromScene(scene);
-    // Reset color and depth buffers 
-    _frameBuffers->clearAll();
+//     // Light
+//     _shaderPrograms->use(0);
+//     _lightLibrary->alignShadowMaps(scene);
+//     _lightLibrary->renderShadowMaps(scene);
+//     _shaderPrograms->use(0);
+//     _lightLibrary->prepare(scene->getAllLights());
 
-    // Adjust ViewPort
-    glViewport(0, 0, _width, _height);
+//     // Bind the proper FBO
+//     _frameBuffers->bindProperFBOFromScene(scene);
+//     // Reset color and depth buffers 
+//     _frameBuffers->clearAll();
 
-    // Draw models
-    std::set <unsigned int> shaderIndexes = _shaderPrograms->getShaderIndexesPerFeature();
-    std::set <unsigned int> shaderIndexesWithInstancing = _shaderPrograms->getShaderIndexesPerFeature(E_ShaderProgramFeatures::E_AUTO_INSTANCING);
-    std::set<unsigned int> shaderIndexesTotal;
-    std::merge(shaderIndexes.begin(), shaderIndexes.end(), shaderIndexesWithInstancing.begin(), shaderIndexesWithInstancing.end(), std::inserter(shaderIndexesTotal, shaderIndexesTotal.begin()));
+//     // Adjust ViewPort
+//     glViewport(0, 0, _viewportWidth, _viewportHeight);
 
-    // Opaque Models
-    for(unsigned int shaderIndex : shaderIndexesTotal)
-    {
-        // Activate shader
-        _shaderPrograms->use(shaderIndex);
+//     // Draw models
+//     std::set <unsigned int> shaderIndexes = _shaderPrograms->getShaderIndexesPerFeature();
+//     std::set <unsigned int> shaderIndexesWithInstancing = _shaderPrograms->getShaderIndexesPerFeature(E_ShaderProgramFeatures::E_AUTO_INSTANCING);
+//     std::set<unsigned int> shaderIndexesTotal;
+//     std::merge(shaderIndexes.begin(), shaderIndexes.end(), shaderIndexesWithInstancing.begin(), shaderIndexesWithInstancing.end(), std::inserter(shaderIndexesTotal, shaderIndexesTotal.begin()));
 
-        // Go down the instancing path if the shader supports it
-        if(_shaderPrograms->getShader(shaderIndex)->isFeatureSupported(E_ShaderProgramFeatures::E_AUTO_INSTANCING))
-        {
-            renderInstancedMeshes();
-        }
-        else // Else just render on a per-model basis
-        {
-            for (auto model : scene->getModels(_shaderPrograms->getShader(shaderIndex)->getProgramId()))
-            {
-                renderModel(*model);   
-            }
-        }
-    }
+//     // Opaque Models
+//     for(unsigned int shaderIndex : shaderIndexesTotal)
+//     {
+//         // Activate shader
+//         _shaderPrograms->use(shaderIndex);
 
-    //Draw Skybox
-    if (scene->getSkybox().getCubemap() != nullptr)
-    {
-        auto ZZview = glm::mat4(glm::mat3(scene->getActiveCamera()->getViewMatrix())); // remove translation from the view matrix
-        auto ZZprojection = scene->getActiveCamera()->getProjectionMatrix();
-        _shaderPrograms->use(4);
-        _shaderPrograms->setUniformMat4(4, "view", ZZview);
-        _shaderPrograms->setUniformMat4(4, "projection", ZZprojection);
-        renderSkybox(scene->getSkybox());
-    }
+//         // Go down the instancing path if the shader supports it
+//         if(_shaderPrograms->getShader(shaderIndex)->isFeatureSupported(E_ShaderProgramFeatures::E_AUTO_INSTANCING))
+//         {
+//             renderInstancedMeshes();
+//         }
+//         else // Else just render on a per-model basis
+//         {
+//             for (auto model : scene->getModels(_shaderPrograms->getShader(shaderIndex)->getProgramId()))
+//             {
+//                 renderModel(*model);   
+//             }
+//         }
+//     }
 
-    // Transparent Models
-    for(unsigned int shaderIndex : _shaderPrograms->getShaderIndexesPerFeature(E_ShaderProgramFeatures::E_TRANSPARENCY))
-    {
-        // Activate shader
-        _shaderPrograms->use(shaderIndex);
-        std::map<float, std::shared_ptr<ModelObject>> sortedTransparentModels;
+//     //Draw Skybox
+//     if (scene->getSkybox().getCubemap() != nullptr)
+//     {
+//         auto ZZview = glm::mat4(glm::mat3(scene->getActiveCamera()->getViewMatrix())); // remove translation from the view matrix
+//         auto ZZprojection = scene->getActiveCamera()->getProjectionMatrix();
+//         _shaderPrograms->use(4);
+//         _shaderPrograms->setUniformMat4(4, "view", ZZview);
+//         _shaderPrograms->setUniformMat4(4, "projection", ZZprojection);
+//         renderSkybox(scene->getSkybox());
+//     }
+
+//     // Transparent Models
+//     for(unsigned int shaderIndex : _shaderPrograms->getShaderIndexesPerFeature(E_ShaderProgramFeatures::E_TRANSPARENCY))
+//     {
+//         // Activate shader
+//         _shaderPrograms->use(shaderIndex);
+//         std::map<float, std::shared_ptr<ModelObject>> sortedTransparentModels;
         
-        for (auto model : scene->getModels(_shaderPrograms->getShader(shaderIndex)->getProgramId()))
-        {
-            if(model->getModel()->hasTransparency())
-            {
-                float distance = glm::length(scene->getActiveCamera()->getPosition() - conversion::toVec3(model->getPosition()));
-                sortedTransparentModels[distance] = model;
-            }
-        }
-        // Render all the transparent models (from in decreasing distance to the camera)
-        if(!sortedTransparentModels.empty())
-        {
-            for (std::map<float, std::shared_ptr<ModelObject>>::reverse_iterator it = sortedTransparentModels.rbegin(); it != sortedTransparentModels.rend(); ++it)
-            {
-                renderModel(*it->second);
-            }
-        }
-    }
+//         for (auto model : scene->getModels(_shaderPrograms->getShader(shaderIndex)->getProgramId()))
+//         {
+//             if(model->getModel()->hasTransparency())
+//             {
+//                 float distance = glm::length(scene->getActiveCamera()->getPosition() - conversion::toVec3(model->getPosition()));
+//                 sortedTransparentModels[distance] = model;
+//             }
+//         }
+//         // Render all the transparent models (from in decreasing distance to the camera)
+//         if(!sortedTransparentModels.empty())
+//         {
+//             for (std::map<float, std::shared_ptr<ModelObject>>::reverse_iterator it = sortedTransparentModels.rbegin(); it != sortedTransparentModels.rend(); ++it)
+//             {
+//                 renderModel(*it->second);
+//             }
+//         }
+//     }
 }
 
 void openGL::renderModel(ModelObject &model)
@@ -202,8 +197,14 @@ void openGL::renderModel(ModelObject &model)
     }
 }
 
-void openGL::renderInstancedMeshes()
+void openGL::renderInstancedMeshes(std::shared_ptr<InstancingManager> instancingManager)
 {
+    // In case no argument is passed just use the default instancing manager
+    if (instancingManager == nullptr)
+    {
+        instancingManager = _instancingManager;
+    }
+
     for(auto& instancingGroup : _instancingManager->getInstancingGroups())
     {
         bindTextures(instancingGroup.second.mesh); 
@@ -216,29 +217,29 @@ void openGL::renderInstancedMeshes()
     glBindVertexArray(0);
 }
 
-void openGL::cameraSetup(std::shared_ptr<Scene> scene)
-{
-    // Camera
-    scene->getActiveCamera()->recalculateMVP();
+// void openGL::cameraSetup(std::shared_ptr<Scene> scene)
+// {
+//     // Camera
+//     scene->getActiveCamera()->recalculateMVP();
 
-    std::tuple<glm::mat4, glm::mat4> mvp = {
-        scene->getActiveCamera()->getViewMatrix(),
-        scene->getActiveCamera()->getProjectionMatrix()
-        };
+//     std::tuple<glm::mat4, glm::mat4> mvp = {
+//         scene->getActiveCamera()->getViewMatrix(),
+//         scene->getActiveCamera()->getProjectionMatrix()
+//         };
 
-    std::tuple<glm::vec3> cameraPosition = {
-        scene->getActiveCamera()->getPosition()
-    };
+//     std::tuple<glm::vec3> cameraPosition = {
+//         scene->getActiveCamera()->getPosition()
+//     };
 
-    _shaderPrograms->getUniformBuffer("mvp_camera").update(mvp);
-    _shaderPrograms->getUniformBuffer("viewPosBlock").update(cameraPosition);
-}
+//     _shaderPrograms->getUniformBuffer("mvp_camera").update(mvp);
+//     _shaderPrograms->getUniformBuffer("viewPosBlock").update(cameraPosition);
+// }
 
 void openGL::resizeWindow(GLFWwindow* window, int width, int height)
 {
-    _width = width;
-    _height = height;
-    glViewport(0, 0, width, height);
+    _viewportWidth = width;
+    _viewportHeight = height;
+    glViewport(0, 0, _viewportWidth, _viewportHeight);
 
     for(auto scene : _scenes)
     {
@@ -456,7 +457,6 @@ void openGL::renderSkybox(Skybox& skybox)
 
 void openGL::initializeInstanceManager(std::shared_ptr<Scene> scene)
 {
-    _instancingManager->resetInstancingGroups();
     _instancingManager->setupInstancing(_shaderPrograms->getShader(0)->getProgramId(), _scenes[0]);
 }
 
