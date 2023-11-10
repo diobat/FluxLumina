@@ -173,7 +173,7 @@ namespace
 {
     unsigned int getShadowResolution(GraphicalEngine* engine)
     {
-        auto setting = engine->getSettings().getShadowQualityGlobal();
+        auto setting = engine->getSettings()->getShadowQualityGlobal();
         switch(setting)
         {
             case E_ShadowQuality_Global::LOW:
@@ -278,8 +278,8 @@ void LightLibrary::lightSetup(unsigned int lightIndex, const PointLight &light)
     shaders->setUniformFloat("pointLight[" + std::to_string(lightIndex) + "].quadratic", attFactors[2]);
 
     // Shadow Maps - Light Space Matrix
-    if( _ranFrom->getSettings().getShadowGlobal() == E_Setting::OFF ||
-        _ranFrom->getSettings().getShadowPoint() == E_Setting::OFF)
+    if( _ranFrom->getSettings()->getShadowGlobal() == E_Setting::OFF ||
+        _ranFrom->getSettings()->getShadowPoint() == E_Setting::OFF)
     {
         return;
     }
@@ -329,8 +329,8 @@ void LightLibrary::lightSetup(unsigned int lightIndex, const SpotLight &light)
 
     // Shadow Maps - Light Space Matrix
 
-    if( _ranFrom->getSettings().getShadowGlobal() == E_Setting::OFF ||
-        _ranFrom->getSettings().getShadowSpot() == E_Setting::OFF)
+    if( _ranFrom->getSettings()->getShadowGlobal() == E_Setting::OFF ||
+        _ranFrom->getSettings()->getShadowSpot() == E_Setting::OFF)
     {
         return;
     }

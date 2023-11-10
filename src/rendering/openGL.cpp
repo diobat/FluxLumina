@@ -28,24 +28,6 @@ int openGL::initialize(GLFWwindow* window)
     glClearColor(0.6784f, 0.8f, 1.0f, 1.0f);
     glViewport(0, 0, _viewportWidth, _viewportHeight);
 
-    // Enable face culling
-    glEnable(GL_CULL_FACE);
-
-    // Enable 16xMSAA
-    glEnable(GL_MULTISAMPLE);
-
-    // Enable Gamma Correction
-    //glEnable(GL_FRAMEBUFFER_SRGB); 
-
-    // Enable depth test
-    glEnable(GL_DEPTH_TEST);
-    // Accept fragment if it closer to the camera than the former one
-    glDepthFunc(GL_LESS);
-
-    // Enable blending
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
     // Set window resize code
     glfwSetWindowUserPointer(_window, this);
     auto func = [](GLFWwindow* window, int width, int height)
@@ -55,6 +37,8 @@ int openGL::initialize(GLFWwindow* window)
     glfwSetWindowSizeCallback(_window, func);
     // End window resize code
 
+    // Settings module initialization
+    _settings = std::make_shared<Settings>(_window);
 
     // Framebuffer Manager initialization
     _frameBuffers = std::make_shared<FBOManager>(_window);
@@ -98,88 +82,7 @@ int openGL::initialize(GLFWwindow* window)
 // Next step is to encapsulate this in a method that also handles Framebuffer changes
 void openGL::renderFrame(std::shared_ptr<Scene> scene)
 {
-
     _strategyChain->run();
-//     // Camera
-//     _shaderPrograms->use(0);
-//     cameraSetup(scene);
-
-//     // Light
-//     _shaderPrograms->use(0);
-//     _lightLibrary->alignShadowMaps(scene);
-//     _lightLibrary->renderShadowMaps(scene);
-//     _shaderPrograms->use(0);
-//     _lightLibrary->prepare(scene->getAllLights());
-
-//     // Bind the proper FBO
-//     _frameBuffers->bindProperFBOFromScene(scene);
-//     // Reset color and depth buffers 
-//     _frameBuffers->clearAll();
-
-//     // Adjust ViewPort
-//     glViewport(0, 0, _viewportWidth, _viewportHeight);
-
-//     // Draw models
-//     std::set <unsigned int> shaderIndexes = _shaderPrograms->getShaderIndexesPerFeature();
-//     std::set <unsigned int> shaderIndexesWithInstancing = _shaderPrograms->getShaderIndexesPerFeature(E_ShaderProgramFeatures::E_AUTO_INSTANCING);
-//     std::set<unsigned int> shaderIndexesTotal;
-//     std::merge(shaderIndexes.begin(), shaderIndexes.end(), shaderIndexesWithInstancing.begin(), shaderIndexesWithInstancing.end(), std::inserter(shaderIndexesTotal, shaderIndexesTotal.begin()));
-
-//     // Opaque Models
-//     for(unsigned int shaderIndex : shaderIndexesTotal)
-//     {
-//         // Activate shader
-//         _shaderPrograms->use(shaderIndex);
-
-//         // Go down the instancing path if the shader supports it
-//         if(_shaderPrograms->getShader(shaderIndex)->isFeatureSupported(E_ShaderProgramFeatures::E_AUTO_INSTANCING))
-//         {
-//             renderInstancedMeshes();
-//         }
-//         else // Else just render on a per-model basis
-//         {
-//             for (auto model : scene->getModels(_shaderPrograms->getShader(shaderIndex)->getProgramId()))
-//             {
-//                 renderModel(*model);   
-//             }
-//         }
-//     }
-
-//     //Draw Skybox
-//     if (scene->getSkybox().getCubemap() != nullptr)
-//     {
-//         auto ZZview = glm::mat4(glm::mat3(scene->getActiveCamera()->getViewMatrix())); // remove translation from the view matrix
-//         auto ZZprojection = scene->getActiveCamera()->getProjectionMatrix();
-//         _shaderPrograms->use(4);
-//         _shaderPrograms->setUniformMat4(4, "view", ZZview);
-//         _shaderPrograms->setUniformMat4(4, "projection", ZZprojection);
-//         renderSkybox(scene->getSkybox());
-//     }
-
-//     // Transparent Models
-//     for(unsigned int shaderIndex : _shaderPrograms->getShaderIndexesPerFeature(E_ShaderProgramFeatures::E_TRANSPARENCY))
-//     {
-//         // Activate shader
-//         _shaderPrograms->use(shaderIndex);
-//         std::map<float, std::shared_ptr<ModelObject>> sortedTransparentModels;
-        
-//         for (auto model : scene->getModels(_shaderPrograms->getShader(shaderIndex)->getProgramId()))
-//         {
-//             if(model->getModel()->hasTransparency())
-//             {
-//                 float distance = glm::length(scene->getActiveCamera()->getPosition() - conversion::toVec3(model->getPosition()));
-//                 sortedTransparentModels[distance] = model;
-//             }
-//         }
-//         // Render all the transparent models (from in decreasing distance to the camera)
-//         if(!sortedTransparentModels.empty())
-//         {
-//             for (std::map<float, std::shared_ptr<ModelObject>>::reverse_iterator it = sortedTransparentModels.rbegin(); it != sortedTransparentModels.rend(); ++it)
-//             {
-//                 renderModel(*it->second);
-//             }
-//         }
-//     }
 }
 
 void openGL::renderModel(ModelObject &model)
@@ -217,24 +120,6 @@ void openGL::renderInstancedMeshes(std::shared_ptr<InstancingManager> instancing
     // Unbind the VAO
     glBindVertexArray(0);
 }
-
-// void openGL::cameraSetup(std::shared_ptr<Scene> scene)
-// {
-//     // Camera
-//     scene->getActiveCamera()->recalculateMVP();
-
-//     std::tuple<glm::mat4, glm::mat4> mvp = {
-//         scene->getActiveCamera()->getViewMatrix(),
-//         scene->getActiveCamera()->getProjectionMatrix()
-//         };
-
-//     std::tuple<glm::vec3> cameraPosition = {
-//         scene->getActiveCamera()->getPosition()
-//     };
-
-//     _shaderPrograms->getUniformBuffer("mvp_camera").update(mvp);
-//     _shaderPrograms->getUniformBuffer("viewPosBlock").update(cameraPosition);
-// }
 
 void openGL::resizeWindow(GLFWwindow* window, int width, int height)
 {
@@ -440,7 +325,6 @@ void openGL::renderSkybox(Skybox& skybox)
 {
     auto cubemap = skybox.getCubemap();
 
-    //glDepthMask(GL_FALSE);
     glDepthFunc(GL_LEQUAL);
 
     glBindVertexArray(cubemap->VAO);
@@ -452,7 +336,6 @@ void openGL::renderSkybox(Skybox& skybox)
 
     glActiveTexture(GL_TEXTURE0);
     glDepthFunc(GL_LESS);
-    //glDepthMask(GL_TRUE);
 
 }
 
