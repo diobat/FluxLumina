@@ -6,7 +6,10 @@
 // First-party includes
 #include "helpers/RootDir.h"
 
-// STD library includes
+// STL library includes
+#include <array>
+#include <string>
+#include <cmath>
 #include <iostream>
 
 // Third-party includes
@@ -17,10 +20,36 @@ namespace openGLContext
     GLFWwindow* window;
     int WINDOW_WIDTH = 2048;
     int WINDOW_HEIGHT = 1536;
+    std::string windowTitle = "Espigão Simulator 3000";
 
     int CreateOpenGLWindow();
     int InitializeOpenGLContext();
+
+    std::array<float, 100> deltaFrameTimes = {0.0f};
+    unsigned int deltaFrameTimeIndex = 0;
+
+    void updateFPSCounter(float delta)
+    {
+        deltaFrameTimes[deltaFrameTimeIndex] = delta;
+        deltaFrameTimeIndex = (deltaFrameTimeIndex + 1) % deltaFrameTimes.size();
+
+        double averageDelta = 0.0f;
+        for (const auto& deltaFrameTime : deltaFrameTimes)
+        {
+            averageDelta += deltaFrameTime;
+        }
+        averageDelta /= deltaFrameTimes.size();
+        averageDelta = std::round(1.0f / averageDelta);
+        std::string fps = std::to_string(averageDelta); // Convert to time per frame
+        fps.erase(fps.find_last_not_of('0'), std::string::npos); // Remove trailing zeros
+        std::string fullWindowTitle = windowTitle + " - " + fps + " FPS";
+        glfwSetWindowTitle(window, fullWindowTitle.c_str());   
+    }
 }
+
+
+
+
 
 GLFWwindow* CreateOpenGLWindow()
 {

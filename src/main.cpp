@@ -3,7 +3,7 @@
 #include "rendering/openGLContext.hpp"
 #include "rendering/openGL.hpp"
 #include "scene/SceneObjectFactory.hpp"
-//#include "util/Logger.hpp"
+#include "Util/Logger.hpp"
 
 // Third-party includes
 #include <memory>
@@ -11,7 +11,7 @@
 
 void update(openGL& graphicalEngine, std::vector<std::shared_ptr<Scene>> scenes, std::shared_ptr<UserInput::glfwKeyboardScanner>& userInput)
 {
-    glEnable(GL_DEBUG_OUTPUT);
+    //glEnable(GL_DEBUG_OUTPUT);
     graphicalEngine.initializeInstanceManager(scenes[0]);
 
     float startTime = static_cast<float>(glfwGetTime());
@@ -19,18 +19,17 @@ void update(openGL& graphicalEngine, std::vector<std::shared_ptr<Scene>> scenes,
     float gameTime = 0.0f;
     float deltaTime = 0.0f;
     std::string windowTitle;
-    glfwSwapInterval(0);
-    // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
+    glfwSwapInterval(1);
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     while (!glfwWindowShouldClose(graphicalEngine.getWindowPtr()))
     {
+
         /* Update game time value */
         newTime  = static_cast<float>(glfwGetTime());
         deltaTime = newTime - gameTime - startTime;
         gameTime = newTime - startTime;
 
-        windowTitle = "Espigão Simulator 3000 - " + std::to_string(1.0f / deltaTime) + " FPS";
-        glfwSetWindowTitle(graphicalEngine.getWindowPtr(), windowTitle.c_str());
+        openGLContext::updateFPSCounter(deltaTime);
 
         graphicalEngine.renderFrame(scenes[0]);
         
@@ -39,7 +38,6 @@ void update(openGL& graphicalEngine, std::vector<std::shared_ptr<Scene>> scenes,
        
         /* Swap front and back buffers */
         glfwSwapBuffers(graphicalEngine.getWindowPtr());
-
         /* Poll for and process events */
         glfwPollEvents();
 
@@ -104,6 +102,7 @@ int main(void)
 
     int width = 700;
     int height = 700;
+
     // for(int i(0); i < width * height; ++i)
     // {
     //     auto& cubeN = factory.create_Model("res/models/cube/cube.obj", 0);
@@ -112,22 +111,26 @@ int main(void)
     //     cubeN.setScale(5.0f);
     // }
 
-    auto& statue = factory.create_Model("res/models/Statue/12330_Statue_v1_L2.obj", 0);
+    auto& statue = factory.create_Model("res/models/Statue/statue_decimated.obj", 0);
+    //auto& statue = factory.create_Model("res/models/Statue/12330_Statue_v1_L2.obj", 0);
     statue.setPosition({0.0f, 0.0f, 5.0f});
     statue.rotate(-90.0f, 0.0f, 0.0f);
     statue.setScale(0.01f);
 
-    auto &statue2 = factory.create_Model("res/models/Statue/12330_Statue_v1_L2.obj", 0);
+    auto &statue2 = factory.create_Model("res/models/Statue/statue_decimated.obj", 0);
+    //auto &statue2 = factory.create_Model("res/models/Statue/12330_Statue_v1_L2.obj", 0);
     statue2.setPosition({0.0f, 0.0f, -5.0f});
     statue2.rotate(-90.0f, 0.0f, 0.0f);
     statue2.setScale(0.01f);
 
-    auto &statue3 = factory.create_Model("res/models/Statue/12330_Statue_v1_L2.obj", 0);
+    auto &statue3 = factory.create_Model("res/models/Statue/statue_decimated.obj", 0);
+    //auto &statue3 = factory.create_Model("res/models/Statue/12330_Statue_v1_L2.obj", 0);
     statue3.setPosition({-5.0f, 0.0f, 0.0f});
     statue3.rotate(-90.0f, 0.0f, 0.0f);
     statue3.setScale(0.01f);
 
-    auto &statue4 = factory.create_Model("res/models/Statue/12330_Statue_v1_L2.obj", 0);
+    auto &statue4 = factory.create_Model("res/models/Statue/statue_decimated.obj", 0);
+    //auto &statue4 = factory.create_Model("res/models/Statue/12330_Statue_v1_L2.obj", 0);
     statue4.setPosition({5.0f, 0.0f, 0.0f});
     statue4.rotate(-90.0f, 0.0f, 0.0f);
     statue4.setScale(0.01f);
@@ -138,7 +141,7 @@ int main(void)
     auto& cube = factory.create_Model("res/models/cube/cubeBlank.obj", 5);
     std::vector<Texture> cubeTextures = {scene->getSkybox().getCubemap()->getTexture()};
     cube.getModel()->meshes[0]->attachTexture(cubeTextures);
-    cube.setPosition({18.0f, 10.0f, 18.0f});
+    cube.setPosition({18.0f, 15.0f, 18.0f});
     
     // Lights
     auto light_A = factory.create_LightSource( E_LightType::POINT_LIGHT);
