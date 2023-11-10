@@ -19,6 +19,7 @@
 #include <boost/uuid/uuid.hpp>
 #include <boost/functional/hash.hpp>
 
+class GraphicalEngine;
 
 class ShadowMap
 {
@@ -29,7 +30,7 @@ public:
 
 	std::shared_ptr<FBO> getShadowMap() const;
 	const glm::mat4& getLightSpaceMatrix(unsigned int index = 0) const;
-	void setDimensions(unsigned int width, unsigned int height);
+	void setDimensions(unsigned int width, unsigned int height = 0);
 private:
 	void setLightType(E_LightType type);
 	void setShadowBuffer(std::shared_ptr<FBO> shadowMap);
@@ -43,7 +44,7 @@ private:
 class LightLibrary
 {
 public:
-	LightLibrary();
+	LightLibrary(GraphicalEngine* engine);
 
 	void bindFramebufferManager(std::weak_ptr<FBOManager> framebufferManager);
 	void bindShaderLibrary(std::weak_ptr<ShaderLibrary> shaderLibrary);
@@ -65,4 +66,5 @@ private:
 
 	std::unordered_map<boost::uuids::uuid, ShadowMap,  boost::hash<boost::uuids::uuid>> _shadowMaps;
 
+	GraphicalEngine* _ranFrom;
 };	

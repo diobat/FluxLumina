@@ -11,6 +11,7 @@
 #include "rendering/engineModules/LightManager.hpp"
 #include "rendering/engineModules/InstancingManager.hpp"
 #include "rendering/framebuffer/Framebuffer_Manager.hpp"
+#include "rendering/Settings.hpp"
 
 class GraphicalEngine
 {
@@ -39,6 +40,9 @@ public:
 	std::shared_ptr<ShaderLibrary> getShaderLibrary() { return _shaderPrograms; };
 	std::shared_ptr<LightLibrary> getLightLibrary() { return _lightLibrary; };
 	std::shared_ptr<InstancingManager> getInstancingManager() { return _instancingManager; }
+	std::shared_ptr<StrategyChain> getStrategyChain() { return _strategyChain; }
+	const Settings& getSettings() const { return _settings; }
+	Settings& getUserSettings() { return _settings; }
 
 	std::array<int, 2> getViewportSize() const { return { _viewportWidth, _viewportHeight }; }
 
@@ -62,6 +66,9 @@ protected:
 
 	// Rendering strategy
 	std::shared_ptr<StrategyChain> _strategyChain;
+
+	// Engine settings
+	Settings _settings;
 };
 
 

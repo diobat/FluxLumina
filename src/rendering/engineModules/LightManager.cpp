@@ -1,5 +1,7 @@
 #include "rendering/engineModules/LightManager.hpp"
 
+#include "rendering/GraphicalEngine.hpp"
+
 #include <stdexcept>
 
 
@@ -24,7 +26,6 @@ namespace
             throw std::runtime_error("Light type not recognized");
         }
     }
-
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -78,7 +79,6 @@ void ShadowMap::alignShadowMap(std::shared_ptr<LightSource> light)
    // Calculate light space transform
 
     _nearPlane = 1.0f;
-
 
     glm::vec3 observed_point;
     float fov;
@@ -155,14 +155,48 @@ void ShadowMap::setShadowBuffer(std::shared_ptr<FBO> shadowMap)
 void ShadowMap::setDimensions(unsigned int width, unsigned int height)
 {
     _bufferWidth = width;
-    _bufferHeight = height;
+    if(height == 0)
+    {
+        _bufferHeight = width;
+    }
+    else
+    {
+        _bufferHeight = height;
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////// LIGHT LIBRARY
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-LightLibrary::LightLibrary()
+namespace
+{
+    unsigned int getShadowResolution(GraphicalEngine* engine)
+    {
+        auto setting = engine->getSettings().getShadowQualityGlobal();
+        switch(setting)
+        {
+            case E_ShadowQuality_Global::LOW:
+                return 512;
+                break;
+            case E_ShadowQuality_Global::MEDIUM:
+                return 1024;
+                break;
+            case E_ShadowQuality_Global::HIGH:
+                return 2048;
+                break;
+            case E_ShadowQuality_Global::ULTRA:
+                return 4096;
+                break;
+            default:
+                throw std::runtime_error("Shadow quality not recognized");
+        }
+        return 512;
+    }
+}
+
+LightLibrary::LightLibrary(GraphicalEngine* engine) :
+    _ranFrom(engine)
 {
     ;
 }
@@ -244,11 +278,17 @@ void LightLibrary::lightSetup(unsigned int lightIndex, const PointLight &light)
     shaders->setUniformFloat("pointLight[" + std::to_string(lightIndex) + "].quadratic", attFactors[2]);
 
     // Shadow Maps - Light Space Matrix
+    if( _ranFrom->getSettings().getShadowGlobal() == E_Setting::OFF ||
+        _ranFrom->getSettings().getShadowPoint() == E_Setting::OFF)
+    {
+        return;
+    }
 
     if(_shadowMaps.find(light._id) == _shadowMaps.end())
     {
         throw std::runtime_error("Shadow map not found");
     }
+
     ShadowMap& shaMap = _shadowMaps[light._id];
     shaders->setUniformFloat("pointLight[" + std::to_string(lightIndex) + "].farPlane", shaMap._farPlane);
     shaders->setUniformInt("pointLight[" + std::to_string(lightIndex) + "].shadowMap", 15 + lightIndex);
@@ -256,7 +296,6 @@ void LightLibrary::lightSetup(unsigned int lightIndex, const PointLight &light)
     glActiveTexture(GL_TEXTURE0 + 15 + lightIndex);
     glBindTexture(GL_TEXTURE_CUBE_MAP, shaMap.getShadowMap()->getDepthTextureID());
     glActiveTexture(GL_TEXTURE0);
-
 }
 
 void LightLibrary::lightSetup(unsigned int lightIndex, const SpotLight &light)
@@ -289,6 +328,13 @@ void LightLibrary::lightSetup(unsigned int lightIndex, const SpotLight &light)
     shaders->setUniformFloat("spotLight[" + std::to_string(lightIndex) + "].outerCutOff", glm::cos(glm::radians(cutoff[1])));
 
     // Shadow Maps - Light Space Matrix
+
+    if( _ranFrom->getSettings().getShadowGlobal() == E_Setting::OFF ||
+        _ranFrom->getSettings().getShadowSpot() == E_Setting::OFF)
+    {
+        return;
+    }
+
     if(_shadowMaps.find(light._id) == _shadowMaps.end())
     {
         throw std::runtime_error("Shadow map not found");
@@ -328,15 +374,16 @@ void LightLibrary::alignShadowMaps(std::shared_ptr<Scene> scene)
         {
             std::shared_ptr<FBO> fbo;
             ShadowMap shadowMap;
-            unsigned int shadowMapHeight = 2048, shadowMapWidth = 2048;
+            unsigned int shadowMapResolution = getShadowResolution(_ranFrom);
+
             switch (getLightType(*light))
             {
                 case E_LightType::POINT_LIGHT:
-                    fbo = framebuffers->addFBO(E_AttachmentFormat::SHADOW_DEPTH_CUBE, shadowMapHeight, shadowMapWidth);
+                    fbo = framebuffers->addFBO(E_AttachmentFormat::SHADOW_DEPTH_CUBE, shadowMapResolution, shadowMapResolution);
                     shadowMap.setLightType(E_LightType::POINT_LIGHT);
                     break;
                 case E_LightType::SPOT_LIGHT:
-                    fbo = framebuffers->addFBO(E_AttachmentFormat::SHADOW_DEPTH, shadowMapHeight, shadowMapWidth);
+                    fbo = framebuffers->addFBO(E_AttachmentFormat::SHADOW_DEPTH, shadowMapResolution, shadowMapResolution);
                     shadowMap.setLightType(E_LightType::SPOT_LIGHT);
                     break;
             }
@@ -344,7 +391,7 @@ void LightLibrary::alignShadowMaps(std::shared_ptr<Scene> scene)
             fbo->addAttachment(E_AttachmentType::DEPTH);
             shadowMap.setShadowBuffer(fbo);
             shadowMap.alignShadowMap(light);
-            shadowMap.setDimensions(shadowMapHeight, shadowMapWidth);
+            shadowMap.setDimensions(shadowMapResolution);
             _shadowMaps.insert(std::make_pair(light->_id, shadowMap));
         }
     }

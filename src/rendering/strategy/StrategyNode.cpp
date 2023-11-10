@@ -8,6 +8,7 @@
 #include "rendering/engineModules/LightManager.hpp"
 #include "rendering/engineModules/InstancingManager.hpp"
 #include "rendering/framebuffer/Framebuffer_Manager.hpp"
+#include "rendering/Settings.hpp"
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////// STRATEGY NODE (Pure abstract class)
@@ -53,6 +54,20 @@ void ShadowsSetupNode::run()
     std::shared_ptr<Scene> scene = _chain->engine()->getScene();
     std::shared_ptr<LightLibrary> lightLibrary = _chain->engine()->getLightLibrary();
     std::shared_ptr<ShaderLibrary> shaderPrograms = _chain->engine()->getShaderLibrary();
+    const Settings& settings = _chain->engine()->getSettings();
+
+    if(settings.getShadowGlobal() != E_Setting::ON)
+    {
+        return;
+    }
+
+    std::tuple<bool, bool, bool> shadowSettings = {
+        settings.getShadowDirectional() == E_Setting::ON,
+        settings.getShadowPoint() == E_Setting::ON,
+        settings.getShadowSpot() == E_Setting::ON
+    };
+    
+    shaderPrograms->getUniformBuffer("shadowSettingsBlock").update(shadowSettings);
 
     shaderPrograms->use(0);
     lightLibrary->alignShadowMaps(scene);

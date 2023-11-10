@@ -79,9 +79,10 @@ int openGL::initialize(GLFWwindow* window)
     // Add uniform buffers to the shaders
     _shaderPrograms->createUniformBuffer("mvp_camera");
     _shaderPrograms->createUniformBuffer("viewPosBlock");
+    _shaderPrograms->createUniformBuffer("shadowSettingsBlock");
 
     // Initialize LightManager
-    _lightLibrary = std::make_shared<LightLibrary>();
+    _lightLibrary = std::make_shared<LightLibrary>(this);
     _lightLibrary->bindFramebufferManager(_frameBuffers);
     _lightLibrary->bindShaderLibrary(_shaderPrograms);
 

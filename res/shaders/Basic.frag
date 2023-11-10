@@ -75,6 +75,13 @@ layout(std140) uniform viewPosBlock
 	vec3 viewPos;
 };
 
+layout(std140) uniform shadowSettingsBlock
+{
+	bool directional;
+	bool point;
+	bool spot;
+};
+
 // Outputs
 out vec4 fragColor;
 
@@ -195,7 +202,12 @@ vec3 calcPointLight(int i, PointLight light, vec3 normal, vec3 FragPos, vec3 vie
 	specular *= attenuation;
 
 	// Calculate shadow
-	float shadow = PointLightShadowCalculation(i, FragmentIn.FragPos);
+	float shadow = 0.0;
+	if(point)
+	{
+		shadow = PointLightShadowCalculation(i, FragmentIn.FragPos);
+	}
+
 	return ( (1.0 - shadow) * (diffuse + specular));
 }
 
@@ -238,7 +250,11 @@ vec3 calcSpotLight(int i, SpotLight light, vec3 normal, vec3 FragPos, vec3 viewD
 	specular *= attenuation * intensity;
 	
 	// Calculate shadow
-	float shadow = SpotLightShadowCalculation(i, LightSpaceFragmentIn.Spotlight[i], normal, lightDir);
+	float shadow = 0.0;
+	if(spot)
+	{
+		shadow = SpotLightShadowCalculation(i, LightSpaceFragmentIn.Spotlight[i], normal, lightDir);
+	}
 	return ( (1.0 - shadow) * (diffuse + specular) );
 }
 
