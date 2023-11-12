@@ -24,7 +24,6 @@
     This is the class that manages the proper creation and release of resources for rendered objects
     It manages safe coordination between the scene and rendering engine while allowing the first to not be aware of the latter
 */
-
 class SceneObjectFactory
 {
 public:

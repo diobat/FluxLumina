@@ -11,9 +11,6 @@
 
 namespace
 {
-
-    //std::vector<Texture> loadedTextures;
-
     bool flipUVsOnLoad = false;
 
     Texture TextureFromFile(const char *path, const std::string &directory, bool gamma = false)
@@ -32,7 +29,6 @@ namespace
 
     void setTextureData(Texture &texture, aiTextureType type)
     {
-
         // Set texture parameters
         if (texture._components == 1)
             texture._colorChannels = GL_RED;
@@ -79,11 +75,11 @@ SceneObjectFactory::SceneObjectFactory(Scene* scene, GraphicalEngine* engine, Me
     _boundEngine = engine;
     _meshLibrary = meshLibrary;
 
-    if(scene != nullptr)
-    {
-        ModelObject& cube = create_Model("res/models/origin_cube.obj", 0);
-        cube.setScale(0.3f);
-    }
+    // if(scene != nullptr)
+    // {
+    //     ModelObject& cube = create_Model("res/models/origin_cube.obj", 0);
+    //     cube.setScale(0.3f);
+    // }
 }
 
 void SceneObjectFactory::bindScene(Scene* scene)
@@ -110,13 +106,7 @@ ModelObject &SceneObjectFactory::create_Model(const std::string &modelPath, unsi
 
     flipUVsOnLoad = flipUVs;
 
-
     load_ModelMeshes(model, modelPath);
-
-    // for (auto &one_mesh : model.meshes)
-    // {
-    //     _boundEngine->initializeMesh(one_mesh);
-    // }
 
     _boundScene->addModel(model_object);
 
@@ -131,7 +121,12 @@ void SceneObjectFactory::load_ModelMeshes(Model& model, const std::string& path)
     {
         // read file via ASSIMP
         Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile(ROOT_DIR + path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_FixInfacingNormals | aiProcess_CalcTangentSpace);
+        const aiScene *scene = importer.ReadFile(ROOT_DIR + path, 
+        aiProcess_Triangulate | 
+        aiProcess_FlipUVs | 
+        //aiProcess_JoinIdenticalVertices |
+        //aiProcess_FixInfacingNormals | 
+        aiProcess_CalcTangentSpace);
         // check for errors
         if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) // if is Not Zero
         {
@@ -193,13 +188,13 @@ std::shared_ptr<Mesh> SceneObjectFactory::processMesh(const std::string &path, a
         Vertex vertex;
         glm::vec3 vector; // we declare a placeholder vector since assimp uses its own vector class that doesn't directly convert to glm's vec3 class so we transfer the data to this placeholder glm::vec3 first.
         
-        // positions
+        // Positions
         vector.x = mesh->mVertices[i].x;
         vector.y = mesh->mVertices[i].y;
         vector.z = mesh->mVertices[i].z;
         vertex.Position = vector;
         
-        // normals
+        // Normals
         vector.x = mesh->mNormals[i].x;
         vector.y = mesh->mNormals[i].y;
         vector.z = mesh->mNormals[i].z;
@@ -220,7 +215,7 @@ std::shared_ptr<Mesh> SceneObjectFactory::processMesh(const std::string &path, a
             vertex.TexCoords = glm::vec2(0.0f, 0.0f);
         }
         
-        // colors
+        // Colors
         aiColor4D diffuse;
         aiMaterial* mtl = scene->mMaterials[mesh->mMaterialIndex];
 
@@ -238,6 +233,19 @@ std::shared_ptr<Mesh> SceneObjectFactory::processMesh(const std::string &path, a
         }
         vertex.Color = vector;
 
+        // Tangents
+        if(mesh->HasTangentsAndBitangents())
+        {
+            vector.x = mesh->mTangents[i].x;
+            vector.y = mesh->mTangents[i].y;
+            vector.z = mesh->mTangents[i].z;
+            vertex.Tangent = vector;
+        }
+        else
+        {
+            vertex.Tangent = glm::vec3(0.0f, 0.0f, 0.0f);
+        }
+
         vertices.push_back(vertex);
     }
     // now wak through each of the mesh's faces (a face is a mesh its triangle) and retrieve the corresponding vertex indices.
@@ -249,7 +257,6 @@ std::shared_ptr<Mesh> SceneObjectFactory::processMesh(const std::string &path, a
             indices.push_back(face.mIndices[j]);
     }
 
-
     std::string directory = path.substr(0, path.find_last_of('/'));
 
     // process materials
@@ -260,6 +267,8 @@ std::shared_ptr<Mesh> SceneObjectFactory::processMesh(const std::string &path, a
         textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
         std::vector<Texture> specularMaps = loadMaterialTextures(directory, material, aiTextureType_SPECULAR);
         textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+        std::vector<Texture> normalMaps = loadMaterialTextures(directory, material, aiTextureType_HEIGHT);
+        textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
 
         float opacity = 1.0f;
         if(material->Get(AI_MATKEY_OPACITY, opacity) == AI_SUCCESS)
@@ -269,8 +278,6 @@ std::shared_ptr<Mesh> SceneObjectFactory::processMesh(const std::string &path, a
                 hasTransparency = true;
             }
         }
-    
-
     }
     // return a mesh object created from the extracted mesh data
     return std::make_shared<Mesh>(Mesh(vertices, indices, textures, hasTransparency));
@@ -299,7 +306,6 @@ std::vector<Texture> SceneObjectFactory::loadMaterialTextures(const std::string 
 
         if(!isPreviouslyLoaded)
         {
-
             Texture texture = TextureFromFile(str.C_Str(), path);
             setTextureData(texture, type);
 

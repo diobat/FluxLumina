@@ -4,6 +4,7 @@ struct Material{
 sampler2D diffuse;
 sampler2D specular;
 float shininess;
+sampler2D height;
 };
 
 struct DirLight{
@@ -41,10 +42,11 @@ sampler2D shadowMap;
 
 // Inputs from the vertex shader
 in VertexOutput{
-vec3 objectColor;
-vec3 Normal;
-vec2 TexCoords;
-vec3 FragPos;
+	vec3 objectColor;
+	vec3 Normal;
+	vec2 TexCoords;
+	vec3 FragPos;
+	mat3 TBN;
 } FragmentIn;
 
 in LightSpaceVertexOutput{
@@ -59,6 +61,7 @@ in LightSpaceVertexOutput{
 uniform Material material;
 uniform int sampleFromDiffuse;
 uniform int sampleFromSpecular;
+uniform int sampleFromHeight;
 
 // Directional lights
 uniform int numDirLights;
@@ -80,6 +83,11 @@ layout(std140) uniform shadowSettingsBlock
 	bool directional;
 	bool point;
 	bool spot;
+};
+
+layout(std140) uniform normalMappingBlock
+{
+	int normalMapping;
 };
 
 // Outputs
@@ -263,8 +271,21 @@ void main()
 	vec3 totalLight = vec3(0.0);
 
 	// Calculate common input arguments for all the light calculations
-	vec3 norm = normalize(FragmentIn.Normal);
+	vec3 norm;
 	vec3 viewDir = normalize(viewPos - FragmentIn.FragPos);
+
+	if(sampleFromHeight == 0)
+	{
+		norm = normalize(FragmentIn.Normal);
+	}
+	else
+	{
+		norm = texture(material.height, FragmentIn.TexCoords).rgb;
+		norm = norm * 2.0 - 1.0;   
+		norm = normalize(FragmentIn.TBN * norm); 
+	}
+
+
 	// 1 - Directional Lights
 	for(int i = 0; i < numDirLights; i++)
 	{

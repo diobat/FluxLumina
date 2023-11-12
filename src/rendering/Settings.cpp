@@ -15,16 +15,20 @@ Settings::Settings(GLFWwindow* _window)    :
     _shadowSpot(E_Setting::ON),
     _antiAliasing(E_Setting::ON),
     _transparency(E_Setting::ON),
-    _gammaCorrection(E_Setting::ON)
+    _gammaCorrection(E_Setting::ON),
+    _faceCulling(E_Setting::ON),
+    _depthTest(E_Setting::ON),
+    _normalMapping(E_Setting::ON)
 {
     /* Make the window's context current */
     glfwMakeContextCurrent(_window);
     
     set(E_Settings::ANTI_ALIASING_QUALITY, 1);
     set(E_Settings::TRANSPARENCY, 1);
-    set(E_Settings::GAMMA_CORRECTION, 1);
+    set(E_Settings::GAMMA_CORRECTION, 0);
     set(E_Settings::FACE_CULLING, 1);
     set(E_Settings::DEPTH_TEST, 1);
+    set(E_Settings::NORMAL_MAPPING, 1);
 }
 
 void Settings::set(E_Settings setting, int value)
@@ -103,6 +107,9 @@ void Settings::set(E_Settings setting, int value)
             glDisable(GL_DEPTH_TEST);
         }
         break;
+    case E_Settings::NORMAL_MAPPING:
+        _normalMapping = static_cast<E_Setting>(value);
+        break;
     default:
         break;
     }
@@ -146,4 +153,19 @@ E_Setting Settings::getTransparency() const
 E_Setting Settings::getGammaCorrection() const
 {
     return _gammaCorrection;
+}
+
+E_Setting Settings::getFaceCulling() const
+{
+    return _faceCulling;
+}
+
+E_Setting Settings::getDepthTest() const
+{
+    return _depthTest;
+}
+
+E_Setting Settings::getNormalMapping() const
+{
+    return _normalMapping;
 }

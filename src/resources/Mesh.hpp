@@ -21,6 +21,8 @@ struct Vertex
     glm::vec2 TexCoords;
     // Color
     glm::vec3 Color;
+    // Tangent
+    glm::vec3 Tangent;
 };
 
 class Mesh
