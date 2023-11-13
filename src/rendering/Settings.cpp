@@ -23,6 +23,7 @@ Settings::Settings(GLFWwindow* _window)    :
     /* Make the window's context current */
     glfwMakeContextCurrent(_window);
     
+    set(E_Settings::SHADOW_GLOBAL, 0);
     set(E_Settings::ANTI_ALIASING_QUALITY, 1);
     set(E_Settings::TRANSPARENCY, 1);
     set(E_Settings::GAMMA_CORRECTION, 0);
@@ -39,6 +40,9 @@ void Settings::set(E_Settings setting, int value)
     {
     case E_Settings::SHADOW_QUALITY_GLOBAL:
         _shadowQualityGlobal = static_cast<E_ShadowQuality_Global>(value);
+        break;
+    case E_Settings::SHADOW_GLOBAL:
+        _shadowGlobal = static_cast<E_Setting>(value);
         break;
     case E_Settings::SHADOW_DIRECTIONAL:
         _shadowDirectional = static_cast<E_Setting>(value);

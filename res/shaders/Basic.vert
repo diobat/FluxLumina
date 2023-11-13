@@ -19,7 +19,7 @@ layout(std140) uniform mvp_camera
 	mat4 projection;
 };
 
-uniform int sampleFromHeight;
+uniform int sampleFromNormal;
 uniform int numSpotLights;
 uniform mat4 spotLightSpaceMatrix[10];
 
@@ -50,7 +50,7 @@ void main()
 		LightSpaceVertexOut.Spotlight[i] = spotLightSpaceMatrix[i] * vec4(VertexOut.FragPos, 1.0);
 	}
 
-	if(sampleFromHeight == 1)
+	if(sampleFromNormal	== 1)
 	{
 		vec3 T = normalize(vec3(instanceMatrix * vec4(aTangent,   0.0)));
 		vec3 N = normalize(vec3(instanceMatrix * vec4(aNormal,    0.0)));

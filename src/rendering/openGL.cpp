@@ -73,7 +73,7 @@ int openGL::initialize(GLFWwindow* window)
     // Initialize Instancing Manager
     _instancingManager = std::make_shared<InstancingManager>();
 
-    // Initialize rendering strategy
+    // Initialize Rendering strategy
     _strategyChain = std::make_shared<DefaultStrategyChain>(this);
 
     return 1;
@@ -192,7 +192,9 @@ void openGL::bindTextures(std::shared_ptr<Mesh> mesh)
 
     _shaderPrograms->setUniformInt("sampleFromDiffuse", 0);
     _shaderPrograms->setUniformInt("sampleFromSpecular", 0);
-    _shaderPrograms->setUniformInt("sampleFromHeight", 0);
+    _shaderPrograms->setUniformInt("sampleFromNormal", 0);
+
+    _shaderPrograms->setUniformFloat("material.shininess", 4.5f);
 
     if (mesh->_textures.size() == 0)
     {
@@ -213,20 +215,19 @@ void openGL::bindTextures(std::shared_ptr<Mesh> mesh)
         case SPECULAR:
             _shaderPrograms->setUniformInt("sampleFromSpecular", 1);
             _shaderPrograms->setUniformInt("material.specular", 2);
-            _shaderPrograms->setUniformFloat("material.shininess", 4.5f);
             glActiveTexture(GL_TEXTURE0 + 2);
             glBindTexture(GL_TEXTURE_2D, mesh->_textures[i]._id);
             break;
         case NORMAL:
-            break;
-        case HEIGHT:
             if(_settings->getNormalMapping() == E_Setting::ON)
             {
-                _shaderPrograms->setUniformInt("sampleFromHeight", 1);
-                _shaderPrograms->setUniformInt("material.height", 30);
-                glActiveTexture(GL_TEXTURE0 + 30);
+                _shaderPrograms->setUniformInt("sampleFromNormal", 1);
+                _shaderPrograms->setUniformInt("material.normal", 3);
+                glActiveTexture(GL_TEXTURE0 + 3);
                 glBindTexture(GL_TEXTURE_2D, mesh->_textures[i]._id);
             }
+            break;
+        case HEIGHT:
             break;
         case CUBEMAP:
             _shaderPrograms->setUniformInt("cubemap", 3);

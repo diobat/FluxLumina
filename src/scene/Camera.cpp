@@ -94,7 +94,6 @@ void Camera::resizeCameraPlane(const float& width, const float& height)
 
 void Camera::move(relativeDirections d)
 {
-
 	switch (d)
 	{
 		case relativeDirections::FORWARD:
@@ -115,12 +114,9 @@ void Camera::move(relativeDirections d)
 		case relativeDirections::DOWN:
 			_position -= _cameraUp * _translationSpeed;
 			break;
-
 		default:
 			break;
-
 	}
-
 }
 
 void Camera::rotate(const std::array<float, 2>& angleDelta)

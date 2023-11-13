@@ -4,7 +4,7 @@ struct Material{
 sampler2D diffuse;
 sampler2D specular;
 float shininess;
-sampler2D height;
+sampler2D normal;
 };
 
 struct DirLight{
@@ -61,7 +61,7 @@ in LightSpaceVertexOutput{
 uniform Material material;
 uniform int sampleFromDiffuse;
 uniform int sampleFromSpecular;
-uniform int sampleFromHeight;
+uniform int sampleFromNormal;
 
 // Directional lights
 uniform int numDirLights;
@@ -215,7 +215,6 @@ vec3 calcPointLight(int i, PointLight light, vec3 normal, vec3 FragPos, vec3 vie
 	{
 		shadow = PointLightShadowCalculation(i, FragmentIn.FragPos);
 	}
-
 	return ( (1.0 - shadow) * (diffuse + specular));
 }
 
@@ -273,14 +272,14 @@ void main()
 	// Calculate common input arguments for all the light calculations
 	vec3 norm;
 	vec3 viewDir = normalize(viewPos - FragmentIn.FragPos);
-
-	if(sampleFromHeight == 0)
+	
+	if(sampleFromNormal == 0)
 	{
 		norm = normalize(FragmentIn.Normal);
 	}
 	else
 	{
-		norm = texture(material.height, FragmentIn.TexCoords).rgb;
+		norm = texture(material.normal, FragmentIn.TexCoords).rgb;
 		norm = norm * 2.0 - 1.0;   
 		norm = normalize(FragmentIn.TBN * norm); 
 	}

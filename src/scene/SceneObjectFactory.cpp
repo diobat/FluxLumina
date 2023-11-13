@@ -9,11 +9,38 @@
 /////////////////////////// HELPER FUNCTIONS
 ///////////////////////////////////////////////////////////////////////////////////////////
 
+
+
 namespace
 {
+    enum class FileType
+    {
+        NONE,
+        OBJ,
+        GLB,
+        UNKNOWN
+    } fileType;
+
     bool flipUVsOnLoad = false;
 
-    Texture TextureFromFile(const char *path, const std::string &directory, bool gamma = false)
+    void detectFileType(const std::string& path)
+    {
+        std::string extension = path.substr(path.find_last_of('.') + 1);
+        if(extension == "OBJ" || extension == "obj")
+        {
+            fileType = FileType::OBJ;
+        }
+        else if(extension == "GLB" || extension == "glb")
+        {
+            fileType = FileType::GLB;
+        }
+        else
+        {
+            fileType = FileType::UNKNOWN;
+        }
+    }
+
+    Texture TextureFromFile(const char* path, const std::string &directory, bool gamma = false)
     {
         std::string filename = std::string(path);
         filename = ROOT_DIR + directory + '/' + filename;
@@ -25,6 +52,24 @@ namespace
         texture._path = path;
 
         return texture;
+    }
+
+    Texture TextureFromEmbeddedTexture(const aiTexture* texture)
+    {
+
+        stbi_set_flip_vertically_on_load(false);
+
+        Texture embeddedTexture;
+        embeddedTexture._pixels = stbi_load_from_memory(
+            reinterpret_cast<const unsigned char*>(texture->pcData),
+            texture->mWidth,
+            &embeddedTexture._width,
+            &embeddedTexture._height,
+            &embeddedTexture._components,
+            0);
+        embeddedTexture._path = std::string(texture->mFilename.C_Str()) + "." + texture->achFormatHint;
+
+        return embeddedTexture;
     }
 
     void setTextureData(Texture &texture, aiTextureType type)
@@ -98,6 +143,8 @@ void SceneObjectFactory::bindEngine(GraphicalEngine *engine)
 
 ModelObject &SceneObjectFactory::create_Model(const std::string &modelPath, unsigned int shader, bool flipUVs)
 {
+    detectFileType(modelPath);
+
     std::shared_ptr<ModelObject> model_object = std::make_shared<ModelObject>();
     Model& model = (*model_object->getModel());
 
@@ -110,6 +157,7 @@ ModelObject &SceneObjectFactory::create_Model(const std::string &modelPath, unsi
 
     _boundScene->addModel(model_object);
 
+    fileType = FileType::NONE;
     return *model_object;
 }
 
@@ -124,8 +172,8 @@ void SceneObjectFactory::load_ModelMeshes(Model& model, const std::string& path)
         const aiScene *scene = importer.ReadFile(ROOT_DIR + path, 
         aiProcess_Triangulate | 
         aiProcess_FlipUVs | 
-        //aiProcess_JoinIdenticalVertices |
-        //aiProcess_FixInfacingNormals | 
+        aiProcess_JoinIdenticalVertices |
+        aiProcess_FixInfacingNormals | 
         aiProcess_CalcTangentSpace);
         // check for errors
         if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) // if is Not Zero
@@ -263,13 +311,13 @@ std::shared_ptr<Mesh> SceneObjectFactory::processMesh(const std::string &path, a
     if(mesh->mMaterialIndex >= 0)
     {
         aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
-        std::vector<Texture> diffuseMaps = loadMaterialTextures(directory, material, aiTextureType_DIFFUSE);
+        std::vector<Texture> diffuseMaps = loadMaterialTextures(scene, directory, material, aiTextureType_DIFFUSE);
         textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
-        std::vector<Texture> specularMaps = loadMaterialTextures(directory, material, aiTextureType_SPECULAR);
+        std::vector<Texture> specularMaps = loadMaterialTextures(scene, directory, material, aiTextureType_SPECULAR);
         textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
-        std::vector<Texture> normalMaps = loadMaterialTextures(directory, material, aiTextureType_HEIGHT);
+        std::vector<Texture> normalMaps = loadMaterialTextures(scene, directory, material, aiTextureType_NORMALS);
         textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
-
+        
         float opacity = 1.0f;
         if(material->Get(AI_MATKEY_OPACITY, opacity) == AI_SUCCESS)
         {
@@ -283,7 +331,7 @@ std::shared_ptr<Mesh> SceneObjectFactory::processMesh(const std::string &path, a
     return std::make_shared<Mesh>(Mesh(vertices, indices, textures, hasTransparency));
 }
 
-std::vector<Texture> SceneObjectFactory::loadMaterialTextures(const std::string &path, aiMaterial *mat, aiTextureType type)
+std::vector<Texture> SceneObjectFactory::loadMaterialTextures(const aiScene* scene, const std::string &path, aiMaterial *mat, aiTextureType type)
 {
     std::vector<Texture> materialTextures;
     const auto& loadedTextures = _meshLibrary->getLoadedTextures();
@@ -293,6 +341,8 @@ std::vector<Texture> SceneObjectFactory::loadMaterialTextures(const std::string 
         aiString str;
         mat->GetTexture(type, i, &str);
         bool isPreviouslyLoaded = false;
+
+        mat->Get(AI_MATKEY_TEXTURE(type, i), str);
 
         for(unsigned int k = 0; k < loadedTextures.size(); k++)
         {
@@ -306,9 +356,19 @@ std::vector<Texture> SceneObjectFactory::loadMaterialTextures(const std::string 
 
         if(!isPreviouslyLoaded)
         {
-            Texture texture = TextureFromFile(str.C_Str(), path);
-            setTextureData(texture, type);
+            Texture texture;
 
+            switch(fileType)
+            {
+                case FileType::OBJ:
+                    texture = TextureFromFile(str.C_Str(), path);
+                    break;
+                case FileType::GLB:
+                    texture = TextureFromEmbeddedTexture(scene->GetEmbeddedTexture(str.C_Str()));
+                    break;
+            }
+
+            setTextureData(texture, type);
             _boundEngine->initializeTexture(texture);
             materialTextures.push_back(texture);
             _meshLibrary->addTexture(texture);
