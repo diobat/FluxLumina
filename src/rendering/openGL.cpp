@@ -73,7 +73,7 @@ int openGL::initialize(GLFWwindow* window)
     // Initialize Instancing Manager
     _instancingManager = std::make_shared<InstancingManager>();
 
-    // Initialize rendering strategy
+    // Initialize Rendering strategy
     _strategyChain = std::make_shared<DefaultStrategyChain>(this);
 
     return 1;
@@ -138,7 +138,6 @@ void openGL::resizeWindow(GLFWwindow* window, int width, int height)
 
 void openGL::initializeMesh(std::shared_ptr<Mesh>& mesh)
 {
-
     // create buffers/arrays
     glGenVertexArrays(1, &mesh->VAO);
     glGenBuffers(1, &mesh->VBO);
@@ -164,6 +163,9 @@ void openGL::initializeMesh(std::shared_ptr<Mesh>& mesh)
     // vertex color info
     glEnableVertexAttribArray(3);
     glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, Color));
+    // vertex tangent info
+    glEnableVertexAttribArray(4);
+    glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, Tangent));
 
     glBindVertexArray(0);
 }
@@ -187,19 +189,17 @@ void openGL::initializeTexture(Texture& texture)
 
 void openGL::bindTextures(std::shared_ptr<Mesh> mesh)
 {
-    unsigned int diffuseNr = 0;
-    unsigned int specularNr = 0;
-    unsigned int cubemapNr = 0;
 
     _shaderPrograms->setUniformInt("sampleFromDiffuse", 0);
     _shaderPrograms->setUniformInt("sampleFromSpecular", 0);
+    _shaderPrograms->setUniformInt("sampleFromNormal", 0);
+
+    _shaderPrograms->setUniformFloat("material.shininess", 4.5f);
 
     if (mesh->_textures.size() == 0)
     {
         return;
     }
-
-    int imageUnitSpace;
 
     for (int i = 0; i < mesh->_textures.size(); i++)
     {
@@ -207,37 +207,34 @@ void openGL::bindTextures(std::shared_ptr<Mesh> mesh)
         switch (mesh->_textures[i]._type)
         {
         case DIFFUSE:
-            imageUnitSpace = 0;
             _shaderPrograms->setUniformInt("sampleFromDiffuse", 1);
             _shaderPrograms->setUniformInt("material.diffuse", 1);
             glActiveTexture(GL_TEXTURE0 + 1);
             glBindTexture(GL_TEXTURE_2D, mesh->_textures[i]._id);
-            diffuseNr++;
             break;
         case SPECULAR:
-            imageUnitSpace = 20;
             _shaderPrograms->setUniformInt("sampleFromSpecular", 1);
             _shaderPrograms->setUniformInt("material.specular", 2);
-            _shaderPrograms->setUniformFloat("material.shininess", 4.5f);
             glActiveTexture(GL_TEXTURE0 + 2);
             glBindTexture(GL_TEXTURE_2D, mesh->_textures[i]._id);
-            specularNr++;
             break;
         case NORMAL:
-            imageUnitSpace = 40;
+            if(_settings->getNormalMapping() == E_Setting::ON)
+            {
+                _shaderPrograms->setUniformInt("sampleFromNormal", 1);
+                _shaderPrograms->setUniformInt("material.normal", 3);
+                glActiveTexture(GL_TEXTURE0 + 3);
+                glBindTexture(GL_TEXTURE_2D, mesh->_textures[i]._id);
+            }
             break;
         case HEIGHT:
-            imageUnitSpace = 60;
             break;
         case CUBEMAP:
-            imageUnitSpace = 80;
             _shaderPrograms->setUniformInt("cubemap", 3);
             glActiveTexture(GL_TEXTURE0 + 3);
             glBindTexture(GL_TEXTURE_CUBE_MAP, mesh->_textures[i]._id);
-            cubemapNr++;
             break;
         default:
-            imageUnitSpace = 0;
             break;
         }
 

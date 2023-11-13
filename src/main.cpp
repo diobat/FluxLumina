@@ -9,6 +9,12 @@
 #include <memory>
 
 
+namespace
+{
+    std::shared_ptr<LightSource> movLight;
+}
+
+
 void update(openGL& graphicalEngine, std::vector<std::shared_ptr<Scene>> scenes, std::shared_ptr<UserInput::glfwKeyboardScanner>& userInput)
 {
     //glEnable(GL_DEBUG_OUTPUT);
@@ -23,11 +29,13 @@ void update(openGL& graphicalEngine, std::vector<std::shared_ptr<Scene>> scenes,
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     while (!glfwWindowShouldClose(graphicalEngine.getWindowPtr()))
     {
-
         /* Update game time value */
         newTime  = static_cast<float>(glfwGetTime());
         deltaTime = newTime - gameTime - startTime;
         gameTime = newTime - startTime;
+
+        // Move objects
+        movLight->setPosition({-10.0f + 10.0f * sin(gameTime), 5.0f, 19.0f + 10.0f * cos(gameTime)});
 
         openGLContext::updateFPSCounter(deltaTime);
 
@@ -71,6 +79,12 @@ int main(void)
     // Camera setup
     factory.create_Camera();
 
+
+    auto& wall = factory.create_Model("res/models/brickWall/brickWall.glb", 0);
+    wall.setPosition({-10.0f, 5.0f, 19.0f});
+    wall.setScale(3.5f);
+
+
     // Skybox setup
     auto skybox = factory.create_Skybox(
         {"res/models/skybox/right.jpg",
@@ -81,24 +95,25 @@ int main(void)
          "res/models/skybox/back.jpg"});
 
     // Scene objects 
-    auto &window1 = factory.create_Model("res/models/window/window.obj", 2);
-    window1.setPosition({-25.0f, 10.0f, -20.0f});
+    // auto &window1 = factory.create_Model("res/models/window/window.obj", 2);
+    // window1.setPosition({-25.0f, 10.0f, -20.0f});
 
-    auto &window2 = factory.create_Model("res/models/window/window.obj", 2);
-    window2.setPosition({-25.0f, 10.0f, -18.0f});
+    // auto &window2 = factory.create_Model("res/models/window/window.obj", 2);
+    // window2.setPosition({-25.0f, 10.0f, -18.0f});
 
-    auto &window3 = factory.create_Model("res/models/window/window.obj", 2);
-    window3.setPosition({-25.0f, 10.0f, -16.0f});
+    // auto &window3 = factory.create_Model("res/models/window/window.obj", 2);
+    // window3.setPosition({-25.0f, 10.0f, -16.0f});
 
     ModelObject &ground = factory.create_Model("res/models/ground2.obj", 0);
+    ground.setScale(3.5f);
     ground.setPosition({0.0f, -0.5f, 0.0f});
 
     // ModelObject& mothership = factory.create_Model("res/models/Mothership/Mothership.obj", 0);
     // mothership.setPosition({0.0f, 10.0f, 7.5f});
     // mothership.setScale(0.001f);
 
-    ModelObject& backpack = factory.create_Model("res/models/backpack/backpack.obj", 0, true);
-    backpack.setPosition({15.0f, 3.0f, -16.5f});
+    // ModelObject& backpack = factory.create_Model("res/models/backpack/backpack.obj", 0, true);
+    // backpack.setPosition({15.0f, 3.0f, -16.5f});
 
     int width = 700;
     int height = 700;
@@ -135,22 +150,26 @@ int main(void)
     statue4.rotate(-90.0f, 0.0f, 0.0f);
     statue4.setScale(0.01f);
 
-    auto& grass = factory.create_Model("res/models/grassSquare/grassSquare.obj", 2);
-    grass.setPosition({10.0f, 1.0f, 10.0f});
+    // auto& grass = factory.create_Model("res/models/grassSquare/grassSquare.obj", 2);
+    // grass.setPosition({10.0f, 1.0f, 10.0f});
 
-    auto& cube = factory.create_Model("res/models/cube/cubeBlank.obj", 5);
-    std::vector<Texture> cubeTextures = {scene->getSkybox().getCubemap()->getTexture()};
-    cube.getModel()->meshes[0]->attachTexture(cubeTextures);
-    cube.setPosition({18.0f, 15.0f, 18.0f});
+    // auto& cube = factory.create_Model("res/models/cube/cubeBlank.obj", 5);
+    // std::vector<Texture> cubeTextures = {scene->getSkybox().getCubemap()->getTexture()};
+    // cube.getModel()->meshes[0]->attachTexture(cubeTextures);
+    // cube.setPosition({18.0f, 15.0f, 18.0f});
     
     // Lights
     auto light_A = factory.create_LightSource( E_LightType::POINT_LIGHT);
     light_A->setPosition({13.0f, 5.0f, 13.0f});
     light_A->setAttenuationFactors({1.0f, 0.09f, 0.032f});
 
-    auto light_B = factory.create_LightSource( E_LightType::POINT_LIGHT);
-    light_B->setPosition({-13.0f, 5.0f, 13.0f});
-    light_B->setAttenuationFactors({1.0f, 0.09f, 0.032f});
+    // auto light_B = factory.create_LightSource( E_LightType::POINT_LIGHT);
+    // light_B->setPosition({-11.0f, 5.0f, 13.0f});
+    // light_B->setAttenuationFactors({1.0f, 0.18f, 0.032f});
+
+    movLight = factory.create_LightSource( E_LightType::POINT_LIGHT);
+    movLight->setPosition({-11.0f, 5.0f, 13.0f});
+    movLight->setAttenuationFactors({1.0f, 0.09f, 0.032f});
 
     auto light_C = factory.create_LightSource( E_LightType::POINT_LIGHT);
     light_C->setPosition({13.0f, 5.0f, -13.0f});

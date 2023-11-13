@@ -24,7 +24,6 @@
     This is the class that manages the proper creation and release of resources for rendered objects
     It manages safe coordination between the scene and rendering engine while allowing the first to not be aware of the latter
 */
-
 class SceneObjectFactory
 {
 public:
@@ -41,7 +40,7 @@ public:
     void load_ModelMeshes(Model& model, std::string const &path);
     void processNode(const std::string &path, aiNode* node, const aiScene* scene);
     std::shared_ptr<Mesh> processMesh(const std::string &path, aiMesh *mesh, const aiScene *scene);
-    std::vector<Texture> loadMaterialTextures(const std::string &path, aiMaterial *mat, aiTextureType type);
+    std::vector<Texture> loadMaterialTextures(const aiScene* scene, const std::string &path, aiMaterial *mat, aiTextureType type);
 
     // Creating lights
     std::shared_ptr<LightSource> create_LightSource(E_LightType type);

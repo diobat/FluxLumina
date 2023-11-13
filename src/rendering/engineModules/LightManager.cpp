@@ -98,6 +98,8 @@ void ShadowMap::alignShadowMap(std::shared_ptr<LightSource> light)
         perMat = glm::perspective(fov, 1.0f, _nearPlane, _farPlane);
         posVec = conversion::toVec3(light_point->getPosition());
 
+        _lightSpaceMatrix.clear();
+
         // Right face
         observed_point = posVec + glm::vec3( 1.0f, 0.0f, 0.0f);
         _lightSpaceMatrix.push_back(perMat*glm::lookAt(posVec,observed_point,glm::vec3(0.0f,-1.0f, 0.0f)));
