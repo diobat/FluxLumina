@@ -18,11 +18,14 @@ Settings::Settings(GLFWwindow* _window)    :
     _gammaCorrection(E_Setting::ON),
     _faceCulling(E_Setting::ON),
     _depthTest(E_Setting::ON),
-    _normalMapping(E_Setting::ON)
+    _normalMapping(E_Setting::ON),
+    _heightMapping(E_Setting::ON)
 {
     /* Make the window's context current */
     glfwMakeContextCurrent(_window);
     
+    // Initializer list is not enough because some of these 
+    // involve also calling some functions
     set(E_Settings::SHADOW_GLOBAL, 0);
     set(E_Settings::ANTI_ALIASING_QUALITY, 1);
     set(E_Settings::TRANSPARENCY, 1);
@@ -30,6 +33,7 @@ Settings::Settings(GLFWwindow* _window)    :
     set(E_Settings::FACE_CULLING, 1);
     set(E_Settings::DEPTH_TEST, 1);
     set(E_Settings::NORMAL_MAPPING, 1);
+    set(E_Settings::HEIGHT_MAPPING, 1);
 }
 
 void Settings::set(E_Settings setting, int value)
@@ -114,6 +118,9 @@ void Settings::set(E_Settings setting, int value)
     case E_Settings::NORMAL_MAPPING:
         _normalMapping = static_cast<E_Setting>(value);
         break;
+    case E_Settings::HEIGHT_MAPPING:
+        _heightMapping = static_cast<E_Setting>(value);
+        break;
     default:
         break;
     }
@@ -172,4 +179,9 @@ E_Setting Settings::getDepthTest() const
 E_Setting Settings::getNormalMapping() const
 {
     return _normalMapping;
+}
+
+E_Setting Settings::getHeightMapping() const
+{
+    return _heightMapping;
 }

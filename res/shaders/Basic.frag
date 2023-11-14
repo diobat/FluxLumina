@@ -5,6 +5,7 @@ sampler2D diffuse;
 sampler2D specular;
 float shininess;
 sampler2D normal;
+sampler2D height;
 };
 
 struct DirLight{
@@ -47,6 +48,8 @@ in VertexOutput{
 	vec2 TexCoords;
 	vec3 FragPos;
 	mat3 TBN;
+	vec3 TS_FragPos;
+	vec3 TS_ViewPos;
 } FragmentIn;
 
 in LightSpaceVertexOutput{
@@ -62,6 +65,8 @@ uniform Material material;
 uniform int sampleFromDiffuse;
 uniform int sampleFromSpecular;
 uniform int sampleFromNormal;
+uniform int sampleFromHeight;
+
 
 // Directional lights
 uniform int numDirLights;
@@ -104,6 +109,49 @@ vec3 gridSamplingDisk[20] = vec3[]
 );
 
 // Helper functions
+
+vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir)
+{
+	// number of depth layers based on view angle
+	const float minLayers = 8.0;
+	const float maxLayers = 32.0;
+	float numLayers = mix(maxLayers, minLayers, max(dot(vec3(0.0, 0.0, 1.0), viewDir), 0.0));
+	// calculate the size of each layer
+	float layerDepth = 1.0 / numLayers;
+	// depth of current layer
+	float currentLayerDepth = 0.0;
+	// the amount to shift the texture coordinates per layer (from vector P)
+    vec2 P = viewDir.xy * 0.1; 
+    vec2 deltaTexCoords = P / numLayers;
+
+	// get initial values
+	vec2  currentTexCoords     = texCoords;
+	float currentDepthMapValue = texture(material.height, currentTexCoords).r;
+	
+	while(currentLayerDepth < currentDepthMapValue)
+	{
+		// shift texture coordinates along direction of P
+		currentTexCoords -= deltaTexCoords;
+		// get depthmap value at current texture coordinates
+		currentDepthMapValue = texture(material.height, currentTexCoords).r;  
+		// get depth of next layer
+		currentLayerDepth += layerDepth;  
+	}
+
+	// get texture coordinates before collision (reverse operations)
+	vec2 prevTexCoords = currentTexCoords + deltaTexCoords;
+
+	// get depth after and before collision for linear interpolation
+	float afterDepth  = currentDepthMapValue - currentLayerDepth;
+	float beforeDepth = texture(material.height, prevTexCoords).r - currentLayerDepth + layerDepth;
+	
+	// interpolation of texture coordinates
+	float weight = afterDepth / (afterDepth - beforeDepth);
+	vec2 finalTexCoords = prevTexCoords * weight + currentTexCoords * (1.0 - weight);
+
+	return finalTexCoords;
+}
+
 float PointLightShadowCalculation(int index, vec3 fragPos)
 {
 	// get vector between fragment position and light position
@@ -149,18 +197,18 @@ float SpotLightShadowCalculation(int index, vec4 posLightSpace, vec3 normal, vec
 	return shadow;
 }
 
-vec3 calcDirLight(DirLight light, vec3 normal, vec3 viewDir)
+vec3 calcDirLight(DirLight light, vec3 normal, vec3 viewDir, vec2 texCoords)
 {
 	vec3 diffTex = vec3(0.0);
 	vec3 specTex = vec3(0.0);
 
 	if(sampleFromDiffuse == 1)
-		diffTex = vec3(texture(material.diffuse, FragmentIn.TexCoords));
+		diffTex = vec3(texture(material.diffuse, texCoords));
 	else
 		diffTex = FragmentIn.objectColor;
 
 	if(sampleFromSpecular == 1)
-		specTex = vec3(texture(material.specular, FragmentIn.TexCoords));
+		specTex = vec3(texture(material.specular, texCoords));
 	else
 		specTex = FragmentIn.objectColor;
 
@@ -177,18 +225,18 @@ vec3 calcDirLight(DirLight light, vec3 normal, vec3 viewDir)
 	return (ambient + diffuse + specular);
 }
 
-vec3 calcPointLight(int i, PointLight light, vec3 normal, vec3 FragPos, vec3 viewDir)
+vec3 calcPointLight(int i, PointLight light, vec3 normal, vec3 FragPos, vec3 viewDir, vec2 texCoords)
 {
 	vec3 diffTex = vec3(0.0);
 	vec3 specTex = vec3(0.0);
 
 	if(sampleFromDiffuse == 1)
-		diffTex = vec3(texture(material.diffuse, FragmentIn.TexCoords));
+		diffTex = vec3(texture(material.diffuse, texCoords));
 	else
 		diffTex = FragmentIn.objectColor;
 
 	if(sampleFromSpecular == 1)
-		specTex = vec3(texture(material.specular, FragmentIn.TexCoords));
+		specTex = vec3(texture(material.specular, texCoords));
 	else
 		specTex = FragmentIn.objectColor;
 
@@ -218,19 +266,19 @@ vec3 calcPointLight(int i, PointLight light, vec3 normal, vec3 FragPos, vec3 vie
 	return ( (1.0 - shadow) * (diffuse + specular));
 }
 
-vec3 calcSpotLight(int i, SpotLight light, vec3 normal, vec3 FragPos, vec3 viewDir)
+vec3 calcSpotLight(int i, SpotLight light, vec3 normal, vec3 FragPos, vec3 viewDir, vec2 texCoords)
 {
 
 	vec3 diffTex = vec3(0.0);
 	vec3 specTex = vec3(0.0);
 
 	if(sampleFromDiffuse == 1)
-		diffTex = vec3(texture(material.diffuse, FragmentIn.TexCoords));
+		diffTex = vec3(texture(material.diffuse, texCoords));
 	else
 		diffTex = FragmentIn.objectColor;
 
 	if(sampleFromSpecular == 1)
-		specTex = vec3(texture(material.specular, FragmentIn.TexCoords));
+		specTex = vec3(texture(material.specular, texCoords));
 	else
 		specTex = FragmentIn.objectColor;
 
@@ -271,15 +319,31 @@ void main()
 
 	// Calculate common input arguments for all the light calculations
 	vec3 norm;
-	vec3 viewDir = normalize(viewPos - FragmentIn.FragPos);
+	vec3 viewDir;
+	vec2 texCoords;
 	
+	// Parallax Mapping
+	if(sampleFromHeight == 0)
+	{
+		viewDir = normalize(viewPos - FragmentIn.FragPos);
+		texCoords = FragmentIn.TexCoords;
+	}
+	else
+	{
+		viewDir = normalize(FragmentIn.TS_ViewPos - FragmentIn.TS_FragPos);
+		texCoords = ParallaxMapping(FragmentIn.TexCoords, viewDir);
+		if(texCoords.x > 1.0 || texCoords.y > 1.0 || texCoords.x < 0.0 || texCoords.y < 0.0)
+    		discard;
+	}
+
+	// Normal mapping
 	if(sampleFromNormal == 0)
 	{
 		norm = normalize(FragmentIn.Normal);
 	}
 	else
 	{
-		norm = texture(material.normal, FragmentIn.TexCoords).rgb;
+		norm = texture(material.normal, texCoords).rgb;
 		norm = norm * 2.0 - 1.0;   
 		norm = normalize(FragmentIn.TBN * norm); 
 	}
@@ -288,17 +352,17 @@ void main()
 	// 1 - Directional Lights
 	for(int i = 0; i < numDirLights; i++)
 	{
-		totalLight += calcDirLight(dirLight[i], norm, viewDir);
+		totalLight += calcDirLight(dirLight[i], norm, viewDir, texCoords);
 	}
 	// 2 - Point Lights
 	for(int i = 0; i < numPointLights; i++)
 	{
-		totalLight += calcPointLight(i , pointLight[i], norm, FragmentIn.FragPos, viewDir);
+		totalLight += calcPointLight(i , pointLight[i], norm, FragmentIn.FragPos, viewDir, texCoords);
 	}
 	// 3 - Spot light
 	for(int i = 0; i < numSpotLights; i++)
 	{	
-		totalLight += calcSpotLight(i, spotLight[i], norm, FragmentIn.FragPos, viewDir);
+		totalLight += calcSpotLight(i, spotLight[i], norm, FragmentIn.FragPos, viewDir, texCoords);
 	}
 
 	fragColor = vec4(totalLight, 1.0);

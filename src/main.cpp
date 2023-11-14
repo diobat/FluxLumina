@@ -35,7 +35,7 @@ void update(openGL& graphicalEngine, std::vector<std::shared_ptr<Scene>> scenes,
         gameTime = newTime - startTime;
 
         // Move objects
-        movLight->setPosition({-10.0f + 10.0f * sin(gameTime), 5.0f, 19.0f + 10.0f * cos(gameTime)});
+        //movLight->setPosition({-10.0f + 10.0f * sin(gameTime), 5.0f, 19.0f + 10.0f * cos(gameTime)});
 
         openGLContext::updateFPSCounter(deltaTime);
 
@@ -78,12 +78,16 @@ int main(void)
 
     // Camera setup
     factory.create_Camera();
+    
+    TextureLocations textureLocations;
+    textureLocations.heightMaps.push_back("orange_brick_height.jpg");
+    auto& orangeWall = factory.create_Model("res/models/orangeBrickWall/orangeBrickWall.obj", 0, true, textureLocations);
+    orangeWall.setPosition({-2.0f, 5.0f, 19.0f});
+    orangeWall.setScale(3.5f);
 
-
-    auto& wall = factory.create_Model("res/models/brickWall/brickWall.glb", 0);
+    auto& wall = factory.create_Model("res/models/brickWall/brickWall.obj", 0);
     wall.setPosition({-10.0f, 5.0f, 19.0f});
     wall.setScale(3.5f);
-
 
     // Skybox setup
     auto skybox = factory.create_Skybox(
@@ -168,7 +172,8 @@ int main(void)
     // light_B->setAttenuationFactors({1.0f, 0.18f, 0.032f});
 
     movLight = factory.create_LightSource( E_LightType::POINT_LIGHT);
-    movLight->setPosition({-11.0f, 5.0f, 13.0f});
+
+    movLight->setPosition({-4.0f, 8.0f, 18.0f});
     movLight->setAttenuationFactors({1.0f, 0.09f, 0.032f});
 
     auto light_C = factory.create_LightSource( E_LightType::POINT_LIGHT);

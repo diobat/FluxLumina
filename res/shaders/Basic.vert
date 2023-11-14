@@ -13,6 +13,11 @@ layout(location = 5) in mat4 instanceMatrix;
 
 
 // Uniforms
+
+layout(std140) uniform viewPosBlock
+{
+	vec3 viewPos;
+};
 layout(std140) uniform mvp_camera 
 {
 	mat4 view;
@@ -20,6 +25,7 @@ layout(std140) uniform mvp_camera
 };
 
 uniform int sampleFromNormal;
+uniform int sampleFromHeight;
 uniform int numSpotLights;
 uniform mat4 spotLightSpaceMatrix[10];
 
@@ -30,6 +36,8 @@ out VertexOutput{
 	vec2 TexCoords;
 	vec3 FragPos;
 	mat3 TBN;
+	vec3 TS_FragPos;
+	vec3 TS_ViewPos;
 } VertexOut;
 
 out LightSpaceVertexOutput{
@@ -38,7 +46,6 @@ out LightSpaceVertexOutput{
 
 void main()
 {
-
 	VertexOut.objectColor = aObjectColor;
 	VertexOut.Normal = aNormal;
 	VertexOut.TexCoords = aTexCoords;
@@ -50,12 +57,14 @@ void main()
 		LightSpaceVertexOut.Spotlight[i] = spotLightSpaceMatrix[i] * vec4(VertexOut.FragPos, 1.0);
 	}
 
-	if(sampleFromNormal	== 1)
+	if(sampleFromNormal	== 1 || sampleFromHeight == 1)
 	{
 		vec3 T = normalize(vec3(instanceMatrix * vec4(aTangent,   0.0)));
 		vec3 N = normalize(vec3(instanceMatrix * vec4(aNormal,    0.0)));
 		vec3 B = cross(N, T);	
 		VertexOut.TBN = mat3(T, B, N);
+		VertexOut.TS_FragPos = VertexOut.TBN * VertexOut.FragPos;
+		VertexOut.TS_ViewPos = VertexOut.TBN * viewPos;
 	}
 	
 	gl_Position = projection * view * instanceMatrix * vec4(aPosition, 1.0f);
