@@ -193,6 +193,7 @@ void openGL::bindTextures(std::shared_ptr<Mesh> mesh)
     _shaderPrograms->setUniformInt("sampleFromDiffuse", 0);
     _shaderPrograms->setUniformInt("sampleFromSpecular", 0);
     _shaderPrograms->setUniformInt("sampleFromNormal", 0);
+    _shaderPrograms->setUniformInt("sampleFromHeight", 0);
 
     _shaderPrograms->setUniformFloat("material.shininess", 4.5f);
 
@@ -228,16 +229,22 @@ void openGL::bindTextures(std::shared_ptr<Mesh> mesh)
             }
             break;
         case HEIGHT:
+            if(_settings->getHeightMapping() == E_Setting::ON)
+            {
+                _shaderPrograms->setUniformInt("sampleFromHeight", 1);
+                _shaderPrograms->setUniformInt("material.height", 4);
+                glActiveTexture(GL_TEXTURE0 + 4);
+                glBindTexture(GL_TEXTURE_2D, mesh->_textures[i]._id);
+            }
             break;
         case CUBEMAP:
-            _shaderPrograms->setUniformInt("cubemap", 3);
-            glActiveTexture(GL_TEXTURE0 + 3);
+            _shaderPrograms->setUniformInt("cubemap", 5);
+            glActiveTexture(GL_TEXTURE0 + 5);
             glBindTexture(GL_TEXTURE_CUBE_MAP, mesh->_textures[i]._id);
             break;
         default:
             break;
         }
-
     }
 }
 

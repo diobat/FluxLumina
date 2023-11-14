@@ -21,6 +21,7 @@ namespace
         UNKNOWN
     } fileType;
 
+    TextureLocations externalTextureLocations;
     bool flipUVsOnLoad = false;
 
     void detectFileType(const std::string& path)
@@ -40,7 +41,7 @@ namespace
         }
     }
 
-    Texture TextureFromFile(const char* path, const std::string &directory, bool gamma = false)
+    Texture TextureFromFile(const char* path, const std::string &directory)
     {
         std::string filename = std::string(path);
         filename = ROOT_DIR + directory + '/' + filename;
@@ -49,12 +50,12 @@ namespace
 
         Texture texture;
         texture._pixels = stbi_load(filename.c_str(), &texture._width, &texture._height, &texture._components, 0);
-        texture._path = path;
+        texture._path = directory + '/' + path;
 
         return texture;
     }
 
-    Texture TextureFromEmbeddedTexture(const aiTexture* texture)
+    Texture TextureFromEmbeddedTexture(const aiTexture* texture, const std::string &directory = "")
     {
 
         stbi_set_flip_vertically_on_load(false);
@@ -67,7 +68,7 @@ namespace
             &embeddedTexture._height,
             &embeddedTexture._components,
             0);
-        embeddedTexture._path = std::string(texture->mFilename.C_Str()) + "." + texture->achFormatHint;
+        embeddedTexture._path = directory + '/' + std::string(texture->mFilename.C_Str()) + "." + texture->achFormatHint;
 
         return embeddedTexture;
     }
@@ -94,7 +95,14 @@ namespace
                 texture._type = E_TexureType::NORMAL;
                 break;
             case aiTextureType_HEIGHT:
-                texture._type = E_TexureType::HEIGHT;
+                if (fileType == FileType::OBJ)
+                {   // Wavefront misclassifies normal maps as height maps
+                    texture._type = E_TexureType::NORMAL;
+                }
+                else
+                {
+                    texture._type = E_TexureType::HEIGHT;
+                }
                 break;
             default:
                 texture._type = E_TexureType::DIFFUSE;
@@ -141,7 +149,7 @@ void SceneObjectFactory::bindEngine(GraphicalEngine *engine)
 /////////////////////////// MODELS/MESHES/MATERIALS
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-ModelObject &SceneObjectFactory::create_Model(const std::string &modelPath, unsigned int shader, bool flipUVs)
+ModelObject &SceneObjectFactory::create_Model(const std::string &modelPath, unsigned int shader, bool flipUVs, TextureLocations textureLocations)
 {
     detectFileType(modelPath);
 
@@ -151,7 +159,9 @@ ModelObject &SceneObjectFactory::create_Model(const std::string &modelPath, unsi
     // Set the shader program
     model_object->setShaderIndex(_boundEngine->getShaderProgramID(shader));
 
+    // Set the per-model creation variables
     flipUVsOnLoad = flipUVs;
+    externalTextureLocations = textureLocations;
 
     load_ModelMeshes(model, modelPath);
 
@@ -186,7 +196,6 @@ void SceneObjectFactory::load_ModelMeshes(Model& model, const std::string& path)
 
         // process ASSIMP's root node recursively to build the meshes
         processNode(model.directory, scene->mRootNode, scene);
-
     }
 
     model.directory = path;
@@ -313,10 +322,20 @@ std::shared_ptr<Mesh> SceneObjectFactory::processMesh(const std::string &path, a
         aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
         std::vector<Texture> diffuseMaps = loadMaterialTextures(scene, directory, material, aiTextureType_DIFFUSE);
         textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
+
         std::vector<Texture> specularMaps = loadMaterialTextures(scene, directory, material, aiTextureType_SPECULAR);
         textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
-        std::vector<Texture> normalMaps = loadMaterialTextures(scene, directory, material, aiTextureType_NORMALS);
-        textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
+
+        if(fileType == FileType::OBJ)
+        {
+            std::vector<Texture> normalMaps = loadMaterialTextures(scene, directory, material, aiTextureType_HEIGHT);
+            textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
+        }
+        else
+        {
+            std::vector<Texture> normalMaps = loadMaterialTextures(scene, directory, material, aiTextureType_NORMALS);
+            textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
+        }
         
         float opacity = 1.0f;
         if(material->Get(AI_MATKEY_OPACITY, opacity) == AI_SUCCESS)
@@ -327,6 +346,11 @@ std::shared_ptr<Mesh> SceneObjectFactory::processMesh(const std::string &path, a
             }
         }
     }
+
+    // process external materials
+    std::vector<Texture> externalMaps = loadExternalTextures(directory, externalTextureLocations);
+    textures.insert(textures.end(), externalMaps.begin(), externalMaps.end());
+
     // return a mesh object created from the extracted mesh data
     return std::make_shared<Mesh>(Mesh(vertices, indices, textures, hasTransparency));
 }
@@ -364,11 +388,43 @@ std::vector<Texture> SceneObjectFactory::loadMaterialTextures(const aiScene* sce
                     texture = TextureFromFile(str.C_Str(), path);
                     break;
                 case FileType::GLB:
-                    texture = TextureFromEmbeddedTexture(scene->GetEmbeddedTexture(str.C_Str()));
+                    texture = TextureFromEmbeddedTexture(scene->GetEmbeddedTexture(str.C_Str()), path);
                     break;
             }
 
             setTextureData(texture, type);
+            _boundEngine->initializeTexture(texture);
+            materialTextures.push_back(texture);
+            _meshLibrary->addTexture(texture);
+        }
+    }
+    return materialTextures;
+}
+
+std::vector<Texture> SceneObjectFactory::loadExternalTextures(const std::string &path, const TextureLocations & textures) const
+{
+    std::vector<Texture> materialTextures;
+    const auto& loadedTextures = _meshLibrary->getLoadedTextures();
+
+    for(unsigned int i = 0; i < textures.heightMaps.size(); i++)
+    {
+        bool isPreviouslyLoaded = false;
+
+        for(unsigned int k = 0; k < loadedTextures.size(); k++)
+        {
+            if(std::strcmp(loadedTextures[k]._path.data(), textures.heightMaps[i].c_str()) == 0)
+            {
+                materialTextures.push_back(loadedTextures[k]);
+                isPreviouslyLoaded = true;
+                break;
+            }
+        }
+
+        if(!isPreviouslyLoaded)
+        {
+            Texture texture = TextureFromFile(textures.heightMaps[i].c_str(), path);
+            setTextureData(texture, aiTextureType_HEIGHT);
+            texture._type = E_TexureType::HEIGHT;   // Wavefront misclassifies normal maps as height maps, temporarily fix
             _boundEngine->initializeTexture(texture);
             materialTextures.push_back(texture);
             _meshLibrary->addTexture(texture);

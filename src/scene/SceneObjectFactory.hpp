@@ -21,6 +21,17 @@
 #include <assimp/postprocess.h>
 
 /*
+    Some texture types are not supported by the formats our engine uses
+    This means than we must externally supply the location of the texture
+    This struct is used to store the location of the texture, and the type of texture it is
+    An instance of this struct can then be (optionally) passed to the SceneObjectFactory during the creation of a model.
+*/
+struct TextureLocations
+{
+    std::vector<std::string> heightMaps;
+};
+
+/*
     This is the class that manages the proper creation and release of resources for rendered objects
     It manages safe coordination between the scene and rendering engine while allowing the first to not be aware of the latter
 */
@@ -36,11 +47,12 @@ public:
     void bindEngine(GraphicalEngine* engine);
 
     // Importing models
-    ModelObject &create_Model(const std::string &modelPath, unsigned int shader = 0, bool flipUVs = false);
+    ModelObject &create_Model(const std::string &modelPath, unsigned int shader = 0, bool flipUVs = false, TextureLocations textureLocations = {});
     void load_ModelMeshes(Model& model, std::string const &path);
     void processNode(const std::string &path, aiNode* node, const aiScene* scene);
     std::shared_ptr<Mesh> processMesh(const std::string &path, aiMesh *mesh, const aiScene *scene);
     std::vector<Texture> loadMaterialTextures(const aiScene* scene, const std::string &path, aiMaterial *mat, aiTextureType type);
+    std::vector<Texture> loadExternalTextures(const std::string &path, const TextureLocations & textures) const;
 
     // Creating lights
     std::shared_ptr<LightSource> create_LightSource(E_LightType type);
