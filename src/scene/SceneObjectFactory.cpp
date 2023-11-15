@@ -365,12 +365,11 @@ std::vector<Texture> SceneObjectFactory::loadMaterialTextures(const aiScene* sce
         aiString str;
         mat->GetTexture(type, i, &str);
         bool isPreviouslyLoaded = false;
-
-        mat->Get(AI_MATKEY_TEXTURE(type, i), str);
-
+        //mat->Get(AI_MATKEY_TEXTURE(type, i), str);
+        std::string texturePath = path + '/' + std::string(str.C_Str());
         for(unsigned int k = 0; k < loadedTextures.size(); k++)
         {
-            if(std::strcmp(loadedTextures[k]._path.data(), str.C_Str()) == 0)
+            if(std::strcmp(loadedTextures[k]._path.data(), texturePath.c_str()) == 0)
             {
                 materialTextures.push_back(loadedTextures[k]);
                 isPreviouslyLoaded = true;
