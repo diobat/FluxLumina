@@ -10,14 +10,21 @@
 // First-party includes
 #include "resources/Texture.hpp"
 
-enum E_AttachmentType
+enum class E_ColorFormat
+{
+    RGB,              // 8 bits per channel, fixed point
+    RGBA,             // 8 bits per channel, fixed point, alpha
+    RGBA16F        // 16 bits per channel, floating point, alpha
+};
+
+enum class E_AttachmentType
 {
     COLOR,
     DEPTH,
     STENCIL
 };
 
-enum E_AttachmentFormat
+enum class E_AttachmentFormat
 {
     TEXTURE,                // Color = Texture  | Depth = Texture       | Stencil = Texture
     RENDERBUFFER,           // Color = Texture  | Depth = Renderbuffer  | Stencil = Renderbuffer
@@ -34,7 +41,7 @@ public:
     unsigned int getID() const { return _id; }
     const std::array<unsigned int, 2>& getOriginalSize() const { return _originalSize; }
 
-    virtual void addAttachment(E_AttachmentType type) = 0{};
+    virtual void addAttachment(E_AttachmentType type, E_ColorFormat colorFormat = E_ColorFormat::RGB) = 0{};
 
     unsigned int getColorAttachmentID(unsigned int index) const { return _colorAttachmentIDs[index]; }
     unsigned int getDepthAttachmentID() const { return _depthAttachmentID; }
@@ -44,7 +51,7 @@ public:
     unsigned int getDepthTextureID() const;
 
 protected:
-    unsigned int addColorAttachment();
+    unsigned int addColorAttachment(E_ColorFormat colorFormat = E_ColorFormat::RGB);
 
     unsigned int _id;
     std::array<unsigned int, 2> _originalSize;
@@ -60,7 +67,7 @@ public:
     TextureFBO(unsigned int width, unsigned int height);
     ~TextureFBO();
 
-    void addAttachment(E_AttachmentType type) override;
+    void addAttachment(E_AttachmentType type, E_ColorFormat colorFormat = E_ColorFormat::RGB) override;
 
 private:
     unsigned int addDepthAttachment();
@@ -73,7 +80,7 @@ public:
     RenderBufferFBO(unsigned int width, unsigned int height);
     ~RenderBufferFBO();
 
-    void addAttachment(E_AttachmentType type) override;
+    void addAttachment(E_AttachmentType type, E_ColorFormat colorFormat = E_ColorFormat::RGB) override;
 
 private:
     unsigned int addDepthAttachment();
@@ -86,7 +93,7 @@ public:
     ShadowDepthFBO(unsigned int width, unsigned int height);
     ~ShadowDepthFBO();
 
-    void addAttachment(E_AttachmentType type) override;
+    void addAttachment(E_AttachmentType type, E_ColorFormat colorFormat = E_ColorFormat::RGB) override;
 
 private:
     unsigned int addDepthAttachment();
@@ -99,7 +106,7 @@ public:
     ShadowDepthCubeFBO(unsigned int width, unsigned int height);
     ~ShadowDepthCubeFBO();
 
-    void addAttachment(E_AttachmentType type) override;
+    void addAttachment(E_AttachmentType type, E_ColorFormat colorFormat = E_ColorFormat::RGB) override;
 
 private:
     unsigned int addDepthAttachment();

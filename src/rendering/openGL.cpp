@@ -285,10 +285,6 @@ bool openGL::isFrameBufferComplete(std::shared_ptr<FBO> fbo) const
     return _frameBuffers->isFrameBufferComplete(fbo);
 }
 
-FBOManager& openGL::getFBOManager()
-{
-    return *_frameBuffers;
-}
 
 void openGL::initializeSkybox(Skybox &skybox, const std::array<Texture, 6>& textures)
 {

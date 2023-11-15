@@ -17,13 +17,14 @@ public:
     FBOManager(GLFWwindow *window);
     ~FBOManager();
 
-    std::shared_ptr<FBO> addFBO(E_AttachmentFormat format, int width = 0, int height = 0);
+    std::shared_ptr<FBO> addFBO(E_AttachmentFormat format,int width , int height);
     void bindFBO(unsigned int fboIndex);
     void unbindFBO();
 
     size_t getFBOCount() const;
 
     std::shared_ptr<FBO> getFBO(unsigned int fboIndex) const;
+    std::shared_ptr<FBO> getSceneFBO(std::shared_ptr<Scene> scene) const;
     unsigned int getFBOIndex(std::shared_ptr<FBO> fbo) const;
 
     bool bindSceneToFBO(std::shared_ptr<Scene> scene, std::shared_ptr<FBO> fbo);

@@ -17,7 +17,7 @@ namespace
 
 void update(openGL& graphicalEngine, std::vector<std::shared_ptr<Scene>> scenes, std::shared_ptr<UserInput::glfwKeyboardScanner>& userInput)
 {
-    //glEnable(GL_DEBUG_OUTPUT);
+    glEnable(GL_DEBUG_OUTPUT);
     graphicalEngine.initializeInstanceManager(scenes[0]);
 
     float startTime = static_cast<float>(glfwGetTime());
@@ -40,7 +40,7 @@ void update(openGL& graphicalEngine, std::vector<std::shared_ptr<Scene>> scenes,
         openGLContext::updateFPSCounter(deltaTime);
 
         graphicalEngine.renderFrame(scenes[0]);
-        
+
         // Check and log errors
         //Logger::Instance().logGLErrors("Main Loop:");        
        
@@ -73,21 +73,23 @@ int main(void)
     graphicalEngine.bindScene(scene);
     graphicalEngine.bindMeshLibrary(meshLibrary);
 
+    // Framebuffer setup
+    std::shared_ptr<FBOManager> FBOs = graphicalEngine.getFBOManager();
+    std::shared_ptr<FBO> HDRfbo = FBOs->addFBO(E_AttachmentFormat::RENDERBUFFER, 2048, 1536);
+    HDRfbo->addAttachment(E_AttachmentType::COLOR, E_ColorFormat::RGBA16F);
+    HDRfbo->addAttachment(E_AttachmentType::DEPTH);
+    //HDRfbo->addAttachment(E_AttachmentType::STENCIL);
+
+    //FBOs->bindSceneToFBO(scene, HDRfbo);
+
     // Init object factory
     SceneObjectFactory factory(scene.get(), &graphicalEngine, meshLibrary.get());
 
     // Camera setup
     factory.create_Camera();
     
-    TextureLocations textureLocations;
-    textureLocations.heightMaps.push_back("orange_brick_height.jpg");
-    auto& orangeWall = factory.create_Model("res/models/orangeBrickWall/orangeBrickWall.obj", 0, true, textureLocations);
-    orangeWall.setPosition({-2.0f, 5.0f, 19.0f});
-    orangeWall.setScale(3.5f);
-
-    auto& wall = factory.create_Model("res/models/brickWall/brickWall.obj", 0);
-    wall.setPosition({-10.0f, 5.0f, 19.0f});
-    wall.setScale(3.5f);
+    // ModelObject& backpack = factory.create_Model("res/models/backpack/backpack.obj", 0, true);
+    // backpack.setPosition({15.0f, 3.0f, -16.5f});
 
     // Skybox setup
     auto skybox = factory.create_Skybox(
@@ -108,16 +110,23 @@ int main(void)
     // auto &window3 = factory.create_Model("res/models/window/window.obj", 2);
     // window3.setPosition({-25.0f, 10.0f, -16.0f});
 
-    ModelObject &ground = factory.create_Model("res/models/ground2.obj", 0);
+    TextureLocations textureLocations;
+    textureLocations.heightMaps.push_back("orange_brick_height.jpg");
+    auto& orangeWall = factory.create_Model("res/models/orangeBrickWall/orangeBrickWall.obj", 0, true, textureLocations);
+    orangeWall.setPosition({-2.0f, 5.0f, 19.0f});
+    orangeWall.setScale(3.5f);
+
+    auto& wall = factory.create_Model("res/models/brickWall/brickWall.obj", 0);
+    wall.setPosition({-10.0f, 5.0f, 19.0f});
+    wall.setScale(3.5f);
+
+    ModelObject &ground = factory.create_Model("res/models/Ground3.obj", 0);
     ground.setScale(3.5f);
     ground.setPosition({0.0f, -0.5f, 0.0f});
 
     // ModelObject& mothership = factory.create_Model("res/models/Mothership/Mothership.obj", 0);
     // mothership.setPosition({0.0f, 10.0f, 7.5f});
     // mothership.setScale(0.001f);
-
-    // ModelObject& backpack = factory.create_Model("res/models/backpack/backpack.obj", 0, true);
-    // backpack.setPosition({15.0f, 3.0f, -16.5f});
 
     int width = 700;
     int height = 700;
@@ -162,8 +171,10 @@ int main(void)
     // cube.getModel()->meshes[0]->attachTexture(cubeTextures);
     // cube.setPosition({18.0f, 15.0f, 18.0f});
     
-    // Lights
+    // Point Lights
+
     auto light_A = factory.create_LightSource( E_LightType::POINT_LIGHT);
+    light_A->setColor({100.0f, 100.0f, 100.0f});
     light_A->setPosition({13.0f, 5.0f, 13.0f});
     light_A->setAttenuationFactors({1.0f, 0.09f, 0.032f});
 
@@ -184,6 +195,8 @@ int main(void)
     light_D->setPosition({-13.0f, 5.0f, -13.0f});
     light_D->setAttenuationFactors({1.0f, 0.09f, 0.032f});
 
+    // Spot Lights
+    
     auto light3 = factory.create_LightSource( E_LightType::SPOT_LIGHT);
     auto light4 = std::dynamic_pointer_cast<SpotLight>(light3);
     light4->setCutoff(18.5f);
@@ -208,7 +221,7 @@ int main(void)
     light10->setPosition({0.0f, 10.0f, 0.0f});
     light10->pointAt(statue4.getPosition());
 
-    //light4->pointAt({1.0f, 0.0f, 0.0f});
+    light4->pointAt({1.0f, 0.0f, 0.0f});
 
     // auto& cube5 = factory.create_Model("res/models/cube/cubeBlank.obj", 0);
     // cube5.setScale(3.0f);

@@ -205,3 +205,67 @@ void RenderTransparentNode::run()
     }
 
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////// HIGH DYNAMIC RANGE NODE
+///////////////////////////////////////////////////////////////////////////////////////////
+
+namespace
+{
+    float quadVertices[] = {
+                // positions        // texture Coords
+                -1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
+                -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+                1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
+                1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+            };
+
+    unsigned int quadVAO = 0;
+    unsigned int quadVBO = 0;
+}
+
+void HighDynamicRangeNode::run()
+{
+    std::shared_ptr<Scene> scene = _chain->engine()->getScene();
+    std::shared_ptr<ShaderLibrary> shaderPrograms = _chain->engine()->getShaderLibrary();
+    std::shared_ptr<FBOManager> frameBuffers = _chain->engine()->getFBOManager();
+
+    frameBuffers->unbindFBO();
+    frameBuffers->clearAll();
+    unsigned int textureID = frameBuffers->getSceneFBO(scene)->getColorAttachmentID(0);
+    std::set quadShaders = shaderPrograms->getShaderIndexesPerFeature(E_ShaderProgramFeatures::E_QUAD);
+
+    if(quadVAO == 0)
+    {
+        glGenVertexArrays(1, &quadVAO);
+        glGenBuffers(1, &quadVBO);
+
+        glBindVertexArray(quadVAO);
+
+        glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), nullptr);
+
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+
+        glBindVertexArray(0);
+    }
+
+    for (auto quadShader : quadShaders)
+    {
+        shaderPrograms->use(quadShader);
+
+        shaderPrograms->setUniformInt("material.diffuse", 1);
+        glActiveTexture(GL_TEXTURE0 + 1);
+        glBindTexture(GL_TEXTURE_2D, textureID);
+
+        glBindVertexArray(quadVAO);
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+        glBindVertexArray(0);
+    }
+
+    frameBuffers->bindProperFBOFromScene(scene);
+}

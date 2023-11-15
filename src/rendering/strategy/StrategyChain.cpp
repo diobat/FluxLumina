@@ -1,5 +1,8 @@
 #include "rendering/strategy/StrategyChain.hpp"
 
+#include "rendering/GraphicalEngine.hpp"
+#include "rendering/Settings.hpp"
+
 StrategyChain::StrategyChain(GraphicalEngine* engine) : 
     _ranFrom(engine)
 {
@@ -33,11 +36,18 @@ GraphicalEngine* StrategyChain::engine() const
 DefaultStrategyChain::DefaultStrategyChain(GraphicalEngine* engine) : 
     StrategyChain(engine)
 {
+    // Setups
     add(std::make_shared<CameraSetupNode>(this));
     add(std::make_shared<ShadowsSetupNode>(this));
     add(std::make_shared<LightsSetupNode>(this));
     add(std::make_shared<FramebufferNode>(this));
+    // Rendering
     add(std::make_shared<RenderOpaqueNode>(this));
     add(std::make_shared<RenderSkyboxNode>(this));
     add(std::make_shared<RenderTransparentNode>(this));
+    // Post-processing
+    if(engine->getSettings()->getHighDynamicRange() == E_Setting::ON)
+    {
+        add(std::make_shared<HighDynamicRangeNode>(this));  
+    }
 }

@@ -60,3 +60,10 @@ public:
     RenderTransparentNode(const StrategyChain* chain) : StrategyNode(chain) {}
     void run() override;
 };
+
+class HighDynamicRangeNode : public StrategyNode
+{
+public:
+    HighDynamicRangeNode(const StrategyChain* chain) : StrategyNode(chain) {}
+    void run() override;
+};
