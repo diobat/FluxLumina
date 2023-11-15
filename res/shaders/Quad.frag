@@ -1,5 +1,4 @@
-#version 430 core
-
+#version 430
 
 struct Material
 {
@@ -20,5 +19,13 @@ out vec4 FragColor;
 
 void main()
 { 
-    FragColor = texture(material.diffuse, TexCoords);
+    const float gamma = 2.2;
+    vec3 hdrColor = texture(material.diffuse, TexCoords).rgb;
+  
+    // reinhard tone mapping
+    vec3 mapped = hdrColor / (hdrColor + vec3(1.0));
+    // gamma correction 
+    mapped = pow(mapped, vec3(1.0 / gamma));
+  
+    FragColor = vec4(mapped, 1.0);
 }
