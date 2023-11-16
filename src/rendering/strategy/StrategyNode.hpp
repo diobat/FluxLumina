@@ -11,7 +11,6 @@ protected:
     const StrategyChain* _chain;
 };
 
-
 class CameraSetupNode : public StrategyNode
 {
 public:
@@ -65,5 +64,12 @@ class HighDynamicRangeNode : public StrategyNode
 {
 public:
     HighDynamicRangeNode(const StrategyChain* chain) : StrategyNode(chain) {}
+    void run() override;
+};
+
+class DefaultFramebufferNode : public StrategyNode
+{
+public:
+    DefaultFramebufferNode(const StrategyChain* chain) : StrategyNode(chain) {}
     void run() override;
 };

@@ -239,25 +239,19 @@ void HighDynamicRangeNode::run()
     {
         glGenVertexArrays(1, &quadVAO);
         glGenBuffers(1, &quadVBO);
-
         glBindVertexArray(quadVAO);
-
         glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
         glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
-
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), nullptr);
-
         glEnableVertexAttribArray(1);
         glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-
         glBindVertexArray(0);
     }
 
     for (auto quadShader : quadShaders)
     {
         shaderPrograms->use(quadShader);
-
         shaderPrograms->setUniformInt("material.diffuse", 1);
         glActiveTexture(GL_TEXTURE0 + 1);
         glBindTexture(GL_TEXTURE_2D, textureID);
@@ -266,6 +260,38 @@ void HighDynamicRangeNode::run()
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
         glBindVertexArray(0);
     }
-
     frameBuffers->bindProperFBOFromScene(scene);
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////// DEFAULT FRAMEBUFFER NODE
+///////////////////////////////////////////////////////////////////////////////////////////
+
+void DefaultFramebufferNode::run()
+{
+    std::shared_ptr<Scene> scene = _chain->engine()->getScene();
+    std::shared_ptr<FBOManager> frameBuffers = _chain->engine()->getFBOManager();
+
+    std::shared_ptr<FBO> sourceFBO = frameBuffers->getSceneFBO(scene);
+
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, sourceFBO->id());    // Source Framebuffer
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);                  // Destination (default) Framebuffer
+
+    unsigned int originWidth = sourceFBO->getOriginalSize()[0];
+    unsigned int originHeight = sourceFBO->getOriginalSize()[1];
+
+    unsigned int viewportWidth = _chain->engine()->getViewportSize()[0];
+    unsigned int viewportHeight = _chain->engine()->getViewportSize()[1];
+
+    glBlitFramebuffer(
+        0, 0, 
+        originWidth, originHeight,
+        0, 0,
+        viewportWidth, viewportHeight,
+        GL_COLOR_BUFFER_BIT,
+        GL_NEAREST
+    );
+
+    // Remove binds
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }

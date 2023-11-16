@@ -50,4 +50,6 @@ DefaultStrategyChain::DefaultStrategyChain(GraphicalEngine* engine) :
     {
         add(std::make_shared<HighDynamicRangeNode>(this));  
     }
+    // Move to default Framebuffer frame
+    add(std::make_shared<DefaultFramebufferNode>(this));
 }

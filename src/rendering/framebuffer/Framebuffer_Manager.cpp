@@ -46,8 +46,8 @@ void FBOManager::bindFBO(unsigned int fboIndex)
     }
 
     _currentFBOIndex = fboIndex;
-    unsigned int newID = _frameBufferObjects[fboIndex]->getID();
-    glBindFramebuffer(GL_FRAMEBUFFER, _frameBufferObjects[fboIndex]->getID());
+    unsigned int newID = _frameBufferObjects[fboIndex]->id();
+    glBindFramebuffer(GL_FRAMEBUFFER, _frameBufferObjects[fboIndex]->id());
 }
 
 void FBOManager::unbindFBO()

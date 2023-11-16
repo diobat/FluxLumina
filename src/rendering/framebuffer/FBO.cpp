@@ -10,7 +10,6 @@ FBO::FBO(unsigned int width, unsigned int height) :
     glGenFramebuffers(1, &_id);
 }
 
-
 unsigned int FBO::addColorAttachment(E_ColorFormat colorFormat)
 {
     unsigned int _textureId;
@@ -19,7 +18,6 @@ unsigned int FBO::addColorAttachment(E_ColorFormat colorFormat)
 
     switch(colorFormat)
     {
-
         case E_ColorFormat::RGBA:
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, getOriginalSize()[0], getOriginalSize()[1], 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
             break;

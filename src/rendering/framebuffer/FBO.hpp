@@ -38,7 +38,7 @@ public:
     FBO(unsigned int width, unsigned int height);
     virtual ~FBO() = 0{};
 
-    unsigned int getID() const { return _id; }
+    unsigned int id() const { return _id; }
     const std::array<unsigned int, 2>& getOriginalSize() const { return _originalSize; }
 
     virtual void addAttachment(E_AttachmentType type, E_ColorFormat colorFormat = E_ColorFormat::RGB) = 0{};

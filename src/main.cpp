@@ -74,13 +74,17 @@ int main(void)
     graphicalEngine.bindMeshLibrary(meshLibrary);
 
     // Framebuffer setup
-    std::shared_ptr<FBOManager> FBOs = graphicalEngine.getFBOManager();
-    std::shared_ptr<FBO> HDRfbo = FBOs->addFBO(E_AttachmentFormat::RENDERBUFFER, 2048, 1536);
-    HDRfbo->addAttachment(E_AttachmentType::COLOR, E_ColorFormat::RGBA16F);
-    HDRfbo->addAttachment(E_AttachmentType::DEPTH);
-    //HDRfbo->addAttachment(E_AttachmentType::STENCIL);
+    // if(graphicalEngine.getSettings()->getHighDynamicRange() == E_Setting::ON)
+    if(1)
+    {
+        std::shared_ptr<FBOManager> FBOs = graphicalEngine.getFBOManager();
+        std::shared_ptr<FBO> HDRfbo = FBOs->addFBO(E_AttachmentFormat::RENDERBUFFER, 2048, 1536);
+        HDRfbo->addAttachment(E_AttachmentType::COLOR, E_ColorFormat::RGBA16F);
+        HDRfbo->addAttachment(E_AttachmentType::DEPTH);
+        //HDRfbo->addAttachment(E_AttachmentType::STENCIL);
 
-    //FBOs->bindSceneToFBO(scene, HDRfbo);
+        FBOs->bindSceneToFBO(scene, HDRfbo);
+    }
 
     // Init object factory
     SceneObjectFactory factory(scene.get(), &graphicalEngine, meshLibrary.get());
