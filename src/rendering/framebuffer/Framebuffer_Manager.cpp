@@ -1,16 +1,35 @@
 #include "rendering/framebuffer/Framebuffer_Manager.hpp"
 
-FBOManager::FBOManager(GLFWwindow *window) : 
+#include "rendering/GraphicalEngine.hpp"
+
+FBOManager::FBOManager(GraphicalEngine *engine) : 
+    _ranFrom(engine),
     _currentFBOIndex(-1),
-    _window(window),
     _forceDefault(false)
 {
-    ;
+    for(std::shared_ptr<Scene> scene : engine->getScenes())
+    {
+        parseNewScene(scene);
+    }
 }
 
 FBOManager::~FBOManager()
 {
     ;
+}
+
+void FBOManager::parseNewScene(std::shared_ptr<Scene> scene)
+{
+    if(_fboSceneMap.count(scene) == 0)
+    {
+        _ranFrom->getViewportSize();
+        std::shared_ptr<FBO> HDRfbo = addFBO(E_AttachmentFormat::TEXTURE, _ranFrom->getViewportSize()[0], _ranFrom->getViewportSize()[1]);
+        HDRfbo->addAttachment(E_AttachmentType::COLOR, E_ColorFormat::RGBA16F);
+        HDRfbo->addAttachment(E_AttachmentType::DEPTH);
+        //HDRfbo->addAttachment(E_AttachmentType::STENCIL);
+
+        bindSceneToFBO(scene, HDRfbo);
+    }
 }
 
 std::shared_ptr<FBO> FBOManager::addFBO(E_AttachmentFormat format, int width, int height)

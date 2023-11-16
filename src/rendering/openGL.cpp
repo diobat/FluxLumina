@@ -41,7 +41,7 @@ int openGL::initialize(GLFWwindow* window)
     _settings = std::make_shared<Settings>(_window);
 
     // Framebuffer Manager initialization
-    _frameBuffers = std::make_shared<FBOManager>(_window);
+    _frameBuffers = std::make_shared<FBOManager>(this);
 
     // Shader Library initialization
     _shaderPrograms = std::make_shared<ShaderLibrary>();

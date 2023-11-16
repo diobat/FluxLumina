@@ -232,6 +232,9 @@ void HighDynamicRangeNode::run()
 
     frameBuffers->unbindFBO();
     frameBuffers->clearAll();
+
+    auto sceneFBO = frameBuffers->getSceneFBO(scene);
+
     unsigned int textureID = frameBuffers->getSceneFBO(scene)->getColorAttachmentID(0);
     std::set quadShaders = shaderPrograms->getShaderIndexesPerFeature(E_ShaderProgramFeatures::E_QUAD);
 
