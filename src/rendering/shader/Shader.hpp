@@ -15,7 +15,8 @@ enum class E_ShaderProgramFeatures
     E_TRANSPARENCY,
     E_SHADOW_MAPPING,
     E_SHADOW_CUBE_MAPPING,
-    E_SKYBOX
+    E_SKYBOX,
+    E_QUAD
 };
 
 

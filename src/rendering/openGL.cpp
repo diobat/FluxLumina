@@ -41,7 +41,7 @@ int openGL::initialize(GLFWwindow* window)
     _settings = std::make_shared<Settings>(_window);
 
     // Framebuffer Manager initialization
-    _frameBuffers = std::make_shared<FBOManager>(_window);
+    _frameBuffers = std::make_shared<FBOManager>(this);
 
     // Shader Library initialization
     _shaderPrograms = std::make_shared<ShaderLibrary>();
@@ -52,6 +52,7 @@ int openGL::initialize(GLFWwindow* window)
     _shaderPrograms->addShader("Simple.vert", "transparency.frag");          //2
     _shaderPrograms->getShader(2)->addSupportedFeature(E_ShaderProgramFeatures::E_TRANSPARENCY);
     _shaderPrograms->addShader("Quad.vert", "Quad.frag");                    //3
+    _shaderPrograms->getShader(3)->addSupportedFeature(E_ShaderProgramFeatures::E_QUAD);
     _shaderPrograms->addShader("Skybox.vert", "Skybox.frag");                //4
     _shaderPrograms->addShader("Reflection.vert", "Reflection.frag");        //5
     _shaderPrograms->addShader("ShadowMap.vert", "ShadowMap.frag");          //6
@@ -284,10 +285,6 @@ bool openGL::isFrameBufferComplete(std::shared_ptr<FBO> fbo) const
     return _frameBuffers->isFrameBufferComplete(fbo);
 }
 
-FBOManager& openGL::getFBOManager()
-{
-    return *_frameBuffers;
-}
 
 void openGL::initializeSkybox(Skybox &skybox, const std::array<Texture, 6>& textures)
 {

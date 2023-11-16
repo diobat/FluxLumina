@@ -128,11 +128,11 @@ SceneObjectFactory::SceneObjectFactory(Scene* scene, GraphicalEngine* engine, Me
     _boundEngine = engine;
     _meshLibrary = meshLibrary;
 
-    // if(scene != nullptr)
-    // {
-    //     ModelObject& cube = create_Model("res/models/origin_cube.obj", 0);
-    //     cube.setScale(0.3f);
-    // }
+    if(scene != nullptr)
+    {
+        ModelObject& cube = create_Model("res/models/origin_cube.obj", 0);
+        cube.setScale(0.3f);
+    }
 }
 
 void SceneObjectFactory::bindScene(Scene* scene)
@@ -182,8 +182,8 @@ void SceneObjectFactory::load_ModelMeshes(Model& model, const std::string& path)
         const aiScene *scene = importer.ReadFile(ROOT_DIR + path, 
         aiProcess_Triangulate | 
         aiProcess_FlipUVs | 
-        aiProcess_JoinIdenticalVertices |
-        aiProcess_FixInfacingNormals | 
+        //aiProcess_JoinIdenticalVertices |
+        //aiProcess_FixInfacingNormals | 
         aiProcess_CalcTangentSpace);
         // check for errors
         if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) // if is Not Zero

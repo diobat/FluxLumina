@@ -1,16 +1,35 @@
 #include "rendering/framebuffer/Framebuffer_Manager.hpp"
 
-FBOManager::FBOManager(GLFWwindow *window) : 
+#include "rendering/GraphicalEngine.hpp"
+
+FBOManager::FBOManager(GraphicalEngine *engine) : 
+    _ranFrom(engine),
     _currentFBOIndex(-1),
-    _window(window),
     _forceDefault(false)
 {
-    ;
+    for(std::shared_ptr<Scene> scene : engine->getScenes())
+    {
+        parseNewScene(scene);
+    }
 }
 
 FBOManager::~FBOManager()
 {
     ;
+}
+
+void FBOManager::parseNewScene(std::shared_ptr<Scene> scene)
+{
+    if(_fboSceneMap.count(scene) == 0)
+    {
+        _ranFrom->getViewportSize();
+        std::shared_ptr<FBO> HDRfbo = addFBO(E_AttachmentFormat::TEXTURE, _ranFrom->getViewportSize()[0], _ranFrom->getViewportSize()[1]);
+        HDRfbo->addAttachment(E_AttachmentType::COLOR, E_ColorFormat::RGBA16F);
+        HDRfbo->addAttachment(E_AttachmentType::DEPTH);
+        //HDRfbo->addAttachment(E_AttachmentType::STENCIL);
+
+        bindSceneToFBO(scene, HDRfbo);
+    }
 }
 
 std::shared_ptr<FBO> FBOManager::addFBO(E_AttachmentFormat format, int width, int height)
@@ -19,16 +38,16 @@ std::shared_ptr<FBO> FBOManager::addFBO(E_AttachmentFormat format, int width, in
 
     switch (format)
     {
-        case TEXTURE:
+        case E_AttachmentFormat::TEXTURE:
             fbo = std::make_shared<TextureFBO>(width, height);
             break;
-        case RENDERBUFFER:
+        case E_AttachmentFormat::RENDERBUFFER:
             fbo = std::make_shared<RenderBufferFBO>(width, height);
             break;
-        case SHADOW_DEPTH:
+        case E_AttachmentFormat::SHADOW_DEPTH:
             fbo = std::make_shared<ShadowDepthFBO>(width, height);
             break;
-        case SHADOW_DEPTH_CUBE:
+        case E_AttachmentFormat::SHADOW_DEPTH_CUBE:
             fbo = std::make_shared<ShadowDepthCubeFBO>(width, height);
             break;
         default:
@@ -46,7 +65,8 @@ void FBOManager::bindFBO(unsigned int fboIndex)
     }
 
     _currentFBOIndex = fboIndex;
-    glBindFramebuffer(GL_FRAMEBUFFER, _frameBufferObjects[fboIndex]->getID());
+    unsigned int newID = _frameBufferObjects[fboIndex]->id();
+    glBindFramebuffer(GL_FRAMEBUFFER, _frameBufferObjects[fboIndex]->id());
 }
 
 void FBOManager::unbindFBO()
@@ -68,6 +88,16 @@ std::shared_ptr<FBO> FBOManager::getFBO(unsigned int fboIndex) const
     }
 
     return _frameBufferObjects[fboIndex];
+}
+
+std::shared_ptr<FBO> FBOManager::getSceneFBO(std::shared_ptr<Scene> scene) const
+{
+    if(_fboSceneMap.find(scene) == _fboSceneMap.end())
+    {
+        return nullptr;
+    }
+
+    return _fboSceneMap.at(scene);
 }
 
 unsigned int FBOManager::getFBOIndex(std::shared_ptr<FBO> fbo) const
@@ -117,11 +147,11 @@ void FBOManager::bindProperFBOFromScene(std::shared_ptr<Scene> scene)
         return;
     }
 
-    if(_fboSceneMap.find(scene) == _fboSceneMap.end())
-    {
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        return;
-    }
+    // if(_fboSceneMap.find(scene) == _fboSceneMap.end())
+    // {
+    //     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    //     return;
+    // }
 
     bindFBO(getFBOIndex(_fboSceneMap[scene]));
 }

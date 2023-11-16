@@ -55,11 +55,9 @@ public:
 	void unbindFBO();
 	unsigned int getFBOIndex(std::shared_ptr<FBO> fbo) const;
 	bool isFrameBufferComplete(std::shared_ptr<FBO>) const;
-	FBOManager& getFBOManager();
 
 	// Cubemaps
 	void initializeSkybox(Skybox &skybox, const std::array<Texture, 6>& textures) override;
-
 
 	// Instancing
 	void initializeInstanceManager(std::shared_ptr<Scene> scene);
