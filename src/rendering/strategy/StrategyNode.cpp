@@ -230,8 +230,8 @@ void HighDynamicRangeNode::run()
     std::shared_ptr<ShaderLibrary> shaderPrograms = _chain->engine()->getShaderLibrary();
     std::shared_ptr<FBOManager> frameBuffers = _chain->engine()->getFBOManager();
 
-    frameBuffers->unbindFBO();
-    frameBuffers->clearAll();
+    // frameBuffers->unbindFBO();
+    // frameBuffers->clearAll();
 
     auto sceneFBO = frameBuffers->getSceneFBO(scene);
 
@@ -263,7 +263,7 @@ void HighDynamicRangeNode::run()
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
         glBindVertexArray(0);
     }
-    frameBuffers->bindProperFBOFromScene(scene);
+    // frameBuffers->bindProperFBOFromScene(scene);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
