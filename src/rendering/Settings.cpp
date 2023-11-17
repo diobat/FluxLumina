@@ -20,7 +20,8 @@ Settings::Settings(GLFWwindow* _window)    :
     _depthTest(E_Setting::ON),
     _normalMapping(E_Setting::ON),
     _heightMapping(E_Setting::ON),
-    _highDynamicRange(E_Setting::ON)
+    _highDynamicRange(E_Setting::ON),
+    _bloom(E_Setting::ON)
 {
     /* Make the window's context current */
     glfwMakeContextCurrent(_window);
@@ -36,6 +37,7 @@ Settings::Settings(GLFWwindow* _window)    :
     set(E_Settings::NORMAL_MAPPING, 1);
     set(E_Settings::HEIGHT_MAPPING, 1);
     set(E_Settings::HIGH_DYNAMIC_RANGE, 1);
+    set(E_Settings::BLOOM, 1);
 }
 
 void Settings::set(E_Settings setting, int value)
@@ -126,6 +128,9 @@ void Settings::set(E_Settings setting, int value)
     case E_Settings::HIGH_DYNAMIC_RANGE:
         _highDynamicRange = static_cast<E_Setting>(value);
         break;
+    case E_Settings::BLOOM:
+        _bloom = static_cast<E_Setting>(value);
+        break;
     default:
         break;
     }
@@ -194,4 +199,9 @@ E_Setting Settings::getHeightMapping() const
 E_Setting Settings::getHighDynamicRange() const
 {
     return _highDynamicRange;
+}
+
+E_Setting Settings::getBloom() const
+{
+    return _bloom;
 }

@@ -18,20 +18,6 @@ FBOManager::~FBOManager()
     ;
 }
 
-void FBOManager::parseNewScene(std::shared_ptr<Scene> scene)
-{
-    if(_fboSceneMap.count(scene) == 0)
-    {
-        _ranFrom->getViewportSize();
-        std::shared_ptr<FBO> HDRfbo = addFBO(E_AttachmentFormat::TEXTURE, _ranFrom->getViewportSize()[0], _ranFrom->getViewportSize()[1]);
-        HDRfbo->addAttachment(E_AttachmentType::COLOR, E_ColorFormat::RGBA16F);
-        HDRfbo->addAttachment(E_AttachmentType::DEPTH);
-        //HDRfbo->addAttachment(E_AttachmentType::STENCIL);
-
-        bindSceneToFBO(scene, HDRfbo);
-    }
-}
-
 std::shared_ptr<FBO> FBOManager::addFBO(E_AttachmentFormat format, int width, int height)
 {
     std::shared_ptr<FBO> fbo;
@@ -57,6 +43,21 @@ std::shared_ptr<FBO> FBOManager::addFBO(E_AttachmentFormat format, int width, in
     return fbo;
 }
 
+void FBOManager::removeFBO(std::shared_ptr<FBO> fbo)
+{
+    unsigned int id = fbo->id();
+    glDeleteFramebuffers(1, &id);
+    
+    for (unsigned int i = 0; i < _frameBufferObjects.size(); i++)
+    {
+        if (_frameBufferObjects[i] == fbo)
+        {
+            _frameBufferObjects.erase(_frameBufferObjects.begin() + i);
+            return;
+        }
+    }
+}
+
 void FBOManager::bindFBO(unsigned int fboIndex)
 {
     if(fboIndex >= _frameBufferObjects.size())
@@ -67,6 +68,11 @@ void FBOManager::bindFBO(unsigned int fboIndex)
     _currentFBOIndex = fboIndex;
     unsigned int newID = _frameBufferObjects[fboIndex]->id();
     glBindFramebuffer(GL_FRAMEBUFFER, _frameBufferObjects[fboIndex]->id());
+}
+
+void FBOManager::bindFBO(std::shared_ptr<FBO> fbo)
+{
+    bindFBO(getFBOIndex(fbo));
 }
 
 void FBOManager::unbindFBO()
@@ -111,6 +117,24 @@ unsigned int FBOManager::getFBOIndex(std::shared_ptr<FBO> fbo) const
     }
 
     return -1;
+}
+
+void FBOManager::parseNewScene(std::shared_ptr<Scene> scene)
+{
+    if(_fboSceneMap.count(scene) == 0)
+    {
+        _ranFrom->getViewportSize();
+        std::shared_ptr<FBO> HDRfbo = addFBO(E_AttachmentFormat::TEXTURE, _ranFrom->getViewportSize()[0], _ranFrom->getViewportSize()[1]);
+        HDRfbo->addAttachment(E_AttachmentType::COLOR, E_ColorFormat::RGBA16F);
+        if(_ranFrom->getSettings()->getBloom() == E_Setting::ON)
+        {
+            HDRfbo->addAttachment(E_AttachmentType::COLOR, E_ColorFormat::RGBA16F);
+        }
+        HDRfbo->addAttachment(E_AttachmentType::DEPTH);
+        //HDRfbo->addAttachment(E_AttachmentType::STENCIL);
+
+        bindSceneToFBO(scene, HDRfbo);
+    }
 }
 
 bool FBOManager::bindSceneToFBO(std::shared_ptr<Scene> scene, std::shared_ptr<FBO> fbo)

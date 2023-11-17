@@ -10,8 +10,9 @@ FBO::FBO(unsigned int width, unsigned int height) :
     glGenFramebuffers(1, &_id);
 }
 
-unsigned int FBO::addColorAttachment(E_ColorFormat colorFormat)
+ColorAttachment FBO::addColorAttachment(E_ColorFormat colorFormat)
 {
+
     unsigned int _textureId;
     glGenTextures(1, &_textureId);
     glBindTexture(GL_TEXTURE_2D, _textureId);
@@ -33,19 +34,20 @@ unsigned int FBO::addColorAttachment(E_ColorFormat colorFormat)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _textureId, 0);
+    unsigned int colorOffset = static_cast<unsigned int>(_colorAttachments.size());
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + colorOffset, GL_TEXTURE_2D, _textureId, 0);
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    return _textureId;
+    return ColorAttachment({_textureId, GL_COLOR_ATTACHMENT0 + colorOffset, colorFormat});
 }
 
 std::vector<Texture> FBO::getTextures() const
 {
     std::vector<Texture> returnTextures;
-    for(unsigned int i = 0; i < _colorAttachmentIDs.size(); ++i)
+    for(unsigned int i = 0; i < _colorAttachments.size(); ++i)
     {
         Texture tempText;
-        tempText._id = _colorAttachmentIDs[i];
+        tempText._id = _colorAttachments[i].id;
         tempText._type = E_TexureType::DIFFUSE;
         tempText._colorChannels = GL_RGB;
         tempText._components = 3;
@@ -61,22 +63,20 @@ unsigned int FBO::getDepthTextureID() const
     return _depthAttachmentID;
 }
 
-
 TextureFBO::TextureFBO(unsigned int width, unsigned int height) : 
     FBO(width, height)
 {
     ;
 }
 
-
 TextureFBO::~TextureFBO()
 {
-
-
-    if(!_colorAttachmentIDs.empty())
+    if(!_colorAttachments.empty())
     {
-        int size = static_cast<int>(_colorAttachmentIDs.size());  
-        glDeleteTextures(size, _colorAttachmentIDs.data());
+        for(auto texture : _colorAttachments)
+        {
+            glDeleteTextures(1, &texture.id);
+        }
     }
     if(_depthAttachmentID != -1)
     {
@@ -97,7 +97,7 @@ void TextureFBO::addAttachment(E_AttachmentType type, E_ColorFormat colorFormat)
     switch(type)
     {
         case E_AttachmentType::COLOR:
-            _colorAttachmentIDs.push_back(addColorAttachment(colorFormat));
+            _colorAttachments.push_back(addColorAttachment(colorFormat));
             break;
         case E_AttachmentType::DEPTH:
             _depthAttachmentID = addDepthAttachment();
@@ -170,7 +170,7 @@ void RenderBufferFBO::addAttachment(E_AttachmentType type, E_ColorFormat colorFo
     switch(type)
     {
         case E_AttachmentType::COLOR:
-            _colorAttachmentIDs.push_back(addColorAttachment(colorFormat));
+            _colorAttachments.push_back(addColorAttachment(colorFormat));
             break;
         case E_AttachmentType::DEPTH:
             addDepthAttachment();
@@ -213,7 +213,7 @@ unsigned int RenderBufferFBO::addStencilAttachment()
 ShadowDepthFBO::ShadowDepthFBO(unsigned int width, unsigned int height) : 
     FBO(width, height)
 {
-    _colorAttachmentIDs.clear();
+    _colorAttachments.clear();
     _stencilAttachmentID = -1;
 }
 
@@ -282,7 +282,7 @@ unsigned int ShadowDepthFBO::addDepthAttachment()
 ShadowDepthCubeFBO::ShadowDepthCubeFBO(unsigned int width, unsigned int height) : 
     FBO(width, height)
 {
-    _colorAttachmentIDs.clear();
+    _colorAttachments.clear();
     _stencilAttachmentID = -1;
     _depthAttachmentID = -1;
 }

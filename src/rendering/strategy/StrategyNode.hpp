@@ -1,6 +1,11 @@
 #pragma once
 
+// STL includes
+#include <array>
+#include <memory>
+
 class StrategyChain;
+class FBO;
 
 class StrategyNode
 {
@@ -60,11 +65,26 @@ public:
     void run() override;
 };
 
+class BloomNode : public StrategyNode
+{
+public:
+    BloomNode(const StrategyChain* chain);
+    ~BloomNode();
+    void run() override;
+private:
+    std::array<std::shared_ptr<FBO>, 2> _pingPongFBOs;
+    unsigned int _quadVAO;
+    unsigned int _quadVBO;
+};
+
 class HighDynamicRangeNode : public StrategyNode
 {
 public:
-    HighDynamicRangeNode(const StrategyChain* chain) : StrategyNode(chain) {}
+    HighDynamicRangeNode(const StrategyChain* chain);
     void run() override;
+private:
+    unsigned int _quadVAO;
+    unsigned int _quadVBO;
 };
 
 class DefaultFramebufferNode : public StrategyNode
