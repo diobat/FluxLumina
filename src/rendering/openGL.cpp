@@ -57,8 +57,12 @@ int openGL::initialize(GLFWwindow* window)
     _shaderPrograms->addShader("Reflection.vert", "Reflection.frag");        //5
     _shaderPrograms->addShader("ShadowMap.vert", "ShadowMap.frag");          //6
     _shaderPrograms->getShader(6)->addSupportedFeature(E_ShaderProgramFeatures::E_SHADOW_MAPPING);
-    _shaderPrograms->addShader("ShadowCubeMap.vert", "ShadowCubeMap.frag", "ShadowCubeMap.geom");      //7
+    _shaderPrograms->addShader("ShadowCubeMap.vert", "ShadowCubeMap.frag", "ShadowCubeMap.geom");       //7
     _shaderPrograms->getShader(7)->addSupportedFeature(E_ShaderProgramFeatures::E_SHADOW_CUBE_MAPPING);
+    _shaderPrograms->addShader("Bloom.vert", "Bloom.frag");                                             //8
+    _shaderPrograms->getShader(8)->addSupportedFeature(E_ShaderProgramFeatures::E_BLOOM);
+    _shaderPrograms->addShader("Bloom.vert", "BloomBlend.frag");                                        //9
+    _shaderPrograms->getShader(9)->addSupportedFeature(E_ShaderProgramFeatures::E_BLOOM_BLEND);
     _shaderPrograms->use(0);
 
     // Add uniform buffers to the shaders

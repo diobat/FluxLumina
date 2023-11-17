@@ -20,7 +20,9 @@ public:
     ~FBOManager();
 
     std::shared_ptr<FBO> addFBO(E_AttachmentFormat format,int width , int height);
+    void removeFBO(std::shared_ptr<FBO> fbo);
     void bindFBO(unsigned int fboIndex);
+    void bindFBO(std::shared_ptr<FBO> fbo);
     void unbindFBO();
 
     size_t getFBOCount() const;

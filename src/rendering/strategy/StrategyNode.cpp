@@ -105,6 +105,13 @@ void FramebufferNode::run()
     frameBuffers->bindProperFBOFromScene(scene);
     // Reset color and depth buffers 
     frameBuffers->clearAll();
+    // Tell OpenGL how many attachments we are using
+    std::vector<unsigned int> colorAttachments;
+    for (auto attachment : frameBuffers->getSceneFBO(scene)->getColorAttachments())
+    {
+        colorAttachments.push_back(attachment.slot);
+    }
+    glDrawBuffers(colorAttachments.size(), colorAttachments.data());  
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -207,7 +214,7 @@ void RenderTransparentNode::run()
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////// HIGH DYNAMIC RANGE NODE
+/////////////////////////// BLOOM NODE
 ///////////////////////////////////////////////////////////////////////////////////////////
 
 namespace
@@ -219,10 +226,118 @@ namespace
                 1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
                 1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
             };
-
-    unsigned int quadVAO = 0;
-    unsigned int quadVBO = 0;
 }
+
+BloomNode::BloomNode(const StrategyChain* chain) : 
+    StrategyNode(chain) 
+{
+    std::shared_ptr<Scene> scene = _chain->engine()->getScene();
+    std::shared_ptr<FBOManager> frameBuffers = _chain->engine()->getFBOManager();
+
+    // Create the ping pong FBOs
+    _pingPongFBOs[0] = frameBuffers->addFBO(E_AttachmentFormat::TEXTURE, _chain->engine()->getViewportSize()[0], _chain->engine()->getViewportSize()[1]);
+    _pingPongFBOs[0]->addAttachment(E_AttachmentType::COLOR, E_ColorFormat::RGBA16F);
+
+    _pingPongFBOs[1] = frameBuffers->addFBO(E_AttachmentFormat::TEXTURE, _chain->engine()->getViewportSize()[0], _chain->engine()->getViewportSize()[1]);
+    _pingPongFBOs[1]->addAttachment(E_AttachmentType::COLOR, E_ColorFormat::RGBA16F);
+
+    // Create the quad VAOs
+    glGenVertexArrays(1, &_quadVAO);
+    glGenBuffers(1, &_quadVBO);
+    glBindVertexArray(_quadVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, _quadVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), nullptr);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glBindVertexArray(0);
+
+}
+
+BloomNode::~BloomNode()
+{
+    std::shared_ptr<FBOManager> frameBuffers = _chain->engine()->getFBOManager();
+
+    frameBuffers->removeFBO(_pingPongFBOs[0]);
+    frameBuffers->removeFBO(_pingPongFBOs[1]);
+}
+
+void BloomNode::run()
+{
+    std::shared_ptr<Scene> scene = _chain->engine()->getScene();
+    std::shared_ptr<FBOManager> frameBuffers = _chain->engine()->getFBOManager();
+    std::shared_ptr<ShaderLibrary> shaderPrograms = _chain->engine()->getShaderLibrary();
+    
+    // Activate proper shader program
+    std::set bloomShader = shaderPrograms->getShaderIndexesPerFeature(E_ShaderProgramFeatures::E_BLOOM);
+    shaderPrograms->use(*bloomShader.begin());
+    shaderPrograms->setUniformInt("material.diffuse", 1);   
+
+    // Loop control variables
+    bool horizontal = true, firstIteration = true;
+    unsigned int horizontal_value;
+    int amount = 10;
+    
+    for(int i(0) ; i < amount; ++i)
+    {
+        horizontal_value = horizontal ? 1 : 0;
+        frameBuffers->bindFBO(_pingPongFBOs[horizontal]);
+        shaderPrograms->setUniformInt("horizontal", horizontal_value);
+        glActiveTexture(GL_TEXTURE0 + 1);
+        glBindTexture(GL_TEXTURE_2D, firstIteration ? frameBuffers->getSceneFBO(scene)->getColorAttachmentID(1) : _pingPongFBOs[!horizontal]->getColorAttachmentID(0));
+
+        glBindVertexArray(_quadVAO);
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+        glBindVertexArray(0);
+
+        horizontal = !horizontal;
+        firstIteration = false;
+    }
+
+    // Activate proper shader program
+    std::set bloomMergeShader = shaderPrograms->getShaderIndexesPerFeature(E_ShaderProgramFeatures::E_BLOOM_BLEND);
+    shaderPrograms->use(*bloomMergeShader.begin());
+
+    frameBuffers->bindProperFBOFromScene(scene);
+
+    shaderPrograms->setUniformInt("material.diffuse", 1);
+    glActiveTexture(GL_TEXTURE0 + 1);
+    glBindTexture(GL_TEXTURE_2D, frameBuffers->getSceneFBO(scene)->getColorAttachmentID(0));
+
+    shaderPrograms->setUniformInt("material.specular", 2);   
+    glActiveTexture(GL_TEXTURE0 + 2);
+    glBindTexture(GL_TEXTURE_2D, _pingPongFBOs[horizontal]->getColorAttachmentID(0));
+
+    glBindVertexArray(_quadVAO);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    glBindVertexArray(0);
+
+    // Remove binds
+    frameBuffers->unbindFBO();
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////// HIGH DYNAMIC RANGE NODE
+///////////////////////////////////////////////////////////////////////////////////////////
+
+
+HighDynamicRangeNode::HighDynamicRangeNode(const StrategyChain* chain) : 
+    StrategyNode(chain) 
+{
+        glGenVertexArrays(1, &_quadVAO);
+        glGenBuffers(1, &_quadVBO);
+        glBindVertexArray(_quadVAO);
+        glBindBuffer(GL_ARRAY_BUFFER, _quadVBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), nullptr);
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+        glBindVertexArray(0);
+}
+
+
 
 void HighDynamicRangeNode::run()
 {
@@ -230,27 +345,10 @@ void HighDynamicRangeNode::run()
     std::shared_ptr<ShaderLibrary> shaderPrograms = _chain->engine()->getShaderLibrary();
     std::shared_ptr<FBOManager> frameBuffers = _chain->engine()->getFBOManager();
 
-    // frameBuffers->unbindFBO();
-    // frameBuffers->clearAll();
-
     auto sceneFBO = frameBuffers->getSceneFBO(scene);
 
     unsigned int textureID = frameBuffers->getSceneFBO(scene)->getColorAttachmentID(0);
     std::set quadShaders = shaderPrograms->getShaderIndexesPerFeature(E_ShaderProgramFeatures::E_QUAD);
-
-    if(quadVAO == 0)
-    {
-        glGenVertexArrays(1, &quadVAO);
-        glGenBuffers(1, &quadVBO);
-        glBindVertexArray(quadVAO);
-        glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), nullptr);
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-        glBindVertexArray(0);
-    }
 
     for (auto quadShader : quadShaders)
     {
@@ -259,11 +357,10 @@ void HighDynamicRangeNode::run()
         glActiveTexture(GL_TEXTURE0 + 1);
         glBindTexture(GL_TEXTURE_2D, textureID);
 
-        glBindVertexArray(quadVAO);
+        glBindVertexArray(_quadVAO);
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
         glBindVertexArray(0);
     }
-    // frameBuffers->bindProperFBOFromScene(scene);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////

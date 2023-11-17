@@ -130,29 +130,17 @@ int main(void)
     //     cubeN.setScale(5.0f);
     // }
 
-    auto& statue = factory.create_Model("res/models/Statue/statue_decimated.obj", 0);
-    //auto& statue = factory.create_Model("res/models/Statue/12330_Statue_v1_L2.obj", 0);
+    auto& statue = factory.create_Model("res/models/Statue/Statue_fixed.obj", 0);
     statue.setPosition({0.0f, 0.0f, 5.0f});
-    statue.rotate(-90.0f, 0.0f, 0.0f);
-    statue.setScale(0.01f);
 
-    auto &statue2 = factory.create_Model("res/models/Statue/statue_decimated.obj", 0);
-    //auto &statue2 = factory.create_Model("res/models/Statue/12330_Statue_v1_L2.obj", 0);
+    auto &statue2 = factory.create_Model("res/models/Statue/Statue_fixed.obj", 0);
     statue2.setPosition({0.0f, 0.0f, -5.0f});
-    statue2.rotate(-90.0f, 0.0f, 0.0f);
-    statue2.setScale(0.01f);
 
-    auto &statue3 = factory.create_Model("res/models/Statue/statue_decimated.obj", 0);
-    //auto &statue3 = factory.create_Model("res/models/Statue/12330_Statue_v1_L2.obj", 0);
+    auto &statue3 = factory.create_Model("res/models/Statue/Statue_fixed.obj", 0);
     statue3.setPosition({-5.0f, 0.0f, 0.0f});
-    statue3.rotate(-90.0f, 0.0f, 0.0f);
-    statue3.setScale(0.01f);
 
-    auto &statue4 = factory.create_Model("res/models/Statue/statue_decimated.obj", 0);
-    //auto &statue4 = factory.create_Model("res/models/Statue/12330_Statue_v1_L2.obj", 0);
+    auto &statue4 = factory.create_Model("res/models/Statue/Statue_fixed.obj", 0);
     statue4.setPosition({5.0f, 0.0f, 0.0f});
-    statue4.rotate(-90.0f, 0.0f, 0.0f);
-    statue4.setScale(0.01f);
 
     // auto& grass = factory.create_Model("res/models/grassSquare/grassSquare.obj", 2);
     // grass.setPosition({10.0f, 1.0f, 10.0f});
@@ -174,15 +162,17 @@ int main(void)
     // light_B->setAttenuationFactors({1.0f, 0.18f, 0.032f});
 
     movLight = factory.create_LightSource( E_LightType::POINT_LIGHT);
-
+    movLight->setColor({10.0f, 0.0f, 0.0f});
     movLight->setPosition({-4.0f, 8.0f, 18.0f});
     movLight->setAttenuationFactors({1.0f, 0.09f, 0.032f});
 
     auto light_C = factory.create_LightSource( E_LightType::POINT_LIGHT);
+    light_C->setColor({0.0f, 10.0f, 0.0f});
     light_C->setPosition({13.0f, 5.0f, -13.0f});
     light_C->setAttenuationFactors({1.0f, 0.09f, 0.032f});
 
     auto light_D = factory.create_LightSource( E_LightType::POINT_LIGHT);
+    light_D->setColor({0.0f, 0.0f, 10.0f});
     light_D->setPosition({-13.0f, 5.0f, -13.0f});
     light_D->setAttenuationFactors({1.0f, 0.09f, 0.032f});
 

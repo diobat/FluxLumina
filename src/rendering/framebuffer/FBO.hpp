@@ -32,6 +32,13 @@ enum class E_AttachmentFormat
     SHADOW_DEPTH_CUBE       // Color = None     | Depth = Cubemap       | Stencil = None
 };
 
+struct ColorAttachment
+{
+    unsigned int id;
+    unsigned int slot;
+    E_ColorFormat format;
+};
+
 class FBO
 {
 public:
@@ -43,7 +50,8 @@ public:
 
     virtual void addAttachment(E_AttachmentType type, E_ColorFormat colorFormat = E_ColorFormat::RGB) = 0{};
 
-    unsigned int getColorAttachmentID(unsigned int index) const { return _colorAttachmentIDs[index]; }
+    const std::vector<ColorAttachment>& getColorAttachments() const { return _colorAttachments; }
+    unsigned int getColorAttachmentID(unsigned int index) const { return _colorAttachments[index].id; }
     unsigned int getDepthAttachmentID() const { return _depthAttachmentID; }
     unsigned int getStencilAttachmentID() const { return _stencilAttachmentID; }
 
@@ -51,12 +59,12 @@ public:
     unsigned int getDepthTextureID() const;
 
 protected:
-    unsigned int addColorAttachment(E_ColorFormat colorFormat = E_ColorFormat::RGB);
+    ColorAttachment addColorAttachment(E_ColorFormat colorFormat = E_ColorFormat::RGB);
 
     unsigned int _id;
     std::array<unsigned int, 2> _originalSize;
 
-    std::vector<unsigned int> _colorAttachmentIDs;
+    std::vector<ColorAttachment> _colorAttachments;
     unsigned int _depthAttachmentID;
     unsigned int _stencilAttachmentID;
 };

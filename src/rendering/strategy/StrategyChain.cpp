@@ -46,6 +46,10 @@ DefaultStrategyChain::DefaultStrategyChain(GraphicalEngine* engine) :
     add(std::make_shared<RenderSkyboxNode>(this));
     add(std::make_shared<RenderTransparentNode>(this));
     // Post-processing
+    if(engine->getSettings()->getBloom() == E_Setting::ON)
+    {
+        add(std::make_shared<BloomNode>(this));  
+    }
     if(engine->getSettings()->getHighDynamicRange() == E_Setting::ON)
     {
         add(std::make_shared<HighDynamicRangeNode>(this));  
