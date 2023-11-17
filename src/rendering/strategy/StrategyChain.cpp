@@ -2,6 +2,7 @@
 
 #include "rendering/GraphicalEngine.hpp"
 #include "rendering/Settings.hpp"
+#include "rendering/framebuffer/Framebuffer_Manager.hpp"
 
 StrategyChain::StrategyChain(GraphicalEngine* engine) : 
     _ranFrom(engine)

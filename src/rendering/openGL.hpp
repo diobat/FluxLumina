@@ -50,7 +50,7 @@ public:
 	unsigned int getShaderProgramID(unsigned int shaderIndex);
 
 	// Framebuffers
-	std::shared_ptr<FBO> addFBO(E_AttachmentFormat format, int width, int height);
+	std::shared_ptr<FBO> addFBO(E_AttachmentTemplate format, int width, int height);
 	void bindFBO(unsigned int fboIndex);
 	void unbindFBO();
 	unsigned int getFBOIndex(std::shared_ptr<FBO> fbo) const;

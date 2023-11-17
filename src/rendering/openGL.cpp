@@ -79,7 +79,7 @@ int openGL::initialize(GLFWwindow* window)
     _instancingManager = std::make_shared<InstancingManager>();
 
     // Initialize Rendering strategy
-    _strategyChain = std::make_shared<DefaultStrategyChain>(this);
+    _strategyChain = std::make_shared<ForwardShadingStrategyChain>(this);
 
     return 1;
 }
@@ -258,7 +258,7 @@ unsigned int openGL::getShaderProgramID(unsigned int shaderIndex)
     return _shaderPrograms->getShader(shaderIndex)->getProgramId();
 }
 
-std::shared_ptr<FBO> openGL::addFBO(E_AttachmentFormat format, int width, int height)
+std::shared_ptr<FBO> openGL::addFBO(E_AttachmentTemplate format, int width, int height)
 {
     if (width <= 0 || height <= 0)
     {

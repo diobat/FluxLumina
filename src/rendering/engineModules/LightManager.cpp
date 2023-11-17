@@ -381,16 +381,16 @@ void LightLibrary::alignShadowMaps(std::shared_ptr<Scene> scene)
             switch (getLightType(*light))
             {
                 case E_LightType::POINT_LIGHT:
-                    fbo = framebuffers->addFBO(E_AttachmentFormat::SHADOW_DEPTH_CUBE, shadowMapResolution, shadowMapResolution);
+                    fbo = framebuffers->addFBO(E_AttachmentTemplate::SHADOW_DEPTH_CUBE, shadowMapResolution, shadowMapResolution);
                     shadowMap.setLightType(E_LightType::POINT_LIGHT);
                     break;
                 case E_LightType::SPOT_LIGHT:
-                    fbo = framebuffers->addFBO(E_AttachmentFormat::SHADOW_DEPTH, shadowMapResolution, shadowMapResolution);
+                    fbo = framebuffers->addFBO(E_AttachmentTemplate::SHADOW_DEPTH, shadowMapResolution, shadowMapResolution);
                     shadowMap.setLightType(E_LightType::SPOT_LIGHT);
                     break;
             }
 
-            fbo->addAttachment(E_AttachmentType::DEPTH);
+            fbo->addAttachment(E_AttachmentSlot::DEPTH);
             shadowMap.setShadowBuffer(fbo);
             shadowMap.alignShadowMap(light);
             shadowMap.setDimensions(shadowMapResolution);

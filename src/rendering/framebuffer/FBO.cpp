@@ -1,13 +1,68 @@
 #include "rendering/framebuffer/FBO.hpp"
 
-
-FBO::FBO(unsigned int width, unsigned int height) : 
+FBO::FBO(E_AttachmentTemplate format, unsigned int width, unsigned int height) : 
     _id(-1),
     _originalSize({width, height}),
     _depthAttachmentID(-1),
     _stencilAttachmentID(-1)
 {
     glGenFramebuffers(1, &_id);
+    glBindFramebuffer(GL_FRAMEBUFFER, _id);
+    switch(format)
+    {
+        case E_AttachmentTemplate::TEXTURE:
+            init({E_AttachmentTypes::TEXTURE, E_AttachmentTypes::TEXTURE, E_AttachmentTypes::TEXTURE});
+            break;
+        case E_AttachmentTemplate::RENDERBUFFER:
+            init({E_AttachmentTypes::TEXTURE, E_AttachmentTypes::RENDERBUFFER, E_AttachmentTypes::RENDERBUFFER});
+            break;
+        case E_AttachmentTemplate::SHADOW_DEPTH:
+            init({E_AttachmentTypes::NONE, E_AttachmentTypes::TEXTURE, E_AttachmentTypes::NONE});
+            glDrawBuffer(GL_NONE);
+            glReadBuffer(GL_NONE);
+            break;
+        case E_AttachmentTemplate::SHADOW_DEPTH_CUBE:
+            init({E_AttachmentTypes::NONE, E_AttachmentTypes::CUBEMAP, E_AttachmentTypes::NONE});
+            glDrawBuffer(GL_NONE);
+            glReadBuffer(GL_NONE);
+            break;
+    }
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+FBO::~FBO()
+{
+    reset();
+    glDeleteFramebuffers(1, &_id);
+}
+
+void FBO::init(const std::array<E_AttachmentTypes, 3>& templateTypes)
+{
+    reset();
+    _framebufferTemplate = templateTypes;
+}
+
+void FBO::addAttachment(E_AttachmentSlot type, E_ColorFormat colorFormat)
+{
+    glBindFramebuffer(GL_FRAMEBUFFER, _id);
+    switch(type)
+    {
+        case E_AttachmentSlot::COLOR:
+            if(!(_framebufferTemplate[0] == E_AttachmentTypes::NONE))
+            {
+                _colorAttachments.push_back(addColorAttachment(colorFormat));
+            }
+            break;
+        case E_AttachmentSlot::DEPTH:
+            _depthAttachmentID = addDepthAttachment(_framebufferTemplate[1]);
+            break;
+        case E_AttachmentSlot::STENCIL:
+            _stencilAttachmentID = addStencilAttachment(_framebufferTemplate[2]);
+            break;
+        default:
+            break;
+    }
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 ColorAttachment FBO::addColorAttachment(E_ColorFormat colorFormat)
@@ -30,7 +85,6 @@ ColorAttachment FBO::addColorAttachment(E_ColorFormat colorFormat)
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, getOriginalSize()[0], getOriginalSize()[1], 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
             break;
     }
-
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
@@ -39,6 +93,184 @@ ColorAttachment FBO::addColorAttachment(E_ColorFormat colorFormat)
     glBindTexture(GL_TEXTURE_2D, 0);
 
     return ColorAttachment({_textureId, GL_COLOR_ATTACHMENT0 + colorOffset, colorFormat});
+}
+
+unsigned int FBO::addDepthAttachment(E_AttachmentTypes type)
+{
+    unsigned int attachment_id = 0;
+    switch(type)
+    {
+        case E_AttachmentTypes::TEXTURE:
+            if(_depthAttachmentID != -1)
+            {
+                glDeleteTextures(1, &_depthAttachmentID);
+            }
+            
+            glGenTextures(1, &attachment_id);
+            glBindTexture(GL_TEXTURE_2D, attachment_id);
+
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, getOriginalSize()[0], getOriginalSize()[1], 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+            // If this depth texture is inteded of a shadowmap the setup is slightly different, however we don't know that here. So we just set it up as a normal depth texture UNLESS the color attachment is NONE.
+            if(_framebufferTemplate[0] == E_AttachmentTypes::NONE)
+            {
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+                float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+                glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);  
+                glDrawBuffer(GL_NONE);
+                glReadBuffer(GL_NONE);
+            }
+
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, attachment_id, 0);
+
+            glBindTexture(GL_TEXTURE_2D, 0);
+            break;
+        case E_AttachmentTypes::RENDERBUFFER:
+            if(_depthAttachmentID != -1)
+            {
+                glDeleteRenderbuffers(1, &_depthAttachmentID);
+            }
+
+            glGenRenderbuffers(1, &attachment_id);
+            glBindRenderbuffer(GL_RENDERBUFFER, attachment_id);
+
+            glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, getOriginalSize()[0], getOriginalSize()[1]);
+            glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, attachment_id);
+
+            glBindRenderbuffer(GL_RENDERBUFFER, 0);
+            break;
+        case E_AttachmentTypes::CUBEMAP:
+            if(_depthAttachmentID != -1)
+            {
+                glDeleteTextures(1, &_depthAttachmentID);
+            }
+            glGenTextures(1, &attachment_id);
+            glBindTexture(GL_TEXTURE_CUBE_MAP, attachment_id);
+
+            for(unsigned int i = 0; i < 6; ++i)
+            {
+                glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT, getOriginalSize()[0], getOriginalSize()[1], 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+            }
+
+            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST); 
+            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);   
+            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);   
+            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);  
+            
+            glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, attachment_id, 0);
+
+            glDrawBuffer(GL_NONE);  // Framebuffers have a colorbuffer requirement, but we don't need it. In order to guarantee that at least a Depth buffer is created, we need to specify GL_NONE as the colorbuffer inside this function.
+            glReadBuffer(GL_NONE);
+
+            glBindTexture(GL_TEXTURE_2D, 0);
+            break;
+        case E_AttachmentTypes::NONE:
+        default:
+            return 0;
+            break;
+    }
+    return attachment_id;	
+}
+
+unsigned int FBO::addStencilAttachment(E_AttachmentTypes type)
+{
+    switch(_framebufferTemplate[2])
+    {
+        case E_AttachmentTypes::TEXTURE:
+
+            if(_stencilAttachmentID != -1)
+            {
+                glDeleteTextures(1, &_stencilAttachmentID);
+            }
+            unsigned int textureId;
+            glGenTextures(1, &textureId);
+            glBindTexture(GL_TEXTURE_2D, textureId);
+
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_STENCIL_INDEX, getOriginalSize()[0], getOriginalSize()[1], 0, GL_STENCIL_INDEX, GL_UNSIGNED_BYTE, NULL);
+
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_TEXTURE_2D, textureId, 0);
+
+            glBindTexture(GL_TEXTURE_2D, 0);
+            return textureId;
+            break;
+
+        case E_AttachmentTypes::RENDERBUFFER:
+            
+            if(_stencilAttachmentID != -1)
+            {
+                glDeleteRenderbuffers(1, &_stencilAttachmentID);
+            }
+
+            unsigned int rb_id;
+            glGenRenderbuffers(1, &rb_id);
+            glBindRenderbuffer(GL_RENDERBUFFER, rb_id);
+
+            glRenderbufferStorage(GL_RENDERBUFFER, GL_STENCIL_INDEX, getOriginalSize()[0], getOriginalSize()[1]);
+            glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rb_id);
+
+            glBindRenderbuffer(GL_RENDERBUFFER, 0);
+            return rb_id;
+            break;
+
+        case E_AttachmentTypes::NONE:
+            return 0;
+    }
+    return -1;
+}
+
+void FBO::reset()
+{
+    // Color attachments
+    for(auto texture : _colorAttachments)
+    {
+        glDeleteTextures(1, &texture.id);
+    }
+    _colorAttachments.clear();
+
+    // Depth attachment
+    if(_depthAttachmentID != -1)
+    {
+        switch(_framebufferTemplate[1])
+        {
+            case E_AttachmentTypes::TEXTURE:
+                glDeleteTextures(1, &_depthAttachmentID);
+                break;
+            case E_AttachmentTypes::RENDERBUFFER:
+                glDeleteRenderbuffers(1, &_depthAttachmentID);
+                break;
+            default:
+                break;
+        }
+        _depthAttachmentID = -1;
+    }
+
+    // Stencil attachment
+    if(_stencilAttachmentID != -1)
+    {
+        switch(_framebufferTemplate[2])
+        {
+            case E_AttachmentTypes::TEXTURE:
+                glDeleteTextures(1, &_stencilAttachmentID);
+                break;
+            case E_AttachmentTypes::RENDERBUFFER:
+                glDeleteRenderbuffers(1, &_stencilAttachmentID);
+                break;
+            default:
+                break;
+        }
+        _stencilAttachmentID = -1;
+    }
 }
 
 std::vector<Texture> FBO::getTextures() const
@@ -61,290 +293,4 @@ std::vector<Texture> FBO::getTextures() const
 unsigned int FBO::getDepthTextureID() const
 {
     return _depthAttachmentID;
-}
-
-TextureFBO::TextureFBO(unsigned int width, unsigned int height) : 
-    FBO(width, height)
-{
-    ;
-}
-
-TextureFBO::~TextureFBO()
-{
-    if(!_colorAttachments.empty())
-    {
-        for(auto texture : _colorAttachments)
-        {
-            glDeleteTextures(1, &texture.id);
-        }
-    }
-    if(_depthAttachmentID != -1)
-    {
-        glDeleteTextures(1, &_depthAttachmentID);
-    }
-    if(_stencilAttachmentID != -1)
-    {
-        glDeleteTextures(1, &_stencilAttachmentID);
-    }
-
-    glDeleteFramebuffers(1, &_id);
-}
-
-void TextureFBO::addAttachment(E_AttachmentType type, E_ColorFormat colorFormat)
-{
-    glBindFramebuffer(GL_FRAMEBUFFER, _id);
-
-    switch(type)
-    {
-        case E_AttachmentType::COLOR:
-            _colorAttachments.push_back(addColorAttachment(colorFormat));
-            break;
-        case E_AttachmentType::DEPTH:
-            _depthAttachmentID = addDepthAttachment();
-            break;
-        case E_AttachmentType::STENCIL:
-            _stencilAttachmentID = addStencilAttachment();
-            break;
-        default:
-            break;
-    }
-
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-}
-
-unsigned int TextureFBO::addDepthAttachment()
-{
-    if(_depthAttachmentID != -1)
-    {
-        glDeleteTextures(1, &_depthAttachmentID);
-    }
-    unsigned int textureId;
-    glGenTextures(1, &textureId);
-    glBindTexture(GL_TEXTURE_2D, textureId);
-
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, getOriginalSize()[0], getOriginalSize()[1], 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, textureId, 0);
-
-    return textureId;
-}
-
-unsigned int TextureFBO::addStencilAttachment()
-{
-    if(_stencilAttachmentID != -1)
-    {
-        glDeleteTextures(1, &_stencilAttachmentID);
-    }
-    unsigned int textureId;
-    glGenTextures(1, &textureId);
-    glBindTexture(GL_TEXTURE_2D, textureId);
-
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_STENCIL_INDEX, getOriginalSize()[0], getOriginalSize()[1], 0, GL_STENCIL_INDEX, GL_UNSIGNED_BYTE, NULL);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_TEXTURE_2D, textureId, 0);
-
-    return textureId;
-}
-
-RenderBufferFBO::RenderBufferFBO(unsigned int width, unsigned int height) : 
-    FBO(width, height)
-{
-    glGenRenderbuffers(1, &_id);
-}
-
-RenderBufferFBO::~RenderBufferFBO()
-{
-    glDeleteRenderbuffers(1, &_id);
-}
-
-void RenderBufferFBO::addAttachment(E_AttachmentType type, E_ColorFormat colorFormat)
-{
-    glBindFramebuffer(GL_FRAMEBUFFER, _id);
-
-    switch(type)
-    {
-        case E_AttachmentType::COLOR:
-            _colorAttachments.push_back(addColorAttachment(colorFormat));
-            break;
-        case E_AttachmentType::DEPTH:
-            addDepthAttachment();
-            break;
-        case E_AttachmentType::STENCIL:
-            addStencilAttachment();
-            break;
-        default:
-            break;
-    }
-
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-}
-
-unsigned int RenderBufferFBO::addDepthAttachment()
-{
-    unsigned int rb_id;
-    glGenRenderbuffers(1, &rb_id);
-    glBindRenderbuffer(GL_RENDERBUFFER, rb_id);
-
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, getOriginalSize()[0], getOriginalSize()[1]);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rb_id);
-
-    return rb_id;
-}
-
-unsigned int RenderBufferFBO::addStencilAttachment()
-{
-    unsigned int rb_id;
-    glGenRenderbuffers(1, &rb_id);
-    glBindRenderbuffer(GL_RENDERBUFFER, rb_id);
-
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_STENCIL_INDEX, getOriginalSize()[0], getOriginalSize()[1]);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rb_id);
-
-    return rb_id;
-}
-
-
-ShadowDepthFBO::ShadowDepthFBO(unsigned int width, unsigned int height) : 
-    FBO(width, height)
-{
-    _colorAttachments.clear();
-    _stencilAttachmentID = -1;
-}
-
-ShadowDepthFBO::~ShadowDepthFBO()
-{
-    if(_depthAttachmentID != -1)
-    {
-        glDeleteTextures(1, &_depthAttachmentID);
-    }
-
-    glDeleteFramebuffers(1, &_id);
-}
-
-void ShadowDepthFBO::addAttachment(E_AttachmentType type, E_ColorFormat colorFormat)
-{
-    glBindFramebuffer(GL_FRAMEBUFFER, _id);
-
-    switch(type)
-    {
-        case E_AttachmentType::COLOR:
-            break;
-        case E_AttachmentType::DEPTH:
-            _depthAttachmentID = addDepthAttachment();
-            break;
-        case E_AttachmentType::STENCIL:
-            break;
-        default:
-            break;
-    }
-
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-}
-
-unsigned int ShadowDepthFBO::addDepthAttachment()
-{
-        if(_depthAttachmentID != -1)
-    {
-        glDeleteTextures(1, &_depthAttachmentID);
-    }
-
-    unsigned int textureId;
-    glGenTextures(1, &textureId);
-    glBindTexture(GL_TEXTURE_2D, textureId);
-
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, getOriginalSize()[0], getOriginalSize()[1], 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-    float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);  
-
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, textureId, 0);
-
-    glDrawBuffer(GL_NONE);  // Framebuffers have a colorbuffer requirement, but we don't need it. In order to guarantee that at least a Depth buffer is created, we need to specify GL_NONE as the colorbuffer inside this function.
-    glReadBuffer(GL_NONE);
-
-    glBindTexture(GL_TEXTURE_2D, 0);
-
-    return textureId;
-}
-
-
-ShadowDepthCubeFBO::ShadowDepthCubeFBO(unsigned int width, unsigned int height) : 
-    FBO(width, height)
-{
-    _colorAttachments.clear();
-    _stencilAttachmentID = -1;
-    _depthAttachmentID = -1;
-}
-
-ShadowDepthCubeFBO::~ShadowDepthCubeFBO()
-{
-    if(_depthAttachmentID != -1)
-    {
-        glDeleteTextures(1, &_depthAttachmentID);
-    }
-
-    glDeleteFramebuffers(1, &_id);
-}
-
-void ShadowDepthCubeFBO::addAttachment(E_AttachmentType type, E_ColorFormat colorFormat)
-{
-    glBindFramebuffer(GL_FRAMEBUFFER, _id);
-
-    switch(type)
-    {
-        case E_AttachmentType::COLOR:
-            break;
-        case E_AttachmentType::DEPTH:
-            _depthAttachmentID = addDepthAttachment();
-            break;
-        case E_AttachmentType::STENCIL:
-            break;
-        default:
-            break;
-    }
-
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-}
-
-unsigned int ShadowDepthCubeFBO::addDepthAttachment()
-{
-    if(_depthAttachmentID != -1)
-    {
-        glDeleteTextures(1, &_depthAttachmentID);
-    }
-
-    unsigned int textureId;
-    glGenTextures(1, &textureId);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, textureId);
-
-    for(unsigned int i = 0; i < 6; ++i)
-    {
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT, getOriginalSize()[0], getOriginalSize()[1], 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-    }
-
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST); 
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);   
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);   
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);  
-    
-    glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, textureId, 0);
-
-    glDrawBuffer(GL_NONE);  // Framebuffers have a colorbuffer requirement, but we don't need it. In order to guarantee that at least a Depth buffer is created, we need to specify GL_NONE as the colorbuffer inside this function.
-    glReadBuffer(GL_NONE);
-
-    glBindTexture(GL_TEXTURE_2D, 0);
-
-    return textureId;
 }

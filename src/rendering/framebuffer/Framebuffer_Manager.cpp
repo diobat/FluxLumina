@@ -18,27 +18,12 @@ FBOManager::~FBOManager()
     ;
 }
 
-std::shared_ptr<FBO> FBOManager::addFBO(E_AttachmentFormat format, int width, int height)
+std::shared_ptr<FBO> FBOManager::addFBO(E_AttachmentTemplate format, int width, int height)
 {
     std::shared_ptr<FBO> fbo;
 
-    switch (format)
-    {
-        case E_AttachmentFormat::TEXTURE:
-            fbo = std::make_shared<TextureFBO>(width, height);
-            break;
-        case E_AttachmentFormat::RENDERBUFFER:
-            fbo = std::make_shared<RenderBufferFBO>(width, height);
-            break;
-        case E_AttachmentFormat::SHADOW_DEPTH:
-            fbo = std::make_shared<ShadowDepthFBO>(width, height);
-            break;
-        case E_AttachmentFormat::SHADOW_DEPTH_CUBE:
-            fbo = std::make_shared<ShadowDepthCubeFBO>(width, height);
-            break;
-        default:
-            break;
-    }
+    fbo = std::make_shared<FBO>(format, width, height);
+
     _frameBufferObjects.push_back(fbo);
     return fbo;
 }
@@ -123,17 +108,17 @@ void FBOManager::parseNewScene(std::shared_ptr<Scene> scene)
 {
     if(_fboSceneMap.count(scene) == 0)
     {
-        _ranFrom->getViewportSize();
-        std::shared_ptr<FBO> HDRfbo = addFBO(E_AttachmentFormat::TEXTURE, _ranFrom->getViewportSize()[0], _ranFrom->getViewportSize()[1]);
-        HDRfbo->addAttachment(E_AttachmentType::COLOR, E_ColorFormat::RGBA16F);
+        std::shared_ptr<FBO> HDRfbo = addFBO(E_AttachmentTemplate::TEXTURE, _ranFrom->getViewportSize()[0], _ranFrom->getViewportSize()[1]);
+        HDRfbo->addAttachment(E_AttachmentSlot::COLOR, E_ColorFormat::RGBA16F);
         if(_ranFrom->getSettings()->getBloom() == E_Setting::ON)
         {
-            HDRfbo->addAttachment(E_AttachmentType::COLOR, E_ColorFormat::RGBA16F);
+            HDRfbo->addAttachment(E_AttachmentSlot::COLOR, E_ColorFormat::RGBA16F);
         }
-        HDRfbo->addAttachment(E_AttachmentType::DEPTH);
-        //HDRfbo->addAttachment(E_AttachmentType::STENCIL);
+        HDRfbo->addAttachment(E_AttachmentSlot::DEPTH);
+        //HDRfbo->addAttachment(E_AttachmentSlot::STENCIL);
 
         bindSceneToFBO(scene, HDRfbo);
+        bindProperFBOFromScene(scene);
     }
 }
 
@@ -171,11 +156,11 @@ void FBOManager::bindProperFBOFromScene(std::shared_ptr<Scene> scene)
         return;
     }
 
-    // if(_fboSceneMap.find(scene) == _fboSceneMap.end())
-    // {
-    //     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    //     return;
-    // }
+    if(_fboSceneMap.find(scene) == _fboSceneMap.end())
+    {
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        return;
+    }
 
     bindFBO(getFBOIndex(_fboSceneMap[scene]));
 }

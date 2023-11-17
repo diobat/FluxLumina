@@ -106,12 +106,19 @@ void FramebufferNode::run()
     // Reset color and depth buffers 
     frameBuffers->clearAll();
     // Tell OpenGL how many attachments we are using
-    std::vector<unsigned int> colorAttachments;
-    for (auto attachment : frameBuffers->getSceneFBO(scene)->getColorAttachments())
+    if(_chain->engine()->getSettings()->getBloom() == E_Setting::ON)
     {
-        colorAttachments.push_back(attachment.slot);
+        std::vector<unsigned int> colorAttachments;
+        for (auto attachment : frameBuffers->getSceneFBO(scene)->getColorAttachments())
+        {
+            colorAttachments.push_back(attachment.slot);
+        }
+        glDrawBuffers(colorAttachments.size(), colorAttachments.data());  
     }
-    glDrawBuffers(colorAttachments.size(), colorAttachments.data());  
+    else
+    {
+        glDrawBuffer(GL_COLOR_ATTACHMENT0);
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -235,11 +242,11 @@ BloomNode::BloomNode(const StrategyChain* chain) :
     std::shared_ptr<FBOManager> frameBuffers = _chain->engine()->getFBOManager();
 
     // Create the ping pong FBOs
-    _pingPongFBOs[0] = frameBuffers->addFBO(E_AttachmentFormat::TEXTURE, _chain->engine()->getViewportSize()[0], _chain->engine()->getViewportSize()[1]);
-    _pingPongFBOs[0]->addAttachment(E_AttachmentType::COLOR, E_ColorFormat::RGBA16F);
+    _pingPongFBOs[0] = frameBuffers->addFBO(E_AttachmentTemplate::TEXTURE, _chain->engine()->getViewportSize()[0], _chain->engine()->getViewportSize()[1]);
+    _pingPongFBOs[0]->addAttachment(E_AttachmentSlot::COLOR, E_ColorFormat::RGBA16F);
 
-    _pingPongFBOs[1] = frameBuffers->addFBO(E_AttachmentFormat::TEXTURE, _chain->engine()->getViewportSize()[0], _chain->engine()->getViewportSize()[1]);
-    _pingPongFBOs[1]->addAttachment(E_AttachmentType::COLOR, E_ColorFormat::RGBA16F);
+    _pingPongFBOs[1] = frameBuffers->addFBO(E_AttachmentTemplate::TEXTURE, _chain->engine()->getViewportSize()[0], _chain->engine()->getViewportSize()[1]);
+    _pingPongFBOs[1]->addAttachment(E_AttachmentSlot::COLOR, E_ColorFormat::RGBA16F);
 
     // Create the quad VAOs
     glGenVertexArrays(1, &_quadVAO);

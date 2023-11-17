@@ -19,7 +19,7 @@ public:
     FBOManager(GraphicalEngine *engine);
     ~FBOManager();
 
-    std::shared_ptr<FBO> addFBO(E_AttachmentFormat format,int width , int height);
+    std::shared_ptr<FBO> addFBO(E_AttachmentTemplate format,int width , int height);
     void removeFBO(std::shared_ptr<FBO> fbo);
     void bindFBO(unsigned int fboIndex);
     void bindFBO(std::shared_ptr<FBO> fbo);
