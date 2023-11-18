@@ -18,6 +18,7 @@ namespace
 void update(openGL& graphicalEngine, std::vector<std::shared_ptr<Scene>> scenes, std::shared_ptr<UserInput::glfwKeyboardScanner>& userInput)
 {
     glEnable(GL_DEBUG_OUTPUT);
+    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
     graphicalEngine.initializeInstanceManager(scenes[0]);
 
     float startTime = static_cast<float>(glfwGetTime());
