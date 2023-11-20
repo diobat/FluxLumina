@@ -203,7 +203,6 @@ int main(void)
     light10->setPosition({0.0f, 10.0f, 0.0f});
     light10->pointAt(statue4.getPosition());
 
-    light4->pointAt({1.0f, 0.0f, 0.0f});
 
     // auto& cube5 = factory.create_Model("res/models/cube/cubeBlank.obj", 0);
     // cube5.setScale(3.0f);

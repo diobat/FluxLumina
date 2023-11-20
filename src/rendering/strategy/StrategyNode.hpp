@@ -93,3 +93,21 @@ public:
     DefaultFramebufferNode(const StrategyChain* chain) : StrategyNode(chain) {}
     void run() override;
 };
+
+///////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////// DEFERRED SHADING NODES
+///////////////////////////////////////////////////////////////////////////////////////////
+
+class GeometryPassNode : public StrategyNode
+{
+public:
+    GeometryPassNode(const StrategyChain* chain) : StrategyNode(chain) {}
+    void run() override;
+};
+
+class LightPassNode : public StrategyNode
+{
+public:
+    LightPassNode(const StrategyChain* chain) : StrategyNode(chain) {}
+    void run() override;
+};

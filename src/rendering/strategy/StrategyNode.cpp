@@ -106,7 +106,8 @@ void FramebufferNode::run()
     // Reset color and depth buffers 
     frameBuffers->clearAll();
     // Tell OpenGL how many attachments we are using
-    if(_chain->engine()->getSettings()->getBloom() == E_Setting::ON)
+    // if(_chain->engine()->getSettings()->getBloom() == E_Setting::ON)
+    if(1)
     {
         std::vector<unsigned int> colorAttachments;
         for (auto attachment : frameBuffers->getSceneFBO(scene)->getColorAttachments())
@@ -401,4 +402,28 @@ void DefaultFramebufferNode::run()
 
     // Remove binds
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+
+///////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////// DEFERRED SHADING NODES
+///////////////////////////////////////////////////////////////////////////////////////////
+
+void GeometryPassNode::run()
+{
+
+    std::shared_ptr<Scene> scene = _chain->engine()->getScene();
+    std::shared_ptr<ShaderLibrary> shaderPrograms = _chain->engine()->getShaderLibrary();
+    std::shared_ptr<InstancingManager> instancingManager = _chain->engine()->getInstancingManager();
+
+    // Activate proper shader program
+    std::set geometryShader = shaderPrograms->getShaderIndexesPerFeature(E_ShaderProgramFeatures::E_DEFERRED_SHADING_GEOMETRY);
+    shaderPrograms->use(*geometryShader.begin());
+
+    _chain->engine()->renderInstancedMeshes(instancingManager);
+}
+
+void LightPassNode::run()
+{
+
 }

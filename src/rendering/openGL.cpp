@@ -26,6 +26,7 @@ int openGL::initialize(GLFWwindow* window)
 
     /* Set the viewport */
     glClearColor(0.6784f, 0.8f, 1.0f, 1.0f);
+    // glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glViewport(0, 0, _viewportWidth, _viewportHeight);
 
     // Set window resize code
@@ -62,7 +63,12 @@ int openGL::initialize(GLFWwindow* window)
     _shaderPrograms->addShader("Bloom.vert", "Bloom.frag");                                             //8
     _shaderPrograms->getShader(8)->addSupportedFeature(E_ShaderProgramFeatures::E_BLOOM);
     _shaderPrograms->addShader("Bloom.vert", "BloomBlend.frag");                                        //9
-    _shaderPrograms->getShader(9)->addSupportedFeature(E_ShaderProgramFeatures::E_BLOOM_BLEND);
+    _shaderPrograms->getShader(9)->addSupportedFeature(E_ShaderProgramFeatures::E_BLOOM_BLEND);         
+    _shaderPrograms->addShader("deferred_geometry.vert", "deferred_geometry.frag");                         //10
+    _shaderPrograms->getShader(10)->addSupportedFeature(E_ShaderProgramFeatures::E_DEFERRED_SHADING_GEOMETRY);
+    // _shaderPrograms->getShader(10)->verbose = true;
+    // _shaderPrograms->addShader("deferred_lighting.vert", "deferred_lighting.frag");                     //11
+    // _shaderPrograms->getShader(11)->addSupportedFeature(E_ShaderProgramFeatures::E_DEFERRED_SHADING_LIGHTING);
     _shaderPrograms->use(0);
 
     // Add uniform buffers to the shaders
@@ -79,7 +85,8 @@ int openGL::initialize(GLFWwindow* window)
     _instancingManager = std::make_shared<InstancingManager>();
 
     // Initialize Rendering strategy
-    _strategyChain = std::make_shared<ForwardShadingStrategyChain>(this);
+    // _strategyChain = std::make_shared<ForwardShadingStrategyChain>(this);
+    _strategyChain = std::make_shared<DeferredShadingStrategyChain>(this);
 
     return 1;
 }

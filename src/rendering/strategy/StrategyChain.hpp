@@ -18,19 +18,30 @@ public:
 
     bool add(std::shared_ptr<StrategyNode> node);
     void clear();
+    virtual bool reserveResources() { return true;};
     void run();
 
     GraphicalEngine* engine() const;
 
-private:
+protected:
     std::list<std::shared_ptr<StrategyNode>> _nodes;
 
     // The engine currently running this chain
     GraphicalEngine* _ranFrom;
+
+private:
+    bool _firstRun;
 };
 
-class DefaultStrategyChain : public StrategyChain
+class ForwardShadingStrategyChain : public StrategyChain
 {
 public:
-    DefaultStrategyChain(GraphicalEngine* engine);
+    ForwardShadingStrategyChain(GraphicalEngine* engine);
+};
+
+class DeferredShadingStrategyChain : public StrategyChain
+{
+public:
+    DeferredShadingStrategyChain(GraphicalEngine* engine);
+    bool reserveResources() override;
 };
