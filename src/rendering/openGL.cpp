@@ -66,9 +66,8 @@ int openGL::initialize(GLFWwindow* window)
     _shaderPrograms->getShader(9)->addSupportedFeature(E_ShaderProgramFeatures::E_BLOOM_BLEND);         
     _shaderPrograms->addShader("deferred_geometry.vert", "deferred_geometry.frag");                         //10
     _shaderPrograms->getShader(10)->addSupportedFeature(E_ShaderProgramFeatures::E_DEFERRED_SHADING_GEOMETRY);
-    // _shaderPrograms->getShader(10)->verbose = true;
-    // _shaderPrograms->addShader("deferred_lighting.vert", "deferred_lighting.frag");                     //11
-    // _shaderPrograms->getShader(11)->addSupportedFeature(E_ShaderProgramFeatures::E_DEFERRED_SHADING_LIGHTING);
+    _shaderPrograms->addShader("deferred_lighting.vert", "deferred_lighting.frag");                     //11
+    _shaderPrograms->getShader(11)->addSupportedFeature(E_ShaderProgramFeatures::E_DEFERRED_SHADING_LIGHT);
     _shaderPrograms->use(0);
 
     // Add uniform buffers to the shaders

@@ -18,7 +18,9 @@ enum class E_ShaderProgramFeatures
     E_SKYBOX,
     E_QUAD,
     E_BLOOM, 
-    E_BLOOM_BLEND
+    E_BLOOM_BLEND,
+    E_DEFERRED_SHADING_GEOMETRY,
+    E_DEFERRED_SHADING_LIGHT
 };
 
 
