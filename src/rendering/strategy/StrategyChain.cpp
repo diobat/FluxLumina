@@ -73,10 +73,14 @@ DeferredShadingStrategyChain::DeferredShadingStrategyChain(GraphicalEngine* engi
 {   
     // Setups
     add(std::make_shared<CameraSetupNode>(this));
+    add(std::make_shared<LightsSetupNode>(this));
     add(std::make_shared<FramebufferNode>(this));
 
     // Rendering
+    add(std::make_shared<RenderSkyboxNode>(this));
     add(std::make_shared<GeometryPassNode>(this));
+    add(std::make_shared<LightPassNode>(this));
+
     // Post-processing
     if(_ranFrom->getSettings()->getBloom() == E_Setting::ON)
     {
@@ -86,6 +90,8 @@ DeferredShadingStrategyChain::DeferredShadingStrategyChain(GraphicalEngine* engi
     {
         add(std::make_shared<HighDynamicRangeNode>(this));  
     }
+
+    add(std::make_shared<LightSourceCubeDebugNode>(this));
     // Move to default Framebuffer frame
     add(std::make_shared<DefaultFramebufferNode>(this));     
 }
@@ -97,8 +103,9 @@ bool DeferredShadingStrategyChain::reserveResources()
     std::shared_ptr<FBO> FBO = framebufferManager->getSceneFBO(_ranFrom->getScene());
 
     FBO->reset();  
-
     // Create G-Buffer
+    FBO->addAttachment(E_AttachmentSlot::COLOR, E_ColorFormat::RGBA16F);    // Color Output
+
     FBO->addAttachment(E_AttachmentSlot::COLOR, E_ColorFormat::RGBA16F);    // Position
     FBO->addAttachment(E_AttachmentSlot::COLOR, E_ColorFormat::RGBA16F);    // Normals
     FBO->addAttachment(E_AttachmentSlot::COLOR, E_ColorFormat::RGBA);       // Albedo + Specular

@@ -23,6 +23,7 @@ out VertexOutput{
 	vec3 Normal;
 	vec2 TexCoords;
 	vec3 FragPos;
+    vec3 objectColor;   
 } VertexOut;
 
 void main()
@@ -33,6 +34,8 @@ void main()
     
     mat3 normalMatrix = transpose(inverse(mat3(instanceMatrix)));
     VertexOut.Normal = normalMatrix * aNormal;
+
+    VertexOut.objectColor = aObjectColor;
 
     gl_Position = projection * view * worldPos;
 }

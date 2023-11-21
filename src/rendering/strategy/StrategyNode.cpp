@@ -10,6 +10,8 @@
 #include "rendering/framebuffer/Framebuffer_Manager.hpp"
 #include "rendering/Settings.hpp"
 
+#include "util/VertexShapes.hpp"
+
 ///////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////// STRATEGY NODE (Pure abstract class)
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -88,7 +90,7 @@ void LightsSetupNode::run()
     std::shared_ptr<LightLibrary> lightLibrary = _chain->engine()->getLightLibrary();
     std::shared_ptr<ShaderLibrary> shaderPrograms = _chain->engine()->getShaderLibrary();
 
-    shaderPrograms->use(0);
+    shaderPrograms->use(11);
     lightLibrary->prepare(scene->getAllLights());
 }
 
@@ -103,8 +105,6 @@ void FramebufferNode::run()
 
     // Bind the proper FBO
     frameBuffers->bindProperFBOFromScene(scene);
-    // Reset color and depth buffers 
-    frameBuffers->clearAll();
     // Tell OpenGL how many attachments we are using
     // if(_chain->engine()->getSettings()->getBloom() == E_Setting::ON)
     if(1)
@@ -114,12 +114,18 @@ void FramebufferNode::run()
         {
             colorAttachments.push_back(attachment.slot);
         }
+        //colorAttachments.erase(colorAttachments.begin());
         glDrawBuffers(colorAttachments.size(), colorAttachments.data());  
     }
     else
     {
         glDrawBuffer(GL_COLOR_ATTACHMENT0);
     }
+
+    // Reset color and depth buffers 
+    frameBuffers->clearAll();
+
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -225,16 +231,6 @@ void RenderTransparentNode::run()
 /////////////////////////// BLOOM NODE
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-namespace
-{
-    float quadVertices[] = {
-                // positions        // texture Coords
-                -1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
-                -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
-                1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
-                1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
-            };
-}
 
 BloomNode::BloomNode(const StrategyChain* chain) : 
     StrategyNode(chain) 
@@ -248,19 +244,6 @@ BloomNode::BloomNode(const StrategyChain* chain) :
 
     _pingPongFBOs[1] = frameBuffers->addFBO(E_AttachmentTemplate::TEXTURE, _chain->engine()->getViewportSize()[0], _chain->engine()->getViewportSize()[1]);
     _pingPongFBOs[1]->addAttachment(E_AttachmentSlot::COLOR, E_ColorFormat::RGBA16F);
-
-    // Create the quad VAOs
-    glGenVertexArrays(1, &_quadVAO);
-    glGenBuffers(1, &_quadVBO);
-    glBindVertexArray(_quadVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, _quadVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), nullptr);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-    glBindVertexArray(0);
-
 }
 
 BloomNode::~BloomNode()
@@ -295,7 +278,7 @@ void BloomNode::run()
         glActiveTexture(GL_TEXTURE0 + 1);
         glBindTexture(GL_TEXTURE_2D, firstIteration ? frameBuffers->getSceneFBO(scene)->getColorAttachmentID(1) : _pingPongFBOs[!horizontal]->getColorAttachmentID(0));
 
-        glBindVertexArray(_quadVAO);
+        glBindVertexArray(shapes::quad::VAO());
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
         glBindVertexArray(0);
 
@@ -317,7 +300,7 @@ void BloomNode::run()
     glActiveTexture(GL_TEXTURE0 + 2);
     glBindTexture(GL_TEXTURE_2D, _pingPongFBOs[horizontal]->getColorAttachmentID(0));
 
-    glBindVertexArray(_quadVAO);
+    glBindVertexArray(shapes::quad::VAO());
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     glBindVertexArray(0);
 
@@ -328,24 +311,6 @@ void BloomNode::run()
 ///////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////// HIGH DYNAMIC RANGE NODE
 ///////////////////////////////////////////////////////////////////////////////////////////
-
-
-HighDynamicRangeNode::HighDynamicRangeNode(const StrategyChain* chain) : 
-    StrategyNode(chain) 
-{
-        glGenVertexArrays(1, &_quadVAO);
-        glGenBuffers(1, &_quadVBO);
-        glBindVertexArray(_quadVAO);
-        glBindBuffer(GL_ARRAY_BUFFER, _quadVBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), nullptr);
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-        glBindVertexArray(0);
-}
-
-
 
 void HighDynamicRangeNode::run()
 {
@@ -365,7 +330,7 @@ void HighDynamicRangeNode::run()
         glActiveTexture(GL_TEXTURE0 + 1);
         glBindTexture(GL_TEXTURE_2D, textureID);
 
-        glBindVertexArray(_quadVAO);
+        glBindVertexArray(shapes::quad::VAO());
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
         glBindVertexArray(0);
     }
@@ -412,6 +377,8 @@ void DefaultFramebufferNode::run()
 void GeometryPassNode::run()
 {
 
+    glEnable(GL_DEPTH_TEST);
+
     std::shared_ptr<Scene> scene = _chain->engine()->getScene();
     std::shared_ptr<ShaderLibrary> shaderPrograms = _chain->engine()->getShaderLibrary();
     std::shared_ptr<InstancingManager> instancingManager = _chain->engine()->getInstancingManager();
@@ -421,9 +388,68 @@ void GeometryPassNode::run()
     shaderPrograms->use(*geometryShader.begin());
 
     _chain->engine()->renderInstancedMeshes(instancingManager);
+
+    glDisable(GL_DEPTH_TEST);
+
 }
 
 void LightPassNode::run()
 {
+    std::shared_ptr<Scene> scene = _chain->engine()->getScene();
+    std::shared_ptr<ShaderLibrary> shaderPrograms = _chain->engine()->getShaderLibrary();
+    std::shared_ptr<FBOManager> frameBuffers = _chain->engine()->getFBOManager();
 
+    // Activate proper shader program
+    std::set lightShader = shaderPrograms->getShaderIndexesPerFeature(E_ShaderProgramFeatures::E_DEFERRED_SHADING_LIGHT);
+    shaderPrograms->use(*lightShader.begin());
+
+    shaderPrograms->setUniformInt("gData.position", 0);
+    glActiveTexture(GL_TEXTURE0 + 0);
+    glBindTexture(GL_TEXTURE_2D, _chain->engine()->getFBOManager()->getSceneFBO(scene)->getColorAttachmentID(1));
+ 
+    shaderPrograms->setUniformInt("gData.normal", 1);
+    glActiveTexture(GL_TEXTURE0 + 1);
+    glBindTexture(GL_TEXTURE_2D, _chain->engine()->getFBOManager()->getSceneFBO(scene)->getColorAttachmentID(2));
+ 
+    shaderPrograms->setUniformInt("gData.albedo", 2);
+    glActiveTexture(GL_TEXTURE0 + 2);
+    glBindTexture(GL_TEXTURE_2D, _chain->engine()->getFBOManager()->getSceneFBO(scene)->getColorAttachmentID(3));
+
+    glDrawBuffer(GL_COLOR_ATTACHMENT0);
+    
+    glBindVertexArray(shapes::quad::VAO());
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    glBindVertexArray(0);
+
+    glActiveTexture(0);        
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////// DEBUG NODES
+///////////////////////////////////////////////////////////////////////////////////////////
+
+void LightSourceCubeDebugNode::run()
+{
+    std::shared_ptr<Scene> scene = _chain->engine()->getScene();
+    std::shared_ptr<LightLibrary> lightLibrary = _chain->engine()->getLightLibrary();
+    std::shared_ptr<ShaderLibrary> shaderPrograms = _chain->engine()->getShaderLibrary();
+
+    shaderPrograms->use(1);
+
+    const std::vector<std::shared_ptr<PointLight>>& pointLights = scene->getAllLights().pointLights;
+
+    glBindVertexArray(shapes::cube::VAO());
+
+    for(const auto& pointLight : pointLights)
+    {
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, conversion::toVec3(pointLight->getPosition()));
+        shaderPrograms->setUniformMat4("model", model);
+        glm::vec4 color = glm::vec4(conversion::toVec3(pointLight->getColor()), 1.0f);
+        shaderPrograms->setUniformVec4("outputColor", color);
+
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+    }
+    glBindVertexArray(0);
+    
 }

@@ -73,18 +73,14 @@ public:
     void run() override;
 private:
     std::array<std::shared_ptr<FBO>, 2> _pingPongFBOs;
-    unsigned int _quadVAO;
-    unsigned int _quadVBO;
 };
 
 class HighDynamicRangeNode : public StrategyNode
 {
 public:
-    HighDynamicRangeNode(const StrategyChain* chain);
+    HighDynamicRangeNode(const StrategyChain* chain) : StrategyNode(chain) {};
     void run() override;
 private:
-    unsigned int _quadVAO;
-    unsigned int _quadVBO;
 };
 
 class DefaultFramebufferNode : public StrategyNode
@@ -109,5 +105,17 @@ class LightPassNode : public StrategyNode
 {
 public:
     LightPassNode(const StrategyChain* chain) : StrategyNode(chain) {}
+    void run() override;
+};
+
+
+///////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////// DEBUG NODES
+//////////////////////////////////////////////////////////////////////////////////////////
+
+class LightSourceCubeDebugNode : public StrategyNode
+{
+public:
+    LightSourceCubeDebugNode(const StrategyChain* chain) : StrategyNode(chain) {}
     void run() override;
 };
