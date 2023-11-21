@@ -288,6 +288,7 @@ void LightLibrary::lightSetup(unsigned int lightIndex, const PointLight &light)
 
     if(_shadowMaps.find(light._id) == _shadowMaps.end())
     {
+        return;
         throw std::runtime_error("Shadow map not found");
     }
 
@@ -339,8 +340,10 @@ void LightLibrary::lightSetup(unsigned int lightIndex, const SpotLight &light)
 
     if(_shadowMaps.find(light._id) == _shadowMaps.end())
     {
+        return;
         throw std::runtime_error("Shadow map not found");
     }
+    
     ShadowMap& shaMap = _shadowMaps[light._id];
     shaders->setUniformMat4("spotLightSpaceMatrix[" + std::to_string(lightIndex) + "]", shaMap.getLightSpaceMatrix());
     shaders->setUniformInt("spotLight[" + std::to_string(lightIndex) + "].shadowMap", 5 + lightIndex);
