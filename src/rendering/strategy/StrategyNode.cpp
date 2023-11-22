@@ -344,7 +344,6 @@ void DefaultFramebufferNode::run()
 {
     std::shared_ptr<Scene> scene = _chain->engine()->getScene();
     std::shared_ptr<FBOManager> frameBuffers = _chain->engine()->getFBOManager();
-
     std::shared_ptr<FBO> sourceFBO = frameBuffers->getSceneFBO(scene);
 
     glBindFramebuffer(GL_READ_FRAMEBUFFER, sourceFBO->id());    // Source Framebuffer
@@ -369,14 +368,12 @@ void DefaultFramebufferNode::run()
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-
 ///////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////// DEFERRED SHADING NODES
 ///////////////////////////////////////////////////////////////////////////////////////////
 
 void GeometryPassNode::run()
 {
-
     glEnable(GL_DEPTH_TEST);
 
     std::shared_ptr<Scene> scene = _chain->engine()->getScene();
