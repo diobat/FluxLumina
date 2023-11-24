@@ -374,8 +374,6 @@ void DefaultFramebufferNode::run()
 
 void GeometryPassNode::run()
 {
-    glEnable(GL_DEPTH_TEST);
-
     std::shared_ptr<Scene> scene = _chain->engine()->getScene();
     std::shared_ptr<ShaderLibrary> shaderPrograms = _chain->engine()->getShaderLibrary();
     std::shared_ptr<InstancingManager> instancingManager = _chain->engine()->getInstancingManager();
@@ -385,9 +383,6 @@ void GeometryPassNode::run()
     shaderPrograms->use(*geometryShader.begin());
 
     _chain->engine()->renderInstancedMeshes(instancingManager);
-
-    glDisable(GL_DEPTH_TEST);
-
 }
 
 void LightPassNode::run()
@@ -516,12 +511,7 @@ void LightVolumeNode::run()
     // }
 
     glBindVertexArray(0);
-
-
-
     glEnable(GL_DEPTH_TEST);
-
-
 
     // return to normal blending
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -537,28 +527,59 @@ void LightVolumeNode::run()
 /////////////////////////// DEBUG NODES
 ///////////////////////////////////////////////////////////////////////////////////////////
 
+LightSourceCubeDebugNode::LightSourceCubeDebugNode(const StrategyChain* chain, bool depthTest) : 
+    StrategyNode(chain),
+    _depthTest(depthTest)
+{
+       ;
+}
+
+
 void LightSourceCubeDebugNode::run()
 {
     std::shared_ptr<Scene> scene = _chain->engine()->getScene();
-    std::shared_ptr<LightLibrary> lightLibrary = _chain->engine()->getLightLibrary();
     std::shared_ptr<ShaderLibrary> shaderPrograms = _chain->engine()->getShaderLibrary();
+
+    glDisable(GL_CULL_FACE);
+
+    if(!_depthTest)
+    {
+        glDisable(GL_DEPTH_TEST);
+    }
+    else
+    {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    }
+
 
     shaderPrograms->use(1);
 
     const std::vector<std::shared_ptr<PointLight>>& pointLights = scene->getAllLights().pointLights;
 
-    glBindVertexArray(shapes::cube::VAO());
+    glBindVertexArray(shapes::sphere::VAO());
 
     for(const auto& pointLight : pointLights)
     {
         glm::mat4 model = glm::mat4(1.0f);
         model = glm::translate(model, conversion::toVec3(pointLight->getPosition()));
+        model = glm::scale(model, pointLight->calculateMaxRange() * glm::vec3(1.0f));
         shaderPrograms->setUniformMat4("model", model);
         glm::vec4 color = glm::vec4(conversion::toVec3(pointLight->getColor()), 1.0f);
         shaderPrograms->setUniformVec4("outputColor", color);
 
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+        glDrawElements(GL_TRIANGLES, shapes::sphere::indexCount(), GL_UNSIGNED_INT, 0);
     }
     glBindVertexArray(0);
     
+
+    if(!_depthTest)
+    {
+        glEnable(GL_DEPTH_TEST);
+    }
+    else
+    {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    }
+
+    glEnable(GL_CULL_FACE);
 }

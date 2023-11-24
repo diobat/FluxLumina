@@ -16,6 +16,14 @@ protected:
     const StrategyChain* _chain;
 };
 
+class ViewportUpdateNote : public StrategyNode
+{
+public:
+    ViewportUpdateNote(const StrategyChain* chain) : StrategyNode(chain) {}
+    void run() override;
+};
+
+
 class CameraSetupNode : public StrategyNode
 {
 public:
@@ -124,6 +132,8 @@ private:
 class LightSourceCubeDebugNode : public StrategyNode
 {
 public:
-    LightSourceCubeDebugNode(const StrategyChain* chain) : StrategyNode(chain) {}
+    LightSourceCubeDebugNode(const StrategyChain* chain, bool depthTest = true);
     void run() override;
+private:
+    const bool _depthTest;
 };

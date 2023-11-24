@@ -75,6 +75,13 @@ int openGL::initialize(GLFWwindow* window)
     _shaderPrograms->createUniformBuffer("mvp_camera");
     _shaderPrograms->createUniformBuffer("viewPosBlock");
     _shaderPrograms->createUniformBuffer("shadowSettingsBlock");
+    _shaderPrograms->createUniformBuffer("viewPortBlock");
+
+    std::tuple<glm::vec2> viewPortSize = {
+        glm::vec2(_viewportWidth, _viewportHeight)
+    };
+
+    _shaderPrograms->getUniformBuffer("viewPortBlock").update(viewPortSize);
 
     // Initialize LightManager
     _lightLibrary = std::make_shared<LightLibrary>(this);
@@ -138,6 +145,12 @@ void openGL::resizeWindow(GLFWwindow* window, int width, int height)
     _viewportWidth = width;
     _viewportHeight = height;
     glViewport(0, 0, _viewportWidth, _viewportHeight);
+
+    std::tuple<glm::vec2> viewPortSize = {
+        glm::vec2(_viewportWidth, _viewportHeight)
+    };
+
+    _shaderPrograms->getUniformBuffer("viewPortBlock").update(viewPortSize);
 
     for(auto scene : _scenes)
     {
