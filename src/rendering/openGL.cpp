@@ -68,7 +68,8 @@ int openGL::initialize(GLFWwindow* window)
     _shaderPrograms->getShader(10)->addSupportedFeature(E_ShaderProgramFeatures::E_DEFERRED_SHADING_GEOMETRY);
     _shaderPrograms->addShader("deferred_lighting.vert", "deferred_lighting.frag");                     //11
     _shaderPrograms->getShader(11)->addSupportedFeature(E_ShaderProgramFeatures::E_DEFERRED_SHADING_LIGHT);
-    _shaderPrograms->use(0);
+    _shaderPrograms->addShader("deferred_light_volumes.vert", "deferred_light_volumes.frag");                      //12
+    _shaderPrograms->getShader(12)->addSupportedFeature(E_ShaderProgramFeatures::E_DEFERRED_SHADING_LIGHT_VOLUMES);
 
     // Add uniform buffers to the shaders
     _shaderPrograms->createUniformBuffer("mvp_camera");
