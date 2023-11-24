@@ -70,7 +70,7 @@ void main()
     // vec3 viewDir = normalize(viewPos - FragPos);
 
     // Base lighting
-    vec3 totalLight = albedo * 0.15;
+    vec3 totalLight = albedo * 0.01;
 
     FragColor = vec4(totalLight, 1.0);  
 }

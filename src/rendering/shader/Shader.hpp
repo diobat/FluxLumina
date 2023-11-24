@@ -17,6 +17,7 @@ enum class E_ShaderProgramFeatures
     E_SHADOW_CUBE_MAPPING,
     E_SKYBOX,
     E_QUAD,
+    E_QUAD_TEXTURE,
     E_BLOOM, 
     E_BLOOM_BLEND,
     E_DEFERRED_SHADING_GEOMETRY,

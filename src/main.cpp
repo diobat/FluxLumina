@@ -185,7 +185,7 @@ int main(void)
     auto light_C = factory.create_LightSource( E_LightType::POINT_LIGHT);
     light_C->setColor({0.0f, 10.0f, 0.0f});
     light_C->setPosition({13.0f, 5.0f, -13.0f});
-    light_C->setAttenuationFactors({1.0f, 0.55f, 0.40f});
+    light_C->setAttenuationFactors({1.0f, 0.0f, 3.40f});
 
     auto light_D = factory.create_LightSource( E_LightType::POINT_LIGHT);
     light_D->setColor({0.0f, 0.0f, 10.0f});

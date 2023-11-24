@@ -15,6 +15,7 @@ float constant;
 float linear;
 float quadratic;
 float farPlane;
+float maxRange;
 samplerCube shadowMap;
 };
 
@@ -29,7 +30,6 @@ uniform	GSamples gData;
 // Point lights
 uniform int numPointLights;
 uniform PointLight pointLight;
-
 
 // Outputs
 layout (location = 0) out vec4 FragColor;
@@ -70,7 +70,11 @@ void main()
     vec3 totalLight;
 
     totalLight += calcPointLight(pointLight, normal, FragPos, albedo);
-    
-    FragColor = vec4(totalLight, 1.0);  
 
+    if(distance(FragPos, pointLight.position) > pointLight.maxRange)
+    {
+        totalLight = vec3(0.0);
+    }
+
+    FragColor = vec4(totalLight, 1.0);  
 }

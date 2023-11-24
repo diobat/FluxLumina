@@ -78,10 +78,9 @@ DeferredShadingStrategyChain::DeferredShadingStrategyChain(GraphicalEngine* engi
     // Rendering
     //add(std::make_shared<RenderSkyboxNode>(this));
     add(std::make_shared<GeometryPassNode>(this));
-    add(std::make_shared<LightSourceCubeDebugNode>(this, true));
-    add(std::make_shared<LightPassNode>(this));
+    //add(std::make_shared<LightSourceCubeDebugNode>(this, true));
+    //add(std::make_shared<LightPassNode>(this));
     add(std::make_shared<LightVolumeNode>(this));
-
 
     // Post-processing
     if(_ranFrom->getSettings()->getBloom() == E_Setting::ON)

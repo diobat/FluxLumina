@@ -25,7 +25,7 @@ int openGL::initialize(GLFWwindow* window)
     glfwGetWindowSize(_window, &_viewportWidth, &_viewportHeight);
 
     /* Set the viewport */
-    glClearColor(0.6784f, 0.8f, 1.0f, 1.0f);
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     // glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glViewport(0, 0, _viewportWidth, _viewportHeight);
 
@@ -52,7 +52,7 @@ int openGL::initialize(GLFWwindow* window)
     _shaderPrograms->addShader("Simple.vert", "Simple.frag");                //1
     _shaderPrograms->addShader("Simple.vert", "transparency.frag");          //2
     _shaderPrograms->getShader(2)->addSupportedFeature(E_ShaderProgramFeatures::E_TRANSPARENCY);
-    _shaderPrograms->addShader("Quad.vert", "Quad.frag");                    //3
+    _shaderPrograms->addShader("Quad_HDR.vert", "Quad_HDR.frag");                    //3
     _shaderPrograms->getShader(3)->addSupportedFeature(E_ShaderProgramFeatures::E_QUAD);
     _shaderPrograms->addShader("Skybox.vert", "Skybox.frag");                //4
     _shaderPrograms->addShader("Reflection.vert", "Reflection.frag");        //5
@@ -70,6 +70,8 @@ int openGL::initialize(GLFWwindow* window)
     _shaderPrograms->getShader(11)->addSupportedFeature(E_ShaderProgramFeatures::E_DEFERRED_SHADING_LIGHT);
     _shaderPrograms->addShader("deferred_light_volumes.vert", "deferred_light_volumes.frag");                      //12
     _shaderPrograms->getShader(12)->addSupportedFeature(E_ShaderProgramFeatures::E_DEFERRED_SHADING_LIGHT_VOLUMES);
+    _shaderPrograms->addShader("Quad_HDR.vert", "Quad_Texture.frag");                      //13
+    _shaderPrograms->getShader(13)->addSupportedFeature(E_ShaderProgramFeatures::E_QUAD_TEXTURE);
 
     // Add uniform buffers to the shaders
     _shaderPrograms->createUniformBuffer("mvp_camera");
