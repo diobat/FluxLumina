@@ -67,7 +67,6 @@ ForwardShadingStrategyChain::ForwardShadingStrategyChain(GraphicalEngine* engine
         add(std::make_shared<DefaultFramebufferNode>(this));     
 }
 
-
 DeferredShadingStrategyChain::DeferredShadingStrategyChain(GraphicalEngine* engine) : 
     StrategyChain(engine)
 {   
@@ -77,9 +76,12 @@ DeferredShadingStrategyChain::DeferredShadingStrategyChain(GraphicalEngine* engi
     add(std::make_shared<FramebufferNode>(this));
 
     // Rendering
-    add(std::make_shared<RenderSkyboxNode>(this));
+    //add(std::make_shared<RenderSkyboxNode>(this));
     add(std::make_shared<GeometryPassNode>(this));
+    add(std::make_shared<LightSourceCubeDebugNode>(this, true));
     add(std::make_shared<LightPassNode>(this));
+    add(std::make_shared<LightVolumeNode>(this));
+
 
     // Post-processing
     if(_ranFrom->getSettings()->getBloom() == E_Setting::ON)
@@ -91,7 +93,6 @@ DeferredShadingStrategyChain::DeferredShadingStrategyChain(GraphicalEngine* engi
         add(std::make_shared<HighDynamicRangeNode>(this));  
     }
 
-    add(std::make_shared<LightSourceCubeDebugNode>(this));
     // Move to default Framebuffer frame
     add(std::make_shared<DefaultFramebufferNode>(this));     
 }

@@ -392,6 +392,7 @@ void GeometryPassNode::run()
 
 void LightPassNode::run()
 {
+
     std::shared_ptr<Scene> scene = _chain->engine()->getScene();
     std::shared_ptr<ShaderLibrary> shaderPrograms = _chain->engine()->getShaderLibrary();
     std::shared_ptr<FBOManager> frameBuffers = _chain->engine()->getFBOManager();
@@ -413,13 +414,124 @@ void LightPassNode::run()
     glBindTexture(GL_TEXTURE_2D, _chain->engine()->getFBOManager()->getSceneFBO(scene)->getColorAttachmentID(3));
 
     glDrawBuffer(GL_COLOR_ATTACHMENT0);
-    
+    glDepthMask(GL_FALSE);  // Prevents depth buffer writes
+
     glBindVertexArray(shapes::quad::VAO());
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     glBindVertexArray(0);
 
+    glDepthMask(GL_TRUE);   // Re-enable depth buffer writes
     glActiveTexture(0);        
 }
+
+
+namespace
+{
+    void bindLightUniforms(const std::shared_ptr<LightSource> light, std::shared_ptr<ShaderLibrary> shaderPrograms)
+    {
+        glm::mat4 model = glm::mat4(1.0f);
+        glm::vec3 position = conversion::toVec3(light->getPosition());
+        model = glm::translate(model, position);
+        model = glm::scale(model, light->calculateMaxRange() * glm::vec3(1.0f));
+        shaderPrograms->setUniformMat4("model", model);
+        
+        shaderPrograms->setUniformVec3("pointLight.position", position);
+        shaderPrograms->setUniformVec3("pointLight.diffuse", conversion::toVec3(light->getColor()));
+
+        // Attenuation factors
+        const std::array<float, 3>& attFactors = light->getAttenuationFactors();
+        shaderPrograms->setUniformFloat("pointLight.constant", attFactors[0]);
+        shaderPrograms->setUniformFloat("pointLight.linear", attFactors[1]);
+        shaderPrograms->setUniformFloat("pointLight.quadratic", attFactors[2]);
+    }
+}
+
+
+LightVolumeNode::LightVolumeNode(const StrategyChain* chain) : 
+    StrategyNode(chain) 
+{
+    std::shared_ptr<FBOManager> frameBuffers = _chain->engine()->getFBOManager();
+    
+    _fbo = frameBuffers->addFBO(E_AttachmentTemplate::TEXTURE, _chain->engine()->getViewportSize()[0], _chain->engine()->getViewportSize()[1]);
+
+    _fbo->addAttachment(E_AttachmentSlot::COLOR, E_ColorFormat::RGBA16F);
+    
+    _fbo->addAttachment(E_AttachmentSlot::DEPTH);
+
+}
+
+void LightVolumeNode::run()
+{
+    std::shared_ptr<Scene> scene = _chain->engine()->getScene();
+    std::shared_ptr<ShaderLibrary> shaderPrograms = _chain->engine()->getShaderLibrary();
+    std::shared_ptr<FBOManager> frameBuffers = _chain->engine()->getFBOManager();
+
+    // Activate proper shader program
+    std::set lightShader = shaderPrograms->getShaderIndexesPerFeature(E_ShaderProgramFeatures::E_DEFERRED_SHADING_LIGHT_VOLUMES);
+    shaderPrograms->use(*lightShader.begin());
+
+    shaderPrograms->setUniformInt("gData.position", 0);
+    glActiveTexture(GL_TEXTURE0 + 0);
+    glBindTexture(GL_TEXTURE_2D, _chain->engine()->getFBOManager()->getSceneFBO(scene)->getColorAttachmentID(1));
+ 
+    shaderPrograms->setUniformInt("gData.normal", 1);
+    glActiveTexture(GL_TEXTURE0 + 1);
+    glBindTexture(GL_TEXTURE_2D, _chain->engine()->getFBOManager()->getSceneFBO(scene)->getColorAttachmentID(2));
+ 
+    shaderPrograms->setUniformInt("gData.albedo", 2);
+    glActiveTexture(GL_TEXTURE0 + 2);
+    glBindTexture(GL_TEXTURE_2D, _chain->engine()->getFBOManager()->getSceneFBO(scene)->getColorAttachmentID(3));
+
+    // Use the light volume FBO for these calls
+    //frameBuffers->bindFBO(_fbo);
+
+    // Lights are additively blended
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_ONE, GL_ONE);
+
+    glEnable(GL_CULL_FACE);
+    // Draw Light Volumes back faces
+
+    glCullFace(GL_FRONT);
+    //glDepthMask(GL_FALSE);  // Prevents depth buffer writes
+    glDisable(GL_DEPTH_TEST);
+    glBindVertexArray(shapes::sphere::VAO());
+
+    // Light Volumes: Draw Light Sources as geometry, calculate lighting
+    const std::vector<std::shared_ptr<PointLight>>& pointLights = scene->getAllLights().pointLights;
+    for(auto& pointLight : pointLights)
+    {
+        bindLightUniforms(pointLight, shaderPrograms);
+        glDrawElements(GL_TRIANGLES, shapes::sphere::indexCount(), GL_UNSIGNED_INT, 0);
+    }
+
+    // Draw Light Volumes front faces
+    glCullFace(GL_BACK);
+    //glEnable(GL_DEPTH_TEST);
+
+    // for(const auto& pointLight : pointLights)
+    // {
+    //     bindLightUniforms(pointLight, shaderPrograms);
+    //     glDrawElements(GL_TRIANGLES, shapes::sphere::indexCount(), GL_UNSIGNED_INT, 0);
+    // }
+
+    glBindVertexArray(0);
+
+
+
+    glEnable(GL_DEPTH_TEST);
+
+
+
+    // return to normal blending
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    //glDepthMask(GL_TRUE);  // Prevents depth buffer writes
+
+    // Re-enable the default scene FBO again
+    frameBuffers->bindProperFBOFromScene(scene);
+}
+
+
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////// DEBUG NODES

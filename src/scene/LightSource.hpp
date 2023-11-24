@@ -35,6 +35,8 @@ public:
     virtual void setAttenuationFactors(std::array<float, 3> attenuationFactors);
     virtual const std::array<float, 3>& getAttenuationFactors() const;
 
+    float calculateMaxRange() const;
+
 private:
     float _intensity;
     std::array<float, 3> _color;

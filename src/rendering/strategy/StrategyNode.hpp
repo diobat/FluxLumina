@@ -108,6 +108,14 @@ public:
     void run() override;
 };
 
+class LightVolumeNode : public StrategyNode
+{
+public:
+    LightVolumeNode(const StrategyChain* chain);
+    void run() override;
+private:    
+    std::shared_ptr<FBO> _fbo;
+};
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////// DEBUG NODES

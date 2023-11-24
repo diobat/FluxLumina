@@ -1,5 +1,4 @@
 #version 430
-
 struct GSamples
 {
     sampler2D position;
@@ -19,23 +18,18 @@ float farPlane;
 samplerCube shadowMap;
 };
 
-// Inputs
-in VertexOutput
+//Uniforms
+layout(std140) uniform viewPortBlock
 {
-    vec2 TexCoords;
-} FragmentIn;
+    vec2 viewPortSize;
+};
 
-// Uniforms
 // Geometric Pass data
 uniform	GSamples gData;
 // Point lights
 uniform int numPointLights;
-uniform PointLight pointLight[32];
+uniform PointLight pointLight;
 
-layout(std140) uniform viewPosBlock
-{
-    vec3 viewPos;
-};
 
 // Outputs
 layout (location = 0) out vec4 FragColor;
@@ -62,15 +56,21 @@ vec3 calcPointLight(PointLight light, vec3 normal, vec3 FragPos, vec3 albedo)
 
 void main()
 {
+    vec2 screenSpace;
+    screenSpace.x = gl_FragCoord.x / viewPortSize.x;
+    screenSpace.y = gl_FragCoord.y / viewPortSize.y;
+
     // Get the Geometic Pass data
-    // vec3 FragPos = texture(gData.position, FragmentIn.TexCoords).xyz;
-    // vec3 normal = texture(gData.normal, FragmentIn.TexCoords).xyz;
-    vec3 albedo = texture(gData.albedo, FragmentIn.TexCoords).xyz;
-    // float specular = texture(gData.albedo, FragmentIn.TexCoords).w;
-    // vec3 viewDir = normalize(viewPos - FragPos);
+    vec3 FragPos = texture(gData.position, screenSpace).xyz;
+    vec3 normal = texture(gData.normal, screenSpace).xyz;
+    vec3 albedo = texture(gData.albedo, screenSpace).xyz;
+    float specular = texture(gData.albedo, screenSpace).w;
 
     // Base lighting
-    vec3 totalLight = albedo * 0.15;
+    vec3 totalLight;
 
+    totalLight += calcPointLight(pointLight, normal, FragPos, albedo);
+    
     FragColor = vec4(totalLight, 1.0);  
+
 }

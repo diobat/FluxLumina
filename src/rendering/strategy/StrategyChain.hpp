@@ -45,3 +45,5 @@ public:
     DeferredShadingStrategyChain(GraphicalEngine* engine);
     bool reserveResources() override;
 };
+
+
