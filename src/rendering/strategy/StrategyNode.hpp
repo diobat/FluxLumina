@@ -16,6 +16,14 @@ protected:
     const StrategyChain* _chain;
 };
 
+class ViewportUpdateNote : public StrategyNode
+{
+public:
+    ViewportUpdateNote(const StrategyChain* chain) : StrategyNode(chain) {}
+    void run() override;
+};
+
+
 class CameraSetupNode : public StrategyNode
 {
 public:
@@ -73,18 +81,14 @@ public:
     void run() override;
 private:
     std::array<std::shared_ptr<FBO>, 2> _pingPongFBOs;
-    unsigned int _quadVAO;
-    unsigned int _quadVBO;
 };
 
 class HighDynamicRangeNode : public StrategyNode
 {
 public:
-    HighDynamicRangeNode(const StrategyChain* chain);
+    HighDynamicRangeNode(const StrategyChain* chain) : StrategyNode(chain) {};
     void run() override;
 private:
-    unsigned int _quadVAO;
-    unsigned int _quadVBO;
 };
 
 class DefaultFramebufferNode : public StrategyNode
@@ -92,4 +96,44 @@ class DefaultFramebufferNode : public StrategyNode
 public:
     DefaultFramebufferNode(const StrategyChain* chain) : StrategyNode(chain) {}
     void run() override;
+};
+
+///////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////// DEFERRED SHADING NODES
+///////////////////////////////////////////////////////////////////////////////////////////
+
+class GeometryPassNode : public StrategyNode
+{
+public:
+    GeometryPassNode(const StrategyChain* chain) : StrategyNode(chain) {}
+    void run() override;
+};
+
+class LightPassNode : public StrategyNode
+{
+public:
+    LightPassNode(const StrategyChain* chain) : StrategyNode(chain) {}
+    void run() override;
+};
+
+class LightVolumeNode : public StrategyNode
+{
+public:
+    LightVolumeNode(const StrategyChain* chain);
+    void run() override;
+private:    
+    std::shared_ptr<FBO> _fbo;
+};
+
+///////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////// DEBUG NODES
+//////////////////////////////////////////////////////////////////////////////////////////
+
+class LightSourceCubeDebugNode : public StrategyNode
+{
+public:
+    LightSourceCubeDebugNode(const StrategyChain* chain, bool depthTest = true);
+    void run() override;
+private:
+    const bool _depthTest;
 };

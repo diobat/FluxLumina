@@ -3,6 +3,9 @@
 // Project includes
 #include "util/Arithmetic.hpp"
 
+// STD includes
+#include <cmath>
+
 LightSource::LightSource(float intensity, const std::array<float, 3>& color, const std::array<float, 3>& attenuationFactors)  :
     _intensity(intensity),
     _color(color),
@@ -39,6 +42,15 @@ void LightSource::setAttenuationFactors(std::array<float, 3> attenuationFactors)
 const std::array<float, 3>& LightSource::getAttenuationFactors() const
 {
     return _attenuationFactors;
+}
+
+float LightSource::calculateMaxRange() const 
+{
+    float brightest_component = std::max(std::max(_color[0], _color[1]), _color[2]);
+
+    float cutoff_threshold = 0.025f;
+
+    return (-1.0f * _attenuationFactors[1] + std::sqrt(_attenuationFactors[1] * _attenuationFactors[1] - 4.0f * _attenuationFactors[2] * (_attenuationFactors[0] - brightest_component/cutoff_threshold))) / (2.0f * _attenuationFactors[2]); 
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

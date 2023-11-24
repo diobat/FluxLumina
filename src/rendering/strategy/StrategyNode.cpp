@@ -10,6 +10,8 @@
 #include "rendering/framebuffer/Framebuffer_Manager.hpp"
 #include "rendering/Settings.hpp"
 
+#include "util/VertexShapes.hpp"
+
 ///////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////// STRATEGY NODE (Pure abstract class)
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -88,7 +90,7 @@ void LightsSetupNode::run()
     std::shared_ptr<LightLibrary> lightLibrary = _chain->engine()->getLightLibrary();
     std::shared_ptr<ShaderLibrary> shaderPrograms = _chain->engine()->getShaderLibrary();
 
-    shaderPrograms->use(0);
+    shaderPrograms->use(11);
     lightLibrary->prepare(scene->getAllLights());
 }
 
@@ -103,22 +105,27 @@ void FramebufferNode::run()
 
     // Bind the proper FBO
     frameBuffers->bindProperFBOFromScene(scene);
-    // Reset color and depth buffers 
-    frameBuffers->clearAll();
     // Tell OpenGL how many attachments we are using
-    if(_chain->engine()->getSettings()->getBloom() == E_Setting::ON)
+    // if(_chain->engine()->getSettings()->getBloom() == E_Setting::ON)
+    if(1)
     {
         std::vector<unsigned int> colorAttachments;
         for (auto attachment : frameBuffers->getSceneFBO(scene)->getColorAttachments())
         {
             colorAttachments.push_back(attachment.slot);
         }
+        //colorAttachments.erase(colorAttachments.begin());
         glDrawBuffers(colorAttachments.size(), colorAttachments.data());  
     }
     else
     {
         glDrawBuffer(GL_COLOR_ATTACHMENT0);
     }
+
+    // Reset color and depth buffers 
+    frameBuffers->clearAll();
+
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -224,16 +231,6 @@ void RenderTransparentNode::run()
 /////////////////////////// BLOOM NODE
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-namespace
-{
-    float quadVertices[] = {
-                // positions        // texture Coords
-                -1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
-                -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
-                1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
-                1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
-            };
-}
 
 BloomNode::BloomNode(const StrategyChain* chain) : 
     StrategyNode(chain) 
@@ -247,19 +244,6 @@ BloomNode::BloomNode(const StrategyChain* chain) :
 
     _pingPongFBOs[1] = frameBuffers->addFBO(E_AttachmentTemplate::TEXTURE, _chain->engine()->getViewportSize()[0], _chain->engine()->getViewportSize()[1]);
     _pingPongFBOs[1]->addAttachment(E_AttachmentSlot::COLOR, E_ColorFormat::RGBA16F);
-
-    // Create the quad VAOs
-    glGenVertexArrays(1, &_quadVAO);
-    glGenBuffers(1, &_quadVBO);
-    glBindVertexArray(_quadVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, _quadVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), nullptr);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-    glBindVertexArray(0);
-
 }
 
 BloomNode::~BloomNode()
@@ -294,7 +278,7 @@ void BloomNode::run()
         glActiveTexture(GL_TEXTURE0 + 1);
         glBindTexture(GL_TEXTURE_2D, firstIteration ? frameBuffers->getSceneFBO(scene)->getColorAttachmentID(1) : _pingPongFBOs[!horizontal]->getColorAttachmentID(0));
 
-        glBindVertexArray(_quadVAO);
+        glBindVertexArray(shapes::quad::VAO());
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
         glBindVertexArray(0);
 
@@ -316,7 +300,7 @@ void BloomNode::run()
     glActiveTexture(GL_TEXTURE0 + 2);
     glBindTexture(GL_TEXTURE_2D, _pingPongFBOs[horizontal]->getColorAttachmentID(0));
 
-    glBindVertexArray(_quadVAO);
+    glBindVertexArray(shapes::quad::VAO());
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     glBindVertexArray(0);
 
@@ -327,24 +311,6 @@ void BloomNode::run()
 ///////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////// HIGH DYNAMIC RANGE NODE
 ///////////////////////////////////////////////////////////////////////////////////////////
-
-
-HighDynamicRangeNode::HighDynamicRangeNode(const StrategyChain* chain) : 
-    StrategyNode(chain) 
-{
-        glGenVertexArrays(1, &_quadVAO);
-        glGenBuffers(1, &_quadVBO);
-        glBindVertexArray(_quadVAO);
-        glBindBuffer(GL_ARRAY_BUFFER, _quadVBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), nullptr);
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-        glBindVertexArray(0);
-}
-
-
 
 void HighDynamicRangeNode::run()
 {
@@ -364,7 +330,7 @@ void HighDynamicRangeNode::run()
         glActiveTexture(GL_TEXTURE0 + 1);
         glBindTexture(GL_TEXTURE_2D, textureID);
 
-        glBindVertexArray(_quadVAO);
+        glBindVertexArray(shapes::quad::VAO());
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
         glBindVertexArray(0);
     }
@@ -378,7 +344,6 @@ void DefaultFramebufferNode::run()
 {
     std::shared_ptr<Scene> scene = _chain->engine()->getScene();
     std::shared_ptr<FBOManager> frameBuffers = _chain->engine()->getFBOManager();
-
     std::shared_ptr<FBO> sourceFBO = frameBuffers->getSceneFBO(scene);
 
     glBindFramebuffer(GL_READ_FRAMEBUFFER, sourceFBO->id());    // Source Framebuffer
@@ -401,4 +366,223 @@ void DefaultFramebufferNode::run()
 
     // Remove binds
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////// DEFERRED SHADING NODES
+///////////////////////////////////////////////////////////////////////////////////////////
+
+void GeometryPassNode::run()
+{
+    std::shared_ptr<Scene> scene = _chain->engine()->getScene();
+    std::shared_ptr<ShaderLibrary> shaderPrograms = _chain->engine()->getShaderLibrary();
+    std::shared_ptr<InstancingManager> instancingManager = _chain->engine()->getInstancingManager();
+
+    // Activate proper shader program
+    std::set geometryShader = shaderPrograms->getShaderIndexesPerFeature(E_ShaderProgramFeatures::E_DEFERRED_SHADING_GEOMETRY);
+    shaderPrograms->use(*geometryShader.begin());
+
+    _chain->engine()->renderInstancedMeshes(instancingManager);
+}
+
+void LightPassNode::run()
+{
+
+    std::shared_ptr<Scene> scene = _chain->engine()->getScene();
+    std::shared_ptr<ShaderLibrary> shaderPrograms = _chain->engine()->getShaderLibrary();
+    std::shared_ptr<FBOManager> frameBuffers = _chain->engine()->getFBOManager();
+
+    // Activate proper shader program
+    std::set lightShader = shaderPrograms->getShaderIndexesPerFeature(E_ShaderProgramFeatures::E_DEFERRED_SHADING_LIGHT);
+    shaderPrograms->use(*lightShader.begin());
+
+    // shaderPrograms->setUniformInt("gData.position", 0);
+    // glActiveTexture(GL_TEXTURE0 + 0);
+    // glBindTexture(GL_TEXTURE_2D, _chain->engine()->getFBOManager()->getSceneFBO(scene)->getColorAttachmentID(1));
+ 
+    // shaderPrograms->setUniformInt("gData.normal", 1);
+    // glActiveTexture(GL_TEXTURE0 + 1);
+    // glBindTexture(GL_TEXTURE_2D, _chain->engine()->getFBOManager()->getSceneFBO(scene)->getColorAttachmentID(2));
+ 
+    shaderPrograms->setUniformInt("gData.albedo", 2);
+    glActiveTexture(GL_TEXTURE0 + 2);
+    glBindTexture(GL_TEXTURE_2D, _chain->engine()->getFBOManager()->getSceneFBO(scene)->getColorAttachmentID(3));
+
+    glDrawBuffer(GL_COLOR_ATTACHMENT0);
+    glDepthMask(GL_FALSE);  // Prevents depth buffer writes    
+
+    glBindVertexArray(shapes::quad::VAO());
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    glBindVertexArray(0);
+
+    glDepthMask(GL_TRUE);   // Re-enable depth buffer writes
+    glActiveTexture(GL_TEXTURE0);        
+
+}
+
+namespace
+{
+    void bindLightUniforms(const std::shared_ptr<LightSource> light, std::shared_ptr<ShaderLibrary> shaderPrograms)
+    {
+        glm::mat4 model = glm::mat4(1.0f);
+        glm::vec3 position = conversion::toVec3(light->getPosition());
+        model = glm::translate(model, position);
+        float range = light->calculateMaxRange();
+        model = glm::scale(model, range * glm::vec3(1.0f));
+        shaderPrograms->setUniformMat4("model", model);
+        shaderPrograms->setUniformFloat("pointLight.maxRange", range);
+        shaderPrograms->setUniformVec3("pointLight.position", position);
+        shaderPrograms->setUniformVec3("pointLight.diffuse", conversion::toVec3(light->getColor()));
+
+        // Attenuation factors
+        const std::array<float, 3>& attFactors = light->getAttenuationFactors();
+        shaderPrograms->setUniformFloat("pointLight.constant", attFactors[0]);
+        shaderPrograms->setUniformFloat("pointLight.linear", attFactors[1]);
+        shaderPrograms->setUniformFloat("pointLight.quadratic", attFactors[2]);
+    }
+}
+
+LightVolumeNode::LightVolumeNode(const StrategyChain* chain) : 
+    StrategyNode(chain) 
+{
+    std::shared_ptr<FBOManager> frameBuffers = _chain->engine()->getFBOManager();
+    
+    _fbo = frameBuffers->addFBO(E_AttachmentTemplate::TEXTURE, _chain->engine()->getViewportSize()[0], _chain->engine()->getViewportSize()[1]);
+
+    _fbo->addAttachment(E_AttachmentSlot::COLOR, E_ColorFormat::RGBA16F);
+}
+
+void LightVolumeNode::run()
+{
+    std::shared_ptr<Scene> scene = _chain->engine()->getScene();
+    std::shared_ptr<ShaderLibrary> shaderPrograms = _chain->engine()->getShaderLibrary();
+    std::shared_ptr<FBOManager> frameBuffers = _chain->engine()->getFBOManager();    
+
+    // Bind the proper FBO
+    frameBuffers->bindFBO(_fbo);
+    frameBuffers->clearColor();
+
+    // Activate proper shader program
+    std::set lightShader = shaderPrograms->getShaderIndexesPerFeature(E_ShaderProgramFeatures::E_DEFERRED_SHADING_LIGHT_VOLUMES);
+    shaderPrograms->use(*lightShader.begin());
+
+    shaderPrograms->setUniformInt("gData.position", 0);
+    glActiveTexture(GL_TEXTURE0 + 0);
+    glBindTexture(GL_TEXTURE_2D, _chain->engine()->getFBOManager()->getSceneFBO(scene)->getColorAttachmentID(1));
+
+    shaderPrograms->setUniformInt("gData.normal", 1);
+    glActiveTexture(GL_TEXTURE0 + 1);
+    glBindTexture(GL_TEXTURE_2D, _chain->engine()->getFBOManager()->getSceneFBO(scene)->getColorAttachmentID(2));
+ 
+    shaderPrograms->setUniformInt("gData.albedo", 2);
+    glActiveTexture(GL_TEXTURE0 + 2);
+    glBindTexture(GL_TEXTURE_2D, _chain->engine()->getFBOManager()->getSceneFBO(scene)->getColorAttachmentID(3));
+
+    // Lights are additively blended
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_ONE, GL_ONE);
+
+    // Draw Light Volumes back faces
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_FRONT);
+    glDisable(GL_DEPTH_TEST);
+
+    glDrawBuffer(GL_COLOR_ATTACHMENT0);
+
+    glBindVertexArray(shapes::sphere::VAO());
+    // Light Volumes: Draw Light Sources as geometry, calculate lighting
+    const std::vector<std::shared_ptr<PointLight>>& pointLights = scene->getAllLights().pointLights;
+    for(auto& pointLight : pointLights)
+    {
+        bindLightUniforms(pointLight, shaderPrograms);
+        glDrawElements(GL_TRIANGLES, shapes::sphere::indexCount(), GL_UNSIGNED_INT, 0);
+    }   
+
+    // Return to normal settings
+    glCullFace(GL_BACK);
+
+    // Blend the light volumes with the scene
+    // Re-enable the default scene FBO again
+    frameBuffers->bindProperFBOFromScene(scene);
+    // Switch shaders
+    std::set quadShaders = shaderPrograms->getShaderIndexesPerFeature(E_ShaderProgramFeatures::E_QUAD_TEXTURE);
+    shaderPrograms->use(*quadShaders.begin());
+
+    glDrawBuffer(GL_COLOR_ATTACHMENT0);    
+    shaderPrograms->setUniformInt("tex.color", 0);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, _fbo->getColorAttachmentID(0));
+
+    glDepthMask(GL_FALSE);  // Prevents depth buff}er writes
+
+    glBindVertexArray(shapes::quad::VAO());    
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+    // Return to normal settings
+    glEnable(GL_DEPTH_TEST);
+    glBindVertexArray(0);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDepthMask(GL_TRUE);  // Prevents depth buffer writes      
+
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////// DEBUG NODES
+///////////////////////////////////////////////////////////////////////////////////////////
+
+LightSourceCubeDebugNode::LightSourceCubeDebugNode(const StrategyChain* chain, bool depthTest) : 
+    StrategyNode(chain),
+    _depthTest(depthTest)
+{
+       ;
+}
+
+void LightSourceCubeDebugNode::run()
+{
+    std::shared_ptr<Scene> scene = _chain->engine()->getScene();
+    std::shared_ptr<ShaderLibrary> shaderPrograms = _chain->engine()->getShaderLibrary();
+
+    glDisable(GL_CULL_FACE);
+
+    glDepthMask(GL_FALSE);  // Prevents depth buffer writes
+
+    if(!_depthTest)
+    {
+        glDisable(GL_DEPTH_TEST);
+    }
+    else
+    {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    }
+
+    shaderPrograms->use(1);
+
+    const std::vector<std::shared_ptr<PointLight>>& pointLights = scene->getAllLights().pointLights;
+
+    glBindVertexArray(shapes::sphere::VAO());
+
+    for(const auto& pointLight : pointLights)
+    {
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, conversion::toVec3(pointLight->getPosition()));
+        model = glm::scale(model, pointLight->calculateMaxRange() * glm::vec3(1.0f));
+        shaderPrograms->setUniformMat4("model", model);
+        glm::vec4 color = glm::vec4(conversion::toVec3(pointLight->getColor()), 1.0f);
+        shaderPrograms->setUniformVec4("outputColor", color);
+
+        glDrawElements(GL_TRIANGLES, shapes::sphere::indexCount(), GL_UNSIGNED_INT, 0);
+    }
+    glBindVertexArray(0);
+    
+    if(!_depthTest)
+    {
+        glEnable(GL_DEPTH_TEST);
+    }
+    else
+    {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    }
+
+    glDepthMask(GL_TRUE);  // Prevents depth buffer writes
+    glEnable(GL_CULL_FACE);
 }
