@@ -30,14 +30,14 @@ Settings::Settings(GLFWwindow* _window)    :
     // involve also calling some functions
     set(E_Settings::SHADOW_GLOBAL, 1);
     set(E_Settings::ANTI_ALIASING_QUALITY, 1);
-    set(E_Settings::TRANSPARENCY, 0);
+    set(E_Settings::TRANSPARENCY, 1);
     set(E_Settings::GAMMA_CORRECTION, 0);
     set(E_Settings::FACE_CULLING, 1);
     set(E_Settings::DEPTH_TEST, 1);
     set(E_Settings::NORMAL_MAPPING, 1);
     set(E_Settings::HEIGHT_MAPPING, 1);
     set(E_Settings::HIGH_DYNAMIC_RANGE, 1);
-    set(E_Settings::BLOOM, 1);
+    set(E_Settings::BLOOM, 0);
 }
 
 void Settings::set(E_Settings setting, int value)
