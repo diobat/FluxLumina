@@ -40,11 +40,9 @@ public:
 
 	const SceneContents &getAllObjects() const;
 	const std::vector<std::shared_ptr<Camera>> &getAllCameras() const;
-	const std::vector<std::shared_ptr<ModelObject>> &getModels(unsigned int shaderIndex) const;
+	const std::vector<std::shared_ptr<ModelObject>> &getModels() const;
+	std::vector<std::shared_ptr<ModelObject>> getModels(const std::string& shader) const;
 	const LightContents &getAllLights() const;
-	const ModelContents &getAllModels() const;
-
-	std::vector<unsigned int> getShaderIDs() const;
 
 	AmbientLight& getAmbientLight();
 	std::shared_ptr<Camera> &getActiveCamera();

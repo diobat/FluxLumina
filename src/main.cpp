@@ -104,15 +104,15 @@ int main(void)
 
     TextureLocations textureLocations;
     textureLocations.heightMaps.push_back("orange_brick_height.jpg");
-    auto& orangeWall = factory.create_Model("res/models/orangeBrickWall/orangeBrickWall.obj", 0, true, textureLocations);
+    auto& orangeWall = factory.create_Model("res/models/orangeBrickWall/orangeBrickWall.obj", "Basic", true, textureLocations);
     orangeWall.setPosition({-2.0f, 5.0f, 29.0f});
     orangeWall.setScale(3.5f);
 
-    auto& wall = factory.create_Model("res/models/brickWall/brickWall.obj", 0);
+    auto& wall = factory.create_Model("res/models/brickWall/brickWall.obj", "Basic");
     wall.setPosition({-10.0f, 5.0f, 29.0f});
     wall.setScale(3.5f);
 
-    ModelObject &ground = factory.create_Model("res/models/Ground3.obj", 0);
+    ModelObject &ground = factory.create_Model("res/models/Ground3.obj", "Basic");
     ground.setScale(3.5f);
     ground.setPosition({0.0f, -0.5f, 0.0f});
 
@@ -140,7 +140,7 @@ int main(void)
     {
         for(int j(0); j < n; ++j)
         {
-            auto& statue = factory.create_Model("res/models/Statue/Statue_fixed.obj", 0);
+            auto& statue = factory.create_Model("res/models/Statue/Statue_fixed.obj", "Basic");
             statue.setPosition({(i * spacing) - offset, 0.0f, (j * spacing) - offset});
         }
     }
@@ -169,8 +169,8 @@ int main(void)
     // Point Lights
 
     // auto light_A = factory.create_LightSource( E_LightType::POINT_LIGHT);
-    // light_A->setColor({1.0f, 1.0f, 1.0f});
-    // light_A->setPosition({13.0f, 5.0f, 13.0f});
+    // light_A->setColor({10.0f, 10.0f, 10.0f});
+    // light_A->setPosition({13.0f, 25.0f, 13.0f});
     // light_A->setAttenuationFactors({1.0f, 0.09f, 0.032f});
 
     // auto light_B = factory.create_LightSource( E_LightType::POINT_LIGHT);

@@ -465,20 +465,19 @@ void LightLibrary::renderTextureShadowMap(std::shared_ptr<Scene> scene, std::sha
     framebuffers->clearDepth();
 
     // Render loop
-    for (auto& model_vector : scene->getAllModels().getAllModels())
+    for (auto& model : scene->getModels())
     {
-        for(auto model : model_vector.second)
-        {
-            shaders->setUniformMat4("shadowModel", model->getModelMatrix());
 
-            for (auto &one_mesh : model->getModel()->meshes)
-            {
-                glBindVertexArray(one_mesh->VAO);
-                int numVertexes = static_cast<int>(one_mesh->_indices.size());  // Avoids compiler warning
-                glDrawElements(GL_TRIANGLES, numVertexes, GL_UNSIGNED_INT, 0);
-                glBindVertexArray(0);
-            }
+        shaders->setUniformMat4("shadowModel", model->getModelMatrix());
+
+        for (auto &one_mesh : model->getModel()->meshes)
+        {
+            glBindVertexArray(one_mesh->VAO);
+            int numVertexes = static_cast<int>(one_mesh->_indices.size());  // Avoids compiler warning
+            glDrawElements(GL_TRIANGLES, numVertexes, GL_UNSIGNED_INT, 0);
+            glBindVertexArray(0);
         }
+    
     }
 
     framebuffers->unbindFBO();
@@ -529,19 +528,16 @@ void LightLibrary::renderCubeShadowMap(std::shared_ptr<Scene> scene, std::shared
     framebuffers->clearDepth();
 
     // Render loop
-    for (auto& model_vector : scene->getAllModels().getAllModels())
+    for (auto& model : scene->getModels())
     {
-        for(auto model : model_vector.second)
-        {
-            shaders->setUniformMat4("model", model->getModelMatrix());
+        shaders->setUniformMat4("model", model->getModelMatrix());
 
-            for (auto &one_mesh : model->getModel()->meshes)
-            {
-                glBindVertexArray(one_mesh->VAO);
-                int numVertexes = static_cast<int>(one_mesh->_indices.size());  // Avoids compiler warning
-                glDrawElements(GL_TRIANGLES, numVertexes, GL_UNSIGNED_INT, 0);  
-                glBindVertexArray(0);
-            }
+        for (auto &one_mesh : model->getModel()->meshes)
+        {
+            glBindVertexArray(one_mesh->VAO);
+            int numVertexes = static_cast<int>(one_mesh->_indices.size());  // Avoids compiler warning
+            glDrawElements(GL_TRIANGLES, numVertexes, GL_UNSIGNED_INT, 0);  
+            glBindVertexArray(0);
         }
     }
     framebuffers->unbindFBO();

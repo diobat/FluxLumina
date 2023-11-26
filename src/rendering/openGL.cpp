@@ -347,6 +347,6 @@ void openGL::renderSkybox(Skybox& skybox)
 
 void openGL::initializeInstanceManager(std::shared_ptr<Scene> scene)
 {
-    _instancingManager->setupInstancing(_shaderPrograms->getShader(0)->getProgramId(), _scenes[0]);
+    _instancingManager->setupInstancing(_shaderPrograms->getShader("Basic")->getProgramId(), _scenes[0]);
 }
 
