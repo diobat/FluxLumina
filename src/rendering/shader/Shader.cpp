@@ -11,7 +11,8 @@ Shader::Shader(const std::string & vertexShaderFilename,
                const std::string & tessellationControlShaderFilename, 
                const std::string & tessellationEvaluationShaderFilename) 
                : program_id(0), 
-                 isLinked(false)
+                 isLinked(false),
+                 _name("")
 {
     const std::string shaderCodes[5] = { loadFile(vertexShaderFilename), 
                                          loadFile(fragmentShaderFilename), 
@@ -160,6 +161,11 @@ const std::string& Shader::getName() const
     return _name;
 }
 
+void Shader::setName(const std::string& name)
+{
+    _name = name;
+}
+
 void Shader::addSupportedFeature(E_ShaderProgramFeatures feature)
 {
     _supportedFeatures.insert(feature);
@@ -204,7 +210,8 @@ std::string Shader::loadFile(const std::string & filename)
     std::string filetext;
     std::string line;
 
-    std::ifstream inFile(ROOT_DIR "res/shaders/" + filename);
+    // std::ifstream inFile(ROOT_DIR "res/shaders/" + filename);
+    std::ifstream inFile(filename);
 
     if (!inFile)
     {

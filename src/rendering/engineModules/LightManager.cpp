@@ -443,10 +443,11 @@ void LightLibrary::renderTextureShadowMap(std::shared_ptr<Scene> scene, std::sha
     }
 
     // Activate the proper shader
-    auto shadowMapperShaders = shaders->getShaderIndexesPerFeature(E_ShaderProgramFeatures::E_SHADOW_MAPPING);
-    if(shaders->getActiveShaderIndex() != *shadowMapperShaders.begin())
+    auto& shadowMapperShader = shaders->getShader("ShadowMap");
+
+    if(shaders->getShader(shaders->getActiveShaderIndex()) != shadowMapperShader)
     {
-       shaders->use(*shadowMapperShaders.begin());  
+       shaders->use(shadowMapperShader);  
     }
 
     if(_shadowMaps.find(light->_id) == _shadowMaps.end())
@@ -497,10 +498,11 @@ void LightLibrary::renderCubeShadowMap(std::shared_ptr<Scene> scene, std::shared
     }
 
     // Activate the proper shader
-    auto shadowMapperShaders = shaders->getShaderIndexesPerFeature(E_ShaderProgramFeatures::E_SHADOW_CUBE_MAPPING);
-    if(shaders->getActiveShaderIndex() != *shadowMapperShaders.begin())
+    auto shadowMapperShaders = shaders->getShader("ShadowCubeMap");
+
+    if(shaders->getShader(shaders->getActiveShaderIndex()) != shadowMapperShaders)
     {
-       shaders->use(*shadowMapperShaders.begin());  
+       shaders->use(shadowMapperShaders);  
     }
 
     // Check if the light about to be rendered has an allocated framebuffer

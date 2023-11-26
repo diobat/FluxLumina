@@ -12,17 +12,7 @@
 enum class E_ShaderProgramFeatures
 {
     E_AUTO_INSTANCING,
-    E_TRANSPARENCY,
-    E_SHADOW_MAPPING,
-    E_SHADOW_CUBE_MAPPING,
-    E_SKYBOX,
-    E_QUAD,
-    E_QUAD_TEXTURE,
-    E_BLOOM, 
-    E_BLOOM_BLEND,
-    E_DEFERRED_SHADING_GEOMETRY,
-    E_DEFERRED_SHADING_LIGHT,
-    E_DEFERRED_SHADING_LIGHT_VOLUMES
+    E_TRANSPARENCY
 };
 
 
@@ -51,6 +41,7 @@ public:
     
     GLuint getProgramId() const;
     const std::string& getName() const;
+    void setName(const std::string& name);
 
     void addSupportedFeature(E_ShaderProgramFeatures feature);
     bool isFeatureSupported(E_ShaderProgramFeatures feature) const;
@@ -59,7 +50,7 @@ public:
     bool verbose = false;
 
 private:
-
+    std::string _name;
     std::set<E_ShaderProgramFeatures> _supportedFeatures;
     std::map<std::string, GLint> uniformsLocations;
 
@@ -70,6 +61,6 @@ private:
     bool getUniformLocation(const std::string & uniform_name);
     std::string loadFile(const std::string & filename);
 
-    std::string _name;
+
 };
 
