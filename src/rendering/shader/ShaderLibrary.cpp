@@ -1,6 +1,10 @@
 #include "rendering/shader/ShaderLibrary.hpp"
-#include <stdexcept>
+#include "helpers/RootDir.h"
 
+#include <boost/filesystem.hpp>
+#include <boost/filesystem/fstream.hpp>
+
+#include <stdexcept>
 
 ShaderLibrary::ShaderLibrary()  :
     _activeShader(0),
@@ -133,6 +137,121 @@ void ShaderLibrary::use(const std::string &name)
 {
     _activeShader = getShaderIndex(name);
     glUseProgram(_shaders[_activeShader]->getProgramId());
+}
+
+void ShaderLibrary::use(const std::shared_ptr<Shader> &shader)
+{
+    _activeShader = getShaderIndex(shader->getName());
+    glUseProgram(_shaders[_activeShader]->getProgramId());
+}
+
+unsigned int ShaderLibrary::scan(const std::string &foldername)
+{
+    unsigned int importedShaderPrograms = 0;
+
+    std::string folderToScan = ROOT_DIR + foldername;
+
+    if(!boost::filesystem::exists(folderToScan))
+    {
+        return 0;
+    }
+    else
+    {
+        importedShaderPrograms = recursiveScanFolder(folderToScan, importedShaderPrograms);
+    }
+
+    return importedShaderPrograms;
+}
+
+unsigned int ShaderLibrary::recursiveScanFolder(const std::string& folderName, unsigned int importedShaderPrograms)
+{
+    std::string shaderProgramName;
+
+    std::string vertexShaderFilename = "";
+    std::string fragmentShaderFilename = "";
+    std::string geometryShaderFilename = "";
+    std::string tessellationControlShaderFilename = "";
+    std::string tessellationEvaluationShaderFilename = "";
+
+    // Iterate through the entire folder content
+    for(auto& item : boost::filesystem::directory_iterator(folderName))
+    {
+        if(boost::filesystem::is_directory(item))
+        {
+            importedShaderPrograms = recursiveScanFolder(item.path().string(), importedShaderPrograms);
+        }
+
+        if(boost::filesystem::is_regular_file(item))
+        {
+            shaderProgramName = item.path().parent_path().stem().string();
+
+            std::string filename = item.path().stem().string();
+            // This is only used in the if statement conditions below
+            boost::filesystem::path extension = item.path().extension().string();
+
+            if (extension == ".vert")
+            {
+                if(vertexShaderFilename != "")
+                {
+                    return 0; //Multiple vertex shaders found for shader program name
+                }
+                vertexShaderFilename = folderName + "/" + filename + ".vert";
+            }
+            else if (extension == ".frag")
+            {
+                if(fragmentShaderFilename != "")
+                {
+                    return 0; //Multiple fragment shaders found for shader program name
+                }
+                fragmentShaderFilename = folderName + "/" + filename + ".frag";
+            }
+            else if (extension == ".geom")
+            {
+                if(geometryShaderFilename != "")
+                {
+                    return 0; //Multiple geometry shaders found for shader program name
+                }
+                geometryShaderFilename = folderName + "/" + filename + ".geom";
+            }
+            else if (extension == ".tesc")
+            {
+                if(tessellationControlShaderFilename != "")
+                {
+                    return 0; //Multiple tessellation control shaders found for shader program name
+                }
+                tessellationControlShaderFilename = folderName + "/" + filename + ".tesc";
+            }
+            else if (extension == ".tese")
+            {
+                if(tessellationEvaluationShaderFilename != "")
+                {
+                    return 0; //Multiple tessellation evaluation shaders found for shader program name
+                }
+                tessellationEvaluationShaderFilename = folderName + "/" + filename + ".tese";
+            }
+            else
+            {
+                continue;
+            }
+        }
+    }
+
+    if(vertexShaderFilename == "" || fragmentShaderFilename == "")
+    {
+        return importedShaderPrograms; // No vertex or fragment shader found for shader program name
+    }
+    // After iteration we have all the filenames, so we can create the shader program
+    std::shared_ptr<Shader> shader = std::make_shared<Shader>(vertexShaderFilename,
+                                                            fragmentShaderFilename,
+                                                            geometryShaderFilename,
+                                                            tessellationControlShaderFilename,
+                                                            tessellationEvaluationShaderFilename);
+    shader->setName(shaderProgramName);
+
+    _shaders.emplace_back(shader);
+    ++importedShaderPrograms;
+
+    return importedShaderPrograms;
 }
 
 
@@ -322,7 +441,6 @@ void ShaderLibrary::setUniformMat3(const std::string &shader, const std::string 
 }
 
 // Mat4
-
 void ShaderLibrary::setUniformMat4(const std::string &name, const glm::mat4 &mat)
 {
     _shaders[_activeShader]->setUniformMatrix4fv(name, mat);

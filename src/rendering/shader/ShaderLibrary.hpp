@@ -31,7 +31,6 @@ public:
 
     GLuint loadShader(const std::string &folderName);
 
-
     // Shader management
     std::shared_ptr<Shader> getShader(unsigned int index);
     std::shared_ptr<Shader> getShader(const std::string &name);
@@ -43,6 +42,10 @@ public:
 
     void use(unsigned int index);
     void use(const std::string &name);
+    void use(const std::shared_ptr<Shader> &shader);
+
+    // Scan for shaders
+    unsigned int scan(const std::string &folderName);
 
     // Instancing
     void setupSceneMeshes(Scene* scene);
@@ -101,11 +104,9 @@ public:
     void setUniformMat4(unsigned int index, const std::string &name, const glm::mat4 &mat);
     void setUniformMat4(const std::string &shader, const std::string &name, const glm::mat4 &mat);
 
-
-    // Tomorrow start by establishing the interface for the methods 
-    // we need for interaction with _meshesPerShader
-
 private:
+    // Filetree Scanning
+    unsigned int recursiveScanFolder(const std::string &folderName, unsigned int importedShadersCount = 0);
     // Shaders
     std::shared_ptr<ShaderLibraryContents> _contents;
     std::vector<std::shared_ptr<Shader>>& _shaders;

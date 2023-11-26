@@ -47,31 +47,10 @@ int openGL::initialize(GLFWwindow* window)
     // Shader Library initialization
     _shaderPrograms = std::make_shared<ShaderLibrary>();
 
-    _shaderPrograms->addShader("Basic.vert", "Basic.frag");                  //0
-    _shaderPrograms->getShader(0)->addSupportedFeature(E_ShaderProgramFeatures::E_AUTO_INSTANCING);
-    _shaderPrograms->addShader("Simple.vert", "Simple.frag");                //1
-    _shaderPrograms->addShader("Simple.vert", "transparency.frag");          //2
-    _shaderPrograms->getShader(2)->addSupportedFeature(E_ShaderProgramFeatures::E_TRANSPARENCY);
-    _shaderPrograms->addShader("Quad_HDR.vert", "Quad_HDR.frag");                    //3
-    _shaderPrograms->getShader(3)->addSupportedFeature(E_ShaderProgramFeatures::E_QUAD);
-    _shaderPrograms->addShader("Skybox.vert", "Skybox.frag");                //4
-    _shaderPrograms->addShader("Reflection.vert", "Reflection.frag");        //5
-    _shaderPrograms->addShader("ShadowMap.vert", "ShadowMap.frag");          //6
-    _shaderPrograms->getShader(6)->addSupportedFeature(E_ShaderProgramFeatures::E_SHADOW_MAPPING);
-    _shaderPrograms->addShader("ShadowCubeMap.vert", "ShadowCubeMap.frag", "ShadowCubeMap.geom");       //7
-    _shaderPrograms->getShader(7)->addSupportedFeature(E_ShaderProgramFeatures::E_SHADOW_CUBE_MAPPING);
-    _shaderPrograms->addShader("Bloom.vert", "Bloom.frag");                                             //8
-    _shaderPrograms->getShader(8)->addSupportedFeature(E_ShaderProgramFeatures::E_BLOOM);
-    _shaderPrograms->addShader("Bloom.vert", "BloomBlend.frag");                                        //9
-    _shaderPrograms->getShader(9)->addSupportedFeature(E_ShaderProgramFeatures::E_BLOOM_BLEND);         
-    _shaderPrograms->addShader("deferred_geometry.vert", "deferred_geometry.frag");                         //10
-    _shaderPrograms->getShader(10)->addSupportedFeature(E_ShaderProgramFeatures::E_DEFERRED_SHADING_GEOMETRY);
-    _shaderPrograms->addShader("deferred_lighting.vert", "deferred_lighting.frag");                     //11
-    _shaderPrograms->getShader(11)->addSupportedFeature(E_ShaderProgramFeatures::E_DEFERRED_SHADING_LIGHT);
-    _shaderPrograms->addShader("deferred_light_volumes.vert", "deferred_light_volumes.frag");                      //12
-    _shaderPrograms->getShader(12)->addSupportedFeature(E_ShaderProgramFeatures::E_DEFERRED_SHADING_LIGHT_VOLUMES);
-    _shaderPrograms->addShader("Quad_HDR.vert", "Quad_Texture.frag");                      //13
-    _shaderPrograms->getShader(13)->addSupportedFeature(E_ShaderProgramFeatures::E_QUAD_TEXTURE);
+    _shaderPrograms->scan("res/shaders/");
+
+    _shaderPrograms->getShader("Basic")->addSupportedFeature(E_ShaderProgramFeatures::E_AUTO_INSTANCING);
+    _shaderPrograms->getShader("transparency")->addSupportedFeature(E_ShaderProgramFeatures::E_TRANSPARENCY);
 
     // Add uniform buffers to the shaders
     _shaderPrograms->createUniformBuffer("mvp_camera");
