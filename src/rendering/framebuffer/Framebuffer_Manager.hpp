@@ -45,6 +45,8 @@ public:
     bool isFrameBufferComplete(std::shared_ptr<FBO>) const;
     bool isFrameBufferComplete(unsigned int fboIndex) const;
 
+    void resizeViewPortBoundFBOs();
+
 private:
     std::vector<std::shared_ptr<FBO>> _frameBufferObjects;
     int _currentFBOIndex;

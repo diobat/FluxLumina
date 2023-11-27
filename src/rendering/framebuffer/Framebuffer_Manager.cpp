@@ -108,16 +108,17 @@ void FBOManager::parseNewScene(std::shared_ptr<Scene> scene)
 {
     if(_fboSceneMap.count(scene) == 0)
     {
-        std::shared_ptr<FBO> HDRfbo = addFBO(E_AttachmentTemplate::TEXTURE, _ranFrom->getViewportSize()[0], _ranFrom->getViewportSize()[1]);
-        HDRfbo->addAttachment(E_AttachmentSlot::COLOR, E_ColorFormat::RGBA16F);
+        std::shared_ptr<FBO> fbo = addFBO(E_AttachmentTemplate::TEXTURE, _ranFrom->getViewportSize()[0], _ranFrom->getViewportSize()[1]);
+        fbo->bindToViewportSize(true);
+        fbo->addAttachment(E_AttachmentSlot::COLOR, E_ColorFormat::RGBA16F);
         if(_ranFrom->getSettings()->getBloom() == E_Setting::ON)
         {
-            HDRfbo->addAttachment(E_AttachmentSlot::COLOR, E_ColorFormat::RGBA16F);
+            fbo->addAttachment(E_AttachmentSlot::COLOR, E_ColorFormat::RGBA16F);
         }
-        HDRfbo->addAttachment(E_AttachmentSlot::DEPTH);
-        //HDRfbo->addAttachment(E_AttachmentSlot::STENCIL);
+        fbo->addAttachment(E_AttachmentSlot::DEPTH);
+        //fbo->addAttachment(E_AttachmentSlot::STENCIL);
 
-        bindSceneToFBO(scene, HDRfbo);
+        bindSceneToFBO(scene, fbo);
         bindProperFBOFromScene(scene);
     }
 }
@@ -195,3 +196,16 @@ bool FBOManager::isFrameBufferComplete(unsigned int fboIndex) const
     return glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE;
 }
 
+void FBOManager::resizeViewPortBoundFBOs()
+{
+
+    std::array<int, 2> viewPortSize = _ranFrom->getViewportSize();
+
+    for(std::shared_ptr<FBO> fbo : _frameBufferObjects)
+    {
+        if(fbo->isBoundToViewportSize())
+        {
+            fbo->resize(viewPortSize[0], viewPortSize[1]);
+        }
+    }
+}

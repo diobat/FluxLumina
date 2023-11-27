@@ -40,9 +40,17 @@ enum class E_AttachmentTypes
     CUBEMAP
 };
 
-struct ColorAttachment
+
+// Holds information about a depth & buffer attachments
+struct Attachment
 {
     unsigned int id;
+    E_AttachmentTypes type;
+};
+
+// Extends information about a color attachment
+struct ColorAttachment : public Attachment
+{
     unsigned int slot;
     E_ColorFormat format;
 };
@@ -62,24 +70,30 @@ public:
 
     const std::vector<ColorAttachment>& getColorAttachments() const { return _colorAttachments; }
     unsigned int getColorAttachmentID(unsigned int index) const { return _colorAttachments[index].id; }
-    unsigned int getDepthAttachmentID() const { return _depthAttachmentID; }
-    unsigned int getStencilAttachmentID() const { return _stencilAttachmentID; }
+    unsigned int getDepthAttachmentID() const { return _depthAttachment.id; }
+    unsigned int getStencilAttachmentID() const { return _stencilAttachment.id; }
 
     std::vector<Texture> getTextures() const;
     unsigned int getDepthTextureID() const;
+
+    void bindToViewportSize(bool isBound = true);
+    bool isBoundToViewportSize() const { return _isViewPortSizeBound; }
+
+    void resize(int width, int height);
 
 private:
     void init(const std::array<E_AttachmentTypes, 3>& templateTypes);
 
     ColorAttachment addColorAttachment(E_ColorFormat colorFormat = E_ColorFormat::RGB);
-    unsigned int addDepthAttachment(E_AttachmentTypes type);
-    unsigned int addStencilAttachment(E_AttachmentTypes type);
+    Attachment addDepthAttachment(E_AttachmentTypes type);
+    Attachment addStencilAttachment(E_AttachmentTypes type);
 
     unsigned int _id;
     std::array<unsigned int, 2> _originalSize;
     std::array<E_AttachmentTypes, 3> _framebufferTemplate;
 
     std::vector<ColorAttachment> _colorAttachments;
-    unsigned int _depthAttachmentID;
-    unsigned int _stencilAttachmentID;
+    Attachment _depthAttachment;
+    Attachment _stencilAttachment;
+    bool _isViewPortSizeBound;
 };
