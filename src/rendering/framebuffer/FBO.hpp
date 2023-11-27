@@ -76,9 +76,10 @@ public:
     std::vector<Texture> getTextures() const;
     unsigned int getDepthTextureID() const;
 
-    void bindToViewport(bool isBound = true);
+    void bindToViewportSize(bool isBound = true);
+    bool isBoundToViewportSize() const { return _isViewPortSizeBound; }
 
-    void resize(unsigned int width, unsigned int height);
+    void resize(int width, int height);
 
 private:
     void init(const std::array<E_AttachmentTypes, 3>& templateTypes);
@@ -94,5 +95,5 @@ private:
     std::vector<ColorAttachment> _colorAttachments;
     Attachment _depthAttachment;
     Attachment _stencilAttachment;
-    bool _isViewPortBound;
+    bool _isViewPortSizeBound;
 };

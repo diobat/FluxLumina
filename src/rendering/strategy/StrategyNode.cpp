@@ -71,7 +71,7 @@ void ShadowsSetupNode::run()
     
     shaderPrograms->getUniformBuffer("shadowSettingsBlock").update(shadowSettings);
 
-    shaderPrograms->use(0);
+    shaderPrograms->use("Basic");
     lightLibrary->alignShadowMaps(scene);
     lightLibrary->renderShadowMaps(scene);
     
@@ -90,7 +90,7 @@ void LightsSetupNode::run()
     std::shared_ptr<LightLibrary> lightLibrary = _chain->engine()->getLightLibrary();
     std::shared_ptr<ShaderLibrary> shaderPrograms = _chain->engine()->getShaderLibrary();
 
-    shaderPrograms->use(0);
+    shaderPrograms->use("Basic");
     lightLibrary->prepare(scene->getAllLights());
 }
 
@@ -106,15 +106,13 @@ void FramebufferNode::run()
     // Bind the proper FBO
     frameBuffers->bindProperFBOFromScene(scene);
     // Tell OpenGL how many attachments we are using
-    // if(_chain->engine()->getSettings()->getBloom() == E_Setting::ON)
-    if(1)
+    if(_chain->engine()->getSettings()->getBloom() == E_Setting::ON)
     {
         std::vector<unsigned int> colorAttachments;
         for (auto attachment : frameBuffers->getSceneFBO(scene)->getColorAttachments())
         {
             colorAttachments.push_back(attachment.slot);
         }
-        //colorAttachments.erase(colorAttachments.begin());
         glDrawBuffers(colorAttachments.size(), colorAttachments.data());  
     }
     else
@@ -184,8 +182,8 @@ void RenderSkyboxNode::run()
         auto projection = scene->getActiveCamera()->getProjectionMatrix();
 
         shaderPrograms->use("Skybox");
-        shaderPrograms->setUniformMat4(4, "view", view);
-        shaderPrograms->setUniformMat4(4, "projection", projection);
+        shaderPrograms->setUniformMat4("view", view);
+        shaderPrograms->setUniformMat4("projection", projection);
 
         _chain->engine()->renderSkybox(scene->getSkybox());
     }
@@ -241,9 +239,11 @@ BloomNode::BloomNode(const StrategyChain* chain) :
 
     // Create the ping pong FBOs
     _pingPongFBOs[0] = frameBuffers->addFBO(E_AttachmentTemplate::TEXTURE, _chain->engine()->getViewportSize()[0], _chain->engine()->getViewportSize()[1]);
+    _pingPongFBOs[0]->bindToViewportSize(true);
     _pingPongFBOs[0]->addAttachment(E_AttachmentSlot::COLOR, E_ColorFormat::RGBA16F);
 
     _pingPongFBOs[1] = frameBuffers->addFBO(E_AttachmentTemplate::TEXTURE, _chain->engine()->getViewportSize()[0], _chain->engine()->getViewportSize()[1]);
+    _pingPongFBOs[1]->bindToViewportSize(true);
     _pingPongFBOs[1]->addAttachment(E_AttachmentSlot::COLOR, E_ColorFormat::RGBA16F);
 }
 
@@ -338,7 +338,7 @@ void HighDynamicRangeNode::run()
 ///////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////// DEFAULT FRAMEBUFFER NODE
 ///////////////////////////////////////////////////////////////////////////////////////////
-
+#include <iostream>
 void DefaultFramebufferNode::run()
 {
     std::shared_ptr<Scene> scene = _chain->engine()->getScene();
@@ -354,9 +354,10 @@ void DefaultFramebufferNode::run()
     unsigned int viewportWidth = _chain->engine()->getViewportSize()[0];
     unsigned int viewportHeight = _chain->engine()->getViewportSize()[1];
 
+
     glBlitFramebuffer(
         0, 0, 
-        originWidth, originHeight,
+        viewportWidth, viewportHeight,
         0, 0,
         viewportWidth, viewportHeight,
         GL_COLOR_BUFFER_BIT,
@@ -447,6 +448,7 @@ LightVolumeNode::LightVolumeNode(const StrategyChain* chain) :
     std::shared_ptr<FBOManager> frameBuffers = _chain->engine()->getFBOManager();
     
     _fbo = frameBuffers->addFBO(E_AttachmentTemplate::TEXTURE, _chain->engine()->getViewportSize()[0], _chain->engine()->getViewportSize()[1]);
+    _fbo->bindToViewportSize(true);
 
     _fbo->addAttachment(E_AttachmentSlot::COLOR, E_ColorFormat::RGBA16F);
 }

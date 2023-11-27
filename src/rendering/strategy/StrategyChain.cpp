@@ -51,8 +51,8 @@ ForwardShadingStrategyChain::ForwardShadingStrategyChain(GraphicalEngine* engine
         add(std::make_shared<LightsSetupNode>(this));
         add(std::make_shared<FramebufferNode>(this));
         // Rendering
-        add(std::make_shared<RenderOpaqueNode>(this));
         add(std::make_shared<RenderSkyboxNode>(this));
+        add(std::make_shared<RenderOpaqueNode>(this));
         add(std::make_shared<RenderTransparentNode>(this));
         // Post-processing
         if(_ranFrom->getSettings()->getBloom() == E_Setting::ON)

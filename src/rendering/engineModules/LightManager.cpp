@@ -411,8 +411,6 @@ void LightLibrary::renderShadowMaps(std::shared_ptr<Scene> scene)
     allLightSources.insert(allLightSources.end(), lights.pointLights.begin(), lights.pointLights.end());
     allLightSources.insert(allLightSources.end(), lights.spotLights.begin(), lights.spotLights.end());
 
-    int count = 0;
-
     for(auto& light : allLightSources)
     {
         switch (getLightType(*light))
@@ -487,6 +485,7 @@ void LightLibrary::renderCubeShadowMap(std::shared_ptr<Scene> scene, std::shared
 {
     auto shaders = _shaderLibrary.lock();
     auto framebuffers = _framebufferManager.lock();
+    
     if(shaders == nullptr)
     {
         throw std::runtime_error("Shader Library not bound");
@@ -498,7 +497,7 @@ void LightLibrary::renderCubeShadowMap(std::shared_ptr<Scene> scene, std::shared
 
     // Activate the proper shader
     auto shadowMapperShaders = shaders->getShader("ShadowCubeMap");
-
+    
     if(shaders->getShader(shaders->getActiveShaderIndex()) != shadowMapperShaders)
     {
        shaders->use(shadowMapperShaders);  
@@ -533,7 +532,7 @@ void LightLibrary::renderCubeShadowMap(std::shared_ptr<Scene> scene, std::shared
         shaders->setUniformMat4("model", model->getModelMatrix());
 
         for (auto &one_mesh : model->getModel()->meshes)
-        {
+        {   
             glBindVertexArray(one_mesh->VAO);
             int numVertexes = static_cast<int>(one_mesh->_indices.size());  // Avoids compiler warning
             glDrawElements(GL_TRIANGLES, numVertexes, GL_UNSIGNED_INT, 0);  

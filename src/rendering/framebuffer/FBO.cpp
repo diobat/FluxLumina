@@ -4,7 +4,8 @@ FBO::FBO(E_AttachmentTemplate format, unsigned int width, unsigned int height) :
     _id(-1),
     _originalSize({width, height}),
     _depthAttachment({-1U, E_AttachmentTypes::NONE}),
-    _stencilAttachment({-1U, E_AttachmentTypes::NONE})
+    _stencilAttachment({-1U, E_AttachmentTypes::NONE}),
+    _isViewPortSizeBound(false)
 {
     glGenFramebuffers(1, &_id);
     glBindFramebuffer(GL_FRAMEBUFFER, _id);
@@ -293,12 +294,49 @@ unsigned int FBO::getDepthTextureID() const
     return _depthAttachment.id;
 }
 
-void FBO::bindToViewport(bool isBound)
+void FBO::bindToViewportSize(bool isBound)
 {
-    _isViewPortBound = isBound;
+    _isViewPortSizeBound = isBound;
 }
 
-void FBO::resize(unsigned int width, unsigned int height)
+void FBO::resize(int width, int height)
 {
+    // If the size is the same, don't do anything
+    if(width == _originalSize[0] && height == _originalSize[1])
+    {
+        return;
+    }
+    // If the new size doesn't make sense, don't do anything
+    if(width <= 0 || height <= 0)
+    {
+        return;
+    }
 
+    // Gather all attachments
+    std::vector<ColorAttachment> colorAttachments = _colorAttachments;
+    Attachment depthAttachment = _depthAttachment;
+    Attachment stencilAttachment = _stencilAttachment;
+
+    std::array<E_AttachmentTypes, 3> framebufferTemplate = _framebufferTemplate;
+    // Reset the FBO
+    init(framebufferTemplate);
+
+    // Change the original size
+    _originalSize = {static_cast<unsigned int>(width), static_cast<unsigned int>(height)};
+
+    // Re-add all attachments
+    for(auto attachment : colorAttachments)
+    {
+        addAttachment(E_AttachmentSlot::COLOR, attachment.format);
+    }
+
+    if(depthAttachment.id != -1)
+    {
+        addAttachment(E_AttachmentSlot::DEPTH);
+    }
+
+    if(stencilAttachment.id != -1)
+    {
+        addAttachment(E_AttachmentSlot::STENCIL);
+    }
 }
