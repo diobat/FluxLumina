@@ -4,7 +4,7 @@
 #include "scene/sceneObject.hpp"
 #include "resources/Texture.hpp"
 #include "resources/Model.hpp"
-#include "util/Listener.hpp"
+// #include "util/Listener.hpp"
 #include "scene/ModelMatrixProvider.hpp"
 
 // Third-party headers
@@ -27,8 +27,6 @@ public:
 
     const glm::mat4& getModelMatrix();
 
-    Broadcaster& getBroadcaster();
-
     const boost::uuids::uuid& uuid() const;
 
 private:
@@ -41,6 +39,5 @@ private:
     unsigned int _shaderIndex;
     ModelMatrixProvider _modelMatrixProvider;
 
-    Broadcaster _broadcaster;
 };
 

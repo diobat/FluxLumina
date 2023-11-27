@@ -22,7 +22,6 @@ std::shared_ptr<Model> ModelObject::getModel()
 void ModelObject::setShaderIndex(unsigned int shaderIndex)
 {
     _shaderIndex = shaderIndex;
-    _broadcaster.trigger(shared_from_this(), shaderIndex);
 }
 
 void ModelObject::setShaderName(const std::string& shaderName)
@@ -43,11 +42,6 @@ unsigned int ModelObject::getShaderIndex() const
 const glm::mat4& ModelObject::getModelMatrix()
 {
     return _modelMatrixProvider.getModelMatrix();
-}
-
-Broadcaster& ModelObject::getBroadcaster()
-{
-    return _broadcaster;
 }
 
 const boost::uuids::uuid& ModelObject::uuid() const
