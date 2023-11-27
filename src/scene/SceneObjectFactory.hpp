@@ -47,7 +47,7 @@ public:
     void bindEngine(GraphicalEngine* engine);
 
     // Importing models
-    ModelObject &create_Model(const std::string &modelPath, unsigned int shader = 0, bool flipUVs = false, TextureLocations textureLocations = {});
+    ModelObject &create_Model(const std::string &modelPath, const std::string& shader = "Basic", bool flipUVs = false, TextureLocations textureLocations = {});
     void load_ModelMeshes(Model& model, std::string const &path);
     void processNode(const std::string &path, aiNode* node, const aiScene* scene);
     std::shared_ptr<Mesh> processMesh(const std::string &path, aiMesh *mesh, const aiScene *scene);

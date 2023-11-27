@@ -67,24 +67,19 @@ const std::vector<std::shared_ptr<Camera>> &Scene::getAllCameras() const
 	return _objects.cameras;
 }
 
-const ModelContents &Scene::getAllModels() const
+const std::vector<std::shared_ptr<ModelObject>> &Scene::getModels() const
 {
-	return _objects.models;
+	return _objects.models.getModels();
 }
 
-const std::vector<std::shared_ptr<ModelObject>> &Scene::getModels(unsigned int shaderIndex) const
+std::vector<std::shared_ptr<ModelObject>> Scene::getModels(const std::string& shader) const
 {
-	return _objects.models.getModels(shaderIndex);
+	return _objects.models.getModels(shader);
 }
 
 const LightContents &Scene::getAllLights() const
 {
 	return _objects.lights;
-}
-
-std::vector<unsigned int> Scene::getShaderIDs() const
-{
-	return _objects.models.getShaderIDs();
 }
 
 std::shared_ptr<Camera> &Scene::getActiveCamera()

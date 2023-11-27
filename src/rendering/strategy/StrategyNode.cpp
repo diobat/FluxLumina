@@ -90,7 +90,7 @@ void LightsSetupNode::run()
     std::shared_ptr<LightLibrary> lightLibrary = _chain->engine()->getLightLibrary();
     std::shared_ptr<ShaderLibrary> shaderPrograms = _chain->engine()->getShaderLibrary();
 
-    shaderPrograms->use(11);
+    shaderPrograms->use(0);
     lightLibrary->prepare(scene->getAllLights());
 }
 
@@ -138,33 +138,34 @@ void RenderOpaqueNode::run()
     std::shared_ptr<ShaderLibrary> shaderPrograms = _chain->engine()->getShaderLibrary();
     std::shared_ptr<InstancingManager> instancingManager = _chain->engine()->getInstancingManager();
 
-    // Fetch relevant shaders
-    std::set <unsigned int> shaderIndexes = shaderPrograms->getShaderIndexesPerFeature();
-    std::set <unsigned int> shaderIndexesWithInstancing = shaderPrograms->getShaderIndexesPerFeature(E_ShaderProgramFeatures::E_AUTO_INSTANCING);
+    shaderPrograms->use("Basic");
+    _chain->engine()->renderInstancedMeshes(instancingManager);
 
-    std::set<unsigned int> shaderIndexesTotal;
-    std::merge(shaderIndexes.begin(), shaderIndexes.end(), shaderIndexesWithInstancing.begin(), shaderIndexesWithInstancing.end(), std::inserter(shaderIndexesTotal, shaderIndexesTotal.begin()));
 
-    // Opaque Models
-    for(unsigned int shaderIndex : shaderIndexesTotal)
+    for(auto shader : shaderPrograms->getShaders())
     {
-        // Activate shader
-        shaderPrograms->use(shaderIndex);
+        std::vector<std::shared_ptr<ModelObject>> objectsForThisShader = scene->getModels(shader->getName());
 
-        // Go down the instancing path if the shader supports it
-        if(shaderPrograms->getShader(shaderIndex)->isFeatureSupported(E_ShaderProgramFeatures::E_AUTO_INSTANCING))
+        if(
+            objectsForThisShader.empty() || 
+            shader->isFeatureSupported(E_ShaderProgramFeatures::E_AUTO_INSTANCING) ||   // Instanced Objects were already rendered
+            shader->isFeatureSupported(E_ShaderProgramFeatures::E_TRANSPARENCY)         // And transparent ones will be rendered later
+            )
         {
-            _chain->engine()->renderInstancedMeshes(instancingManager);
+            continue;
         }
-        else // Else just render on a per-model basis
+
+        shaderPrograms->use(shader);
+
+        for(auto modelObject : objectsForThisShader)
         {
-            for (auto model : scene->getModels(shaderPrograms->getShader(shaderIndex)->getProgramId()))
+            if(!modelObject->enabled())
             {
-                _chain->engine()->renderModel(*model);   
+                continue;
             }
+            _chain->engine()->renderModel(*modelObject);
         }
     }
-    
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -182,7 +183,7 @@ void RenderSkyboxNode::run()
         auto view = glm::mat4(glm::mat3(scene->getActiveCamera()->getViewMatrix())); // remove translation from the view matrix
         auto projection = scene->getActiveCamera()->getProjectionMatrix();
 
-        shaderPrograms->use(4);
+        shaderPrograms->use("Skybox");
         shaderPrograms->setUniformMat4(4, "view", view);
         shaderPrograms->setUniformMat4(4, "projection", projection);
 
@@ -207,7 +208,7 @@ void RenderTransparentNode::run()
         shaderPrograms->use(shaderIndex);
         std::map<float, std::shared_ptr<ModelObject>> sortedTransparentModels;
         
-        for (auto model : scene->getModels(shaderPrograms->getShader(shaderIndex)->getProgramId()))
+        for (auto model : scene->getModels(shaderPrograms->getShader(shaderIndex)->getName()))
         {
             if(model->getModel()->hasTransparency())
             {
@@ -261,8 +262,9 @@ void BloomNode::run()
     std::shared_ptr<ShaderLibrary> shaderPrograms = _chain->engine()->getShaderLibrary();
     
     // Activate proper shader program
-    std::set bloomShader = shaderPrograms->getShaderIndexesPerFeature(E_ShaderProgramFeatures::E_BLOOM);
-    shaderPrograms->use(*bloomShader.begin());
+    auto bloomShader = shaderPrograms->getShader("ShadowCubeMap");
+
+    shaderPrograms->use(bloomShader);
     shaderPrograms->setUniformInt("material.diffuse", 1);   
 
     // Loop control variables
@@ -287,8 +289,8 @@ void BloomNode::run()
     }
 
     // Activate proper shader program
-    std::set bloomMergeShader = shaderPrograms->getShaderIndexesPerFeature(E_ShaderProgramFeatures::E_BLOOM_BLEND);
-    shaderPrograms->use(*bloomMergeShader.begin());
+    auto bloomBlendShaderProgram = shaderPrograms->getShader("BloomBlend");
+    shaderPrograms->use(bloomBlendShaderProgram);
 
     frameBuffers->bindProperFBOFromScene(scene);
 
@@ -321,19 +323,16 @@ void HighDynamicRangeNode::run()
     auto sceneFBO = frameBuffers->getSceneFBO(scene);
 
     unsigned int textureID = frameBuffers->getSceneFBO(scene)->getColorAttachmentID(0);
-    std::set quadShaders = shaderPrograms->getShaderIndexesPerFeature(E_ShaderProgramFeatures::E_QUAD);
+    auto& quadShader = shaderPrograms->getShader("Quad_HDR");
 
-    for (auto quadShader : quadShaders)
-    {
-        shaderPrograms->use(quadShader);
-        shaderPrograms->setUniformInt("material.diffuse", 1);
-        glActiveTexture(GL_TEXTURE0 + 1);
-        glBindTexture(GL_TEXTURE_2D, textureID);
+    shaderPrograms->use(quadShader);
+    shaderPrograms->setUniformInt("material.diffuse", 1);
+    glActiveTexture(GL_TEXTURE0 + 1);
+    glBindTexture(GL_TEXTURE_2D, textureID);
 
-        glBindVertexArray(shapes::quad::VAO());
-        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-        glBindVertexArray(0);
-    }
+    glBindVertexArray(shapes::quad::VAO());
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    glBindVertexArray(0);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -379,8 +378,8 @@ void GeometryPassNode::run()
     std::shared_ptr<InstancingManager> instancingManager = _chain->engine()->getInstancingManager();
 
     // Activate proper shader program
-    std::set geometryShader = shaderPrograms->getShaderIndexesPerFeature(E_ShaderProgramFeatures::E_DEFERRED_SHADING_GEOMETRY);
-    shaderPrograms->use(*geometryShader.begin());
+    auto& geometryShaderProgram = shaderPrograms->getShader("deferred_geometry");
+    shaderPrograms->use(geometryShaderProgram);
 
     _chain->engine()->renderInstancedMeshes(instancingManager);
 }
@@ -393,8 +392,8 @@ void LightPassNode::run()
     std::shared_ptr<FBOManager> frameBuffers = _chain->engine()->getFBOManager();
 
     // Activate proper shader program
-    std::set lightShader = shaderPrograms->getShaderIndexesPerFeature(E_ShaderProgramFeatures::E_DEFERRED_SHADING_LIGHT);
-    shaderPrograms->use(*lightShader.begin());
+    auto& lightShaderProgram = shaderPrograms->getShader("deferred_lighting");
+    shaderPrograms->use(lightShaderProgram);
 
     // shaderPrograms->setUniformInt("gData.position", 0);
     // glActiveTexture(GL_TEXTURE0 + 0);
@@ -463,8 +462,8 @@ void LightVolumeNode::run()
     frameBuffers->clearColor();
 
     // Activate proper shader program
-    std::set lightShader = shaderPrograms->getShaderIndexesPerFeature(E_ShaderProgramFeatures::E_DEFERRED_SHADING_LIGHT_VOLUMES);
-    shaderPrograms->use(*lightShader.begin());
+    auto& lightShaderProgram = shaderPrograms->getShader("deferred_light_volumes");
+    shaderPrograms->use(lightShaderProgram);
 
     shaderPrograms->setUniformInt("gData.position", 0);
     glActiveTexture(GL_TEXTURE0 + 0);
@@ -505,8 +504,8 @@ void LightVolumeNode::run()
     // Re-enable the default scene FBO again
     frameBuffers->bindProperFBOFromScene(scene);
     // Switch shaders
-    std::set quadShaders = shaderPrograms->getShaderIndexesPerFeature(E_ShaderProgramFeatures::E_QUAD_TEXTURE);
-    shaderPrograms->use(*quadShaders.begin());
+    auto quadShader = shaderPrograms->getShader("Quad_Texture");
+    shaderPrograms->use(quadShader);
 
     glDrawBuffer(GL_COLOR_ATTACHMENT0);    
     shaderPrograms->setUniformInt("tex.color", 0);
@@ -555,7 +554,7 @@ void LightSourceCubeDebugNode::run()
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     }
 
-    shaderPrograms->use(1);
+    shaderPrograms->use("Simple");
 
     const std::vector<std::shared_ptr<PointLight>>& pointLights = scene->getAllLights().pointLights;
 
