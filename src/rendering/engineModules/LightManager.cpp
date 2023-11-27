@@ -443,10 +443,11 @@ void LightLibrary::renderTextureShadowMap(std::shared_ptr<Scene> scene, std::sha
     }
 
     // Activate the proper shader
-    auto shadowMapperShaders = shaders->getShaderIndexesPerFeature(E_ShaderProgramFeatures::E_SHADOW_MAPPING);
-    if(shaders->getActiveShaderIndex() != *shadowMapperShaders.begin())
+    auto& shadowMapperShader = shaders->getShader("ShadowMap");
+
+    if(shaders->getShader(shaders->getActiveShaderIndex()) != shadowMapperShader)
     {
-       shaders->use(*shadowMapperShaders.begin());  
+       shaders->use(shadowMapperShader);  
     }
 
     if(_shadowMaps.find(light->_id) == _shadowMaps.end())
@@ -464,20 +465,19 @@ void LightLibrary::renderTextureShadowMap(std::shared_ptr<Scene> scene, std::sha
     framebuffers->clearDepth();
 
     // Render loop
-    for (auto& model_vector : scene->getAllModels().getAllModels())
+    for (auto& model : scene->getModels())
     {
-        for(auto model : model_vector.second)
-        {
-            shaders->setUniformMat4("shadowModel", model->getModelMatrix());
 
-            for (auto &one_mesh : model->getModel()->meshes)
-            {
-                glBindVertexArray(one_mesh->VAO);
-                int numVertexes = static_cast<int>(one_mesh->_indices.size());  // Avoids compiler warning
-                glDrawElements(GL_TRIANGLES, numVertexes, GL_UNSIGNED_INT, 0);
-                glBindVertexArray(0);
-            }
+        shaders->setUniformMat4("shadowModel", model->getModelMatrix());
+
+        for (auto &one_mesh : model->getModel()->meshes)
+        {
+            glBindVertexArray(one_mesh->VAO);
+            int numVertexes = static_cast<int>(one_mesh->_indices.size());  // Avoids compiler warning
+            glDrawElements(GL_TRIANGLES, numVertexes, GL_UNSIGNED_INT, 0);
+            glBindVertexArray(0);
         }
+    
     }
 
     framebuffers->unbindFBO();
@@ -497,10 +497,11 @@ void LightLibrary::renderCubeShadowMap(std::shared_ptr<Scene> scene, std::shared
     }
 
     // Activate the proper shader
-    auto shadowMapperShaders = shaders->getShaderIndexesPerFeature(E_ShaderProgramFeatures::E_SHADOW_CUBE_MAPPING);
-    if(shaders->getActiveShaderIndex() != *shadowMapperShaders.begin())
+    auto shadowMapperShaders = shaders->getShader("ShadowCubeMap");
+
+    if(shaders->getShader(shaders->getActiveShaderIndex()) != shadowMapperShaders)
     {
-       shaders->use(*shadowMapperShaders.begin());  
+       shaders->use(shadowMapperShaders);  
     }
 
     // Check if the light about to be rendered has an allocated framebuffer
@@ -527,19 +528,16 @@ void LightLibrary::renderCubeShadowMap(std::shared_ptr<Scene> scene, std::shared
     framebuffers->clearDepth();
 
     // Render loop
-    for (auto& model_vector : scene->getAllModels().getAllModels())
+    for (auto& model : scene->getModels())
     {
-        for(auto model : model_vector.second)
-        {
-            shaders->setUniformMat4("model", model->getModelMatrix());
+        shaders->setUniformMat4("model", model->getModelMatrix());
 
-            for (auto &one_mesh : model->getModel()->meshes)
-            {
-                glBindVertexArray(one_mesh->VAO);
-                int numVertexes = static_cast<int>(one_mesh->_indices.size());  // Avoids compiler warning
-                glDrawElements(GL_TRIANGLES, numVertexes, GL_UNSIGNED_INT, 0);  
-                glBindVertexArray(0);
-            }
+        for (auto &one_mesh : model->getModel()->meshes)
+        {
+            glBindVertexArray(one_mesh->VAO);
+            int numVertexes = static_cast<int>(one_mesh->_indices.size());  // Avoids compiler warning
+            glDrawElements(GL_TRIANGLES, numVertexes, GL_UNSIGNED_INT, 0);  
+            glBindVertexArray(0);
         }
     }
     framebuffers->unbindFBO();

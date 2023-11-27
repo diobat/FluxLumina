@@ -1,6 +1,5 @@
 #include "ModelObject.hpp"
 
-
 ModelObject::ModelObject()  :
     _model(std::make_shared<Model>()),
     _shaderIndex(0),
@@ -24,6 +23,16 @@ void ModelObject::setShaderIndex(unsigned int shaderIndex)
 {
     _shaderIndex = shaderIndex;
     _broadcaster.trigger(shared_from_this(), shaderIndex);
+}
+
+void ModelObject::setShaderName(const std::string& shaderName)
+{
+    _assignedShader = shaderName;
+}
+
+const std::string& ModelObject::getShaderName() const
+{
+    return _assignedShader;
 }
 
 unsigned int ModelObject::getShaderIndex() const

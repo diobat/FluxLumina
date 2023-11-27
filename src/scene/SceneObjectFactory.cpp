@@ -130,7 +130,7 @@ SceneObjectFactory::SceneObjectFactory(Scene* scene, GraphicalEngine* engine, Me
 
     if(scene != nullptr)
     {
-        ModelObject& cube = create_Model("res/models/origin_cube.obj", 0);
+        ModelObject& cube = create_Model("res/models/origin_cube.obj", "Basic");
         cube.setScale(0.3f);
     }
 }
@@ -149,7 +149,7 @@ void SceneObjectFactory::bindEngine(GraphicalEngine *engine)
 /////////////////////////// MODELS/MESHES/MATERIALS
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-ModelObject &SceneObjectFactory::create_Model(const std::string &modelPath, unsigned int shader, bool flipUVs, TextureLocations textureLocations)
+ModelObject &SceneObjectFactory::create_Model(const std::string &modelPath, const std::string& shader, bool flipUVs, TextureLocations textureLocations)
 {
     detectFileType(modelPath);
 
@@ -157,7 +157,7 @@ ModelObject &SceneObjectFactory::create_Model(const std::string &modelPath, unsi
     Model& model = (*model_object->getModel());
 
     // Set the shader program
-    model_object->setShaderIndex(_boundEngine->getShaderProgramID(shader));
+    model_object->setShaderName(shader);
 
     // Set the per-model creation variables
     flipUVsOnLoad = flipUVs;

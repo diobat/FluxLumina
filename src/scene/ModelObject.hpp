@@ -22,6 +22,8 @@ public:
 
     void setShaderIndex(unsigned int shaderIndex);
     unsigned int getShaderIndex() const;
+    void setShaderName(const std::string& shaderName);
+    const std::string& getShaderName() const;
 
     const glm::mat4& getModelMatrix();
 
@@ -32,6 +34,8 @@ public:
 private:
     // Structural Data
     boost::uuids::uuid _id;
+    
+    std::string _assignedShader;
 
     std::shared_ptr<Model> _model;
     unsigned int _shaderIndex;
