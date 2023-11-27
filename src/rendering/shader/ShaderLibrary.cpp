@@ -79,6 +79,11 @@ std::shared_ptr<Shader> ShaderLibrary::getShader(unsigned int index)
     }
 }
 
+std::vector<std::shared_ptr<Shader>> ShaderLibrary::getShaders()
+{
+    return _shaders;
+}
+
 unsigned int ShaderLibrary::getShaderIndex(const std::string &name) const
 {
     for(unsigned int i = 0; i < _shaders.size(); ++i)

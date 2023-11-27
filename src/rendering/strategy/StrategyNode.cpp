@@ -90,7 +90,7 @@ void LightsSetupNode::run()
     std::shared_ptr<LightLibrary> lightLibrary = _chain->engine()->getLightLibrary();
     std::shared_ptr<ShaderLibrary> shaderPrograms = _chain->engine()->getShaderLibrary();
 
-    shaderPrograms->use(11);
+    shaderPrograms->use(0);
     lightLibrary->prepare(scene->getAllLights());
 }
 
@@ -138,37 +138,34 @@ void RenderOpaqueNode::run()
     std::shared_ptr<ShaderLibrary> shaderPrograms = _chain->engine()->getShaderLibrary();
     std::shared_ptr<InstancingManager> instancingManager = _chain->engine()->getInstancingManager();
 
-
     shaderPrograms->use("Basic");
     _chain->engine()->renderInstancedMeshes(instancingManager);
 
-    // // Fetch relevant shaders
-    // std::set <unsigned int> shaderIndexes = shaderPrograms->getShaderIndexesPerFeature();
-    // std::set <unsigned int> shaderIndexesWithInstancing = shaderPrograms->getShaderIndexesPerFeature(E_ShaderProgramFeatures::E_AUTO_INSTANCING);
 
-    // std::set<unsigned int> shaderIndexesTotal;
-    // std::merge(shaderIndexes.begin(), shaderIndexes.end(), shaderIndexesWithInstancing.begin(), shaderIndexesWithInstancing.end(), std::inserter(shaderIndexesTotal, shaderIndexesTotal.begin()));
+    for(auto shader : shaderPrograms->getShaders())
+    {
+        std::vector<std::shared_ptr<ModelObject>> objectsForThisShader = scene->getModels(shader->getName());
 
-    // // Opaque Models
-    // for(unsigned int shaderIndex : shaderIndexesTotal)
-    // {
-    //     // Activate shader
-    //     shaderPrograms->use(shaderIndex);
+        if(
+            objectsForThisShader.empty() || 
+            shader->isFeatureSupported(E_ShaderProgramFeatures::E_AUTO_INSTANCING) ||   // Instanced Objects were already rendered
+            shader->isFeatureSupported(E_ShaderProgramFeatures::E_TRANSPARENCY)         // And transparent ones will be rendered later
+            )
+        {
+            continue;
+        }
 
-    //     // Go down the instancing path if the shader supports it
-    //     if(shaderPrograms->getShader(shaderIndex)->isFeatureSupported(E_ShaderProgramFeatures::E_AUTO_INSTANCING))
-    //     {
-    //         _chain->engine()->renderInstancedMeshes(instancingManager);
-    //     }
-    //     else // Else just render on a per-model basis
-    //     {
-    //         for (auto model : scene->getModels(shaderPrograms->getShader(shaderIndex)->getProgramId()))
-    //         {
-    //             //_chain->engine()->renderModel(*model);   
-    //         }
-    //     }
-    // }
+        shaderPrograms->use(shader);
 
+        for(auto modelObject : objectsForThisShader)
+        {
+            if(!modelObject->enabled())
+            {
+                continue;
+            }
+            _chain->engine()->renderModel(*modelObject);
+        }
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -211,7 +208,7 @@ void RenderTransparentNode::run()
         shaderPrograms->use(shaderIndex);
         std::map<float, std::shared_ptr<ModelObject>> sortedTransparentModels;
         
-        for (auto model : scene->getModels(shaderPrograms->getShader(shaderIndex)->getProgramId()))
+        for (auto model : scene->getModels(shaderPrograms->getShader(shaderIndex)->getName()))
         {
             if(model->getModel()->hasTransparency())
             {
