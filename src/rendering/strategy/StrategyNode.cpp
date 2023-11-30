@@ -12,6 +12,9 @@
 
 #include "util/VertexShapes.hpp"
 
+#include <random>
+#include <cmath>
+
 ///////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////// STRATEGY NODE (Pure abstract class)
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -323,7 +326,7 @@ void HighDynamicRangeNode::run()
     auto sceneFBO = frameBuffers->getSceneFBO(scene);
 
     unsigned int textureID = frameBuffers->getSceneFBO(scene)->getColorAttachmentID(0);
-    auto& quadShader = shaderPrograms->getShader("Quad_HDR");
+    auto quadShader = shaderPrograms->getShader("Quad_HDR");
 
     shaderPrograms->use(quadShader);
     shaderPrograms->setUniformInt("material.diffuse", 1);
@@ -338,7 +341,7 @@ void HighDynamicRangeNode::run()
 ///////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////// DEFAULT FRAMEBUFFER NODE
 ///////////////////////////////////////////////////////////////////////////////////////////
-#include <iostream>
+
 void DefaultFramebufferNode::run()
 {
     std::shared_ptr<Scene> scene = _chain->engine()->getScene();
@@ -372,6 +375,10 @@ void DefaultFramebufferNode::run()
 /////////////////////////// DEFERRED SHADING NODES
 ///////////////////////////////////////////////////////////////////////////////////////////
 
+///////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////// GEOMETRY PASS NODE
+///////////////////////////////////////////////////////////////////////////////////////////
+
 void GeometryPassNode::run()
 {
     std::shared_ptr<Scene> scene = _chain->engine()->getScene();
@@ -385,6 +392,10 @@ void GeometryPassNode::run()
     _chain->engine()->renderInstancedMeshes(instancingManager);
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////// LIGHT PASS NODE
+///////////////////////////////////////////////////////////////////////////////////////////
+
 void LightPassNode::run()
 {
 
@@ -396,17 +407,26 @@ void LightPassNode::run()
     auto& lightShaderProgram = shaderPrograms->getShader("deferred_lighting");
     shaderPrograms->use(lightShaderProgram);
 
-    // shaderPrograms->setUniformInt("gData.position", 0);
-    // glActiveTexture(GL_TEXTURE0 + 0);
-    // glBindTexture(GL_TEXTURE_2D, _chain->engine()->getFBOManager()->getSceneFBO(scene)->getColorAttachmentID(1));
+    // Enable the default scene FBO
+    frameBuffers->bindProperFBOFromScene(scene);
+
+    shaderPrograms->setUniformInt("gData.position", 0);
+    glActiveTexture(GL_TEXTURE0 + 0);
+    glBindTexture(GL_TEXTURE_2D, _chain->engine()->getFBOManager()->getSceneFBO(scene)->getColorAttachmentID(1));
  
-    // shaderPrograms->setUniformInt("gData.normal", 1);
-    // glActiveTexture(GL_TEXTURE0 + 1);
-    // glBindTexture(GL_TEXTURE_2D, _chain->engine()->getFBOManager()->getSceneFBO(scene)->getColorAttachmentID(2));
+    shaderPrograms->setUniformInt("gData.normal", 1);
+    glActiveTexture(GL_TEXTURE0 + 1);
+    glBindTexture(GL_TEXTURE_2D, _chain->engine()->getFBOManager()->getSceneFBO(scene)->getColorAttachmentID(2));
  
     shaderPrograms->setUniformInt("gData.albedo", 2);
     glActiveTexture(GL_TEXTURE0 + 2);
     glBindTexture(GL_TEXTURE_2D, _chain->engine()->getFBOManager()->getSceneFBO(scene)->getColorAttachmentID(3));
+
+    shaderPrograms->setUniformInt("ssaoOcclusion", 3);
+    glActiveTexture(GL_TEXTURE0 + 3);
+    auto occlusionTextureID = _chain->getNode<SSAONode>()->getFBO()->getColorAttachmentID(0);
+    glBindTexture(GL_TEXTURE_2D, occlusionTextureID);
+
 
     glDrawBuffer(GL_COLOR_ATTACHMENT0);
     glDepthMask(GL_FALSE);  // Prevents depth buffer writes    
@@ -419,6 +439,10 @@ void LightPassNode::run()
     glActiveTexture(GL_TEXTURE0);        
 
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////// LIGHT VOLUMES NODE
+///////////////////////////////////////////////////////////////////////////////////////////
 
 namespace
 {
@@ -522,9 +546,112 @@ void LightVolumeNode::run()
     // Return to normal settings
     glEnable(GL_DEPTH_TEST);
     glBindVertexArray(0);
+    glDisable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glDepthMask(GL_TRUE);  // Prevents depth buffer writes      
 
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////// SSAO NODE
+///////////////////////////////////////////////////////////////////////////////////////////
+
+SSAONode::SSAONode(const StrategyChain* chain) :
+    StrategyNode(chain)
+{
+    std::shared_ptr<FBOManager> frameBuffers = _chain->engine()->getFBOManager();
+
+    // Generate the SSAO framebuffer    
+    _occlusionFBO = frameBuffers->addFBO(E_AttachmentTemplate::TEXTURE, _chain->engine()->getViewportSize()[0], _chain->engine()->getViewportSize()[1]);
+    _occlusionFBO->bindToViewportSize(true);
+
+    _occlusionFBO->addAttachment(E_AttachmentSlot::COLOR, E_ColorFormat::RED);
+
+    // Generate the kernel
+    std::uniform_real_distribution<float> randomFloats(0.0, 1.0); // random floats between 0.0 - 1.0
+    std::default_random_engine generator;
+
+    for (unsigned int i = 0; i < 64; ++i)
+    {
+        glm::vec3 sample(
+            randomFloats(generator) * 2.0f - 1.0f, 
+            randomFloats(generator) * 2.0f - 1.0f, 
+            0.0f
+        );
+        sample = glm::normalize(sample);
+        sample *= randomFloats(generator);
+
+        // // Scale samples s.t. they're more aligned to center of kernel
+        // float scale = float(i) / 64.0;
+        // scale = std::lerp(0.1f, 1.0f, scale * scale);
+        // sample *= scale;
+        _ssaoKernel.push_back(sample);
+    };
+
+    // Generate noise texture
+    for (unsigned int i = 0; i < 16; i++)
+    {
+        glm::vec3 noise(
+            randomFloats(generator) * 2.0 - 1.0, 
+            randomFloats(generator) * 2.0 - 1.0, 
+            0.0f); 
+        _ssaoNoise.push_back(noise);
+    }  
+
+    glGenTextures(1, &_noiseTexture);
+    glBindTexture(GL_TEXTURE_2D, _noiseTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, 4, 4, 0, GL_RGB, GL_FLOAT, &_ssaoNoise[0]);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+}
+
+
+void SSAONode::run()
+{
+    std::shared_ptr<Scene> scene = _chain->engine()->getScene();
+    std::shared_ptr<ShaderLibrary> shaderPrograms = _chain->engine()->getShaderLibrary();
+    std::shared_ptr<FBOManager> frameBuffers = _chain->engine()->getFBOManager();
+
+    // Bind the proper FBO
+    frameBuffers->bindFBO(_occlusionFBO);
+    frameBuffers->clearAll();
+
+    // Use the correct shader
+    auto& ssaoShaderProgram = shaderPrograms->getShader("deferred_ssao");
+    shaderPrograms->use(ssaoShaderProgram);
+
+    // Update the Geometry Pass outputs to the uniform slots
+    shaderPrograms->setUniformInt("gData.position", 0);
+    glActiveTexture(GL_TEXTURE0 + 0);
+    glBindTexture(GL_TEXTURE_2D, _chain->engine()->getFBOManager()->getSceneFBO(scene)->getColorAttachmentID(4));
+
+    shaderPrograms->setUniformInt("gData.normal", 1);
+    glActiveTexture(GL_TEXTURE0 + 1);
+    glBindTexture(GL_TEXTURE_2D, _chain->engine()->getFBOManager()->getSceneFBO(scene)->getColorAttachmentID(5));
+ 
+    shaderPrograms->setUniformInt("noiseTex", 2);
+    glActiveTexture(GL_TEXTURE0 + 2);
+    glBindTexture(GL_TEXTURE_2D, _noiseTexture);
+    glActiveTexture(GL_TEXTURE0);
+
+    for (unsigned int i = 0; i < 64; ++i)
+    {
+        shaderPrograms->setUniformVec3("samples[" + std::to_string(i) + "]", _ssaoKernel[i]);
+    }
+ 
+    glDrawBuffer(GL_COLOR_ATTACHMENT0);
+    glBindVertexArray(shapes::quad::VAO());
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    glBindVertexArray(0);
+    
+    frameBuffers->unbindFBO();
+}
+
+std::shared_ptr<FBO> SSAONode::getFBO() const
+{
+    return _occlusionFBO;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////

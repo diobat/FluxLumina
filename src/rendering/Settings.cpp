@@ -21,7 +21,8 @@ Settings::Settings(GLFWwindow* _window)    :
     _normalMapping(E_Setting::ON),
     _heightMapping(E_Setting::ON),
     _highDynamicRange(E_Setting::ON),
-    _bloom(E_Setting::ON)
+    _bloom(E_Setting::ON),
+    _ssao(E_Setting::ON)
 {
     /* Make the window's context current */
     glfwMakeContextCurrent(_window);
@@ -30,14 +31,15 @@ Settings::Settings(GLFWwindow* _window)    :
     // involve also calling some functions
     set(E_Settings::SHADOW_GLOBAL, 1);
     set(E_Settings::ANTI_ALIASING_QUALITY, 1);
-    set(E_Settings::TRANSPARENCY, 1);
+    set(E_Settings::TRANSPARENCY, 0);
     set(E_Settings::GAMMA_CORRECTION, 0);
     set(E_Settings::FACE_CULLING, 1);
     set(E_Settings::DEPTH_TEST, 1);
     set(E_Settings::NORMAL_MAPPING, 1);
     set(E_Settings::HEIGHT_MAPPING, 1);
     set(E_Settings::HIGH_DYNAMIC_RANGE, 1);
-    set(E_Settings::BLOOM, 0);
+    set(E_Settings::BLOOM, 1);
+    set(E_Settings::SSAO, 1);
 }
 
 void Settings::set(E_Settings setting, int value)
@@ -131,6 +133,9 @@ void Settings::set(E_Settings setting, int value)
     case E_Settings::BLOOM:
         _bloom = static_cast<E_Setting>(value);
         break;
+    case E_Settings::SSAO:
+        _ssao = static_cast<E_Setting>(value);
+        break;
     default:
         break;
     }
@@ -204,4 +209,9 @@ E_Setting Settings::getHighDynamicRange() const
 E_Setting Settings::getBloom() const
 {
     return _bloom;
+}
+
+E_Setting Settings::getSSAO() const
+{
+    return _ssao;
 }

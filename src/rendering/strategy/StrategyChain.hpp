@@ -23,6 +23,20 @@ public:
 
     GraphicalEngine* engine() const;
 
+    template<typename T>
+    std::shared_ptr<T> getNode() const
+    {
+    for (auto& node : _nodes)
+    {
+        const auto casted = std::dynamic_pointer_cast<T>(node);
+        if (casted)
+        {
+            return casted;
+        }
+    }
+    return nullptr;
+    };
+
 protected:
     std::list<std::shared_ptr<StrategyNode>> _nodes;
 
