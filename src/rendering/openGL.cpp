@@ -140,6 +140,12 @@ void openGL::resizeWindow(GLFWwindow* window, int width, int height)
             scene->getActiveCamera()->resizeCameraPlane((float)width, (float)height);
         }
     }
+
+    // Resize all FBOs
+    _frameBuffers->resizeViewPortBoundFBOs();
+
+    glViewport(0, 0, _viewportWidth, _viewportHeight);
+
 }
 
 void openGL::initializeMesh(std::shared_ptr<Mesh>& mesh)
