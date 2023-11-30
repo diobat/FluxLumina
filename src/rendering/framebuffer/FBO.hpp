@@ -12,6 +12,7 @@
 
 enum class E_ColorFormat
 {
+    RED,                // 8 bits, fixed point
     RGB,                // 8 bits per channel, fixed point
     RGBA,               // 8 bits per channel, fixed point, alpha
     RGBA16F             // 16 bits per channel, floating point, alpha
