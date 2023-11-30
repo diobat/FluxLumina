@@ -78,8 +78,12 @@ DeferredShadingStrategyChain::DeferredShadingStrategyChain(GraphicalEngine* engi
     // Rendering
     //add(std::make_shared<RenderSkyboxNode>(this));
     add(std::make_shared<GeometryPassNode>(this));
-    //add(std::make_shared<LightSourceCubeDebugNode>(this, true));
-    //add(std::make_shared<LightPassNode>(this));
+    // add(std::make_shared<LightSourceCubeDebugNode>(this, true));
+    if(_ranFrom->getSettings()->getSSAO() == E_Setting::ON)
+    {
+        add(std::make_shared<SSAONode>(this));
+    }
+    add(std::make_shared<LightPassNode>(this));
     add(std::make_shared<LightVolumeNode>(this));
 
     // Post-processing
@@ -109,6 +113,8 @@ bool DeferredShadingStrategyChain::reserveResources()
     FBO->addAttachment(E_AttachmentSlot::COLOR, E_ColorFormat::RGBA16F);    // Position
     FBO->addAttachment(E_AttachmentSlot::COLOR, E_ColorFormat::RGBA16F);    // Normals
     FBO->addAttachment(E_AttachmentSlot::COLOR, E_ColorFormat::RGBA);       // Albedo + Specular
+    FBO->addAttachment(E_AttachmentSlot::COLOR, E_ColorFormat::RGBA16F);    // Screen Space Position
+    FBO->addAttachment(E_AttachmentSlot::COLOR, E_ColorFormat::RGBA16F);    // Screen Space Normals
 
     FBO->addAttachment(E_AttachmentSlot::DEPTH);                            // Depth
 

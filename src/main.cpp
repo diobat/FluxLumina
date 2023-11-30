@@ -80,8 +80,8 @@ int main(void)
     // Camera setup
     factory.create_Camera();
     
-    // ModelObject& backpack = factory.create_Model("res/models/backpack/backpack.obj", 0, true);
-    // backpack.setPosition({15.0f, 3.0f, -16.5f});
+    ModelObject& backpack = factory.create_Model("res/models/backpack/backpack.obj", "Basic", true);
+    backpack.setPosition({15.0f, 3.0f, -16.5f});
 
     // Skybox setup
     auto skybox = factory.create_Skybox(
@@ -114,7 +114,7 @@ int main(void)
 
     ModelObject &ground = factory.create_Model("res/models/Ground3.obj", "Basic");
     ground.setScale(3.5f);
-    ground.setPosition({0.0f, -0.5f, 0.0f});
+    ground.setPosition({0.0f, 0.0f, 0.0f});
 
     // ModelObject& mothership = factory.create_Model("res/models/Mothership/Mothership.obj", 0);
     // mothership.setPosition({0.0f, 10.0f, 7.5f});
@@ -168,27 +168,27 @@ int main(void)
     
     // Point Lights
 
-    // auto light_A = factory.create_LightSource( E_LightType::POINT_LIGHT);
-    // light_A->setColor({10.0f, 10.0f, 10.0f});
-    // light_A->setPosition({13.0f, 25.0f, 13.0f});
-    // light_A->setAttenuationFactors({1.0f, 0.09f, 0.032f});
+    auto light_A = factory.create_LightSource( E_LightType::POINT_LIGHT);
+    light_A->setColor({20.0f, 20.0f, 20.0f});
+    light_A->setPosition({13.0f, 25.0f, 13.0f});
+    light_A->setAttenuationFactors({1.0f, 0.09f, 0.032f});
 
     // auto light_B = factory.create_LightSource( E_LightType::POINT_LIGHT);
     // light_B->setPosition({-11.0f, 5.0f, 13.0f});
     // light_B->setAttenuationFactors({1.0f, 0.18f, 0.032f});
 
     movLight = factory.create_LightSource( E_LightType::POINT_LIGHT);
-    movLight->setColor({10.0f, 0.0f, 0.0f});
+    movLight->setColor({20.0f, 0.0f, 0.0f});
     movLight->setPosition({-4.0f, 8.0f, 17.5f});
     movLight->setAttenuationFactors({1.0f, 0.0f, 5.80f});
 
     auto light_C = factory.create_LightSource( E_LightType::POINT_LIGHT);
-    light_C->setColor({0.0f, 10.0f, 0.0f});
+    light_C->setColor({0.0f, 20.0f, 0.0f});
     light_C->setPosition({13.0f, 5.0f, -13.0f});
     light_C->setAttenuationFactors({1.0f, 0.0f, 3.40f});
 
     auto light_D = factory.create_LightSource( E_LightType::POINT_LIGHT);
-    light_D->setColor({0.0f, 0.0f, 10.0f});
+    light_D->setColor({0.0f, 0.0f, 20.0f});
     light_D->setPosition({-13.0f, 5.0f, -13.0f});
     light_D->setAttenuationFactors({1.0f, 0.55f, 0.40f});
 
