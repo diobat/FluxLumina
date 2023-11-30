@@ -20,9 +20,11 @@ layout(std140) uniform mvp_camera
 
 // Output
 out VertexOutput{
-	vec3 Normal;
-	vec2 TexCoords;
 	vec3 FragPos;
+    vec3 SSFragPos;
+	vec3 Normal;
+    vec3 SSNormal;
+	vec2 TexCoords;
     vec3 objectColor;   
 } VertexOut;
 
@@ -31,9 +33,13 @@ void main()
     vec4 worldPos = instanceMatrix * vec4(aPosition, 1.0);
     VertexOut.FragPos = worldPos.xyz; 
     VertexOut.TexCoords = aTexCoords;
+    VertexOut.SSFragPos = (view * worldPos).xyz;
     
     mat3 normalMatrix = transpose(inverse(mat3(instanceMatrix)));
     VertexOut.Normal = normalMatrix * aNormal;
+
+    normalMatrix = transpose(inverse(mat3(view * instanceMatrix)));
+    VertexOut.SSNormal = normalMatrix * aNormal;
 
     VertexOut.objectColor = aObjectColor;
 

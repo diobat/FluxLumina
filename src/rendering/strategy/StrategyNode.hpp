@@ -2,7 +2,11 @@
 
 // STL includes
 #include <array>
+#include <vector>
 #include <memory>
+
+// Third-party includes
+#include <glm/glm.hpp>
 
 class StrategyChain;
 class FBO;
@@ -123,6 +127,19 @@ public:
     void run() override;
 private:    
     std::shared_ptr<FBO> _fbo;
+};
+
+class SSAONode : public StrategyNode
+{
+public:
+    SSAONode(const StrategyChain* chain);
+    void run() override;
+    std::shared_ptr<FBO> getFBO() const;
+private:
+    unsigned int _noiseTexture;
+    std::shared_ptr<FBO> _occlusionFBO;
+    std::vector<glm::vec3> _ssaoKernel;
+    std::vector<glm::vec3> _ssaoNoise;
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////
