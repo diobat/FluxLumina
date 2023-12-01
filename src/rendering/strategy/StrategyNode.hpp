@@ -90,9 +90,10 @@ private:
 class HighDynamicRangeNode : public StrategyNode
 {
 public:
-    HighDynamicRangeNode(const StrategyChain* chain) : StrategyNode(chain) {};
+    HighDynamicRangeNode(const StrategyChain* chain);
     void run() override;
 private:
+    std::shared_ptr<FBO> _HDRfbo;
 };
 
 class DefaultFramebufferNode : public StrategyNode

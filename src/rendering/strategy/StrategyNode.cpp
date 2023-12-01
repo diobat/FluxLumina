@@ -11,6 +11,7 @@
 #include "rendering/Settings.hpp"
 
 #include "util/VertexShapes.hpp"
+#include "util/TexManip.hpp"
 
 #include <random>
 #include <cmath>
@@ -308,15 +309,37 @@ void BloomNode::run()
 /////////////////////////// HIGH DYNAMIC RANGE NODE
 ///////////////////////////////////////////////////////////////////////////////////////////
 
+HighDynamicRangeNode::HighDynamicRangeNode(const StrategyChain* chain) : 
+    StrategyNode(chain) 
+{
+    std::shared_ptr<Scene> scene = _chain->engine()->getScene();
+    std::shared_ptr<FBOManager> frameBuffers = _chain->engine()->getFBOManager();
+
+    // Create the HDR FBO
+    _HDRfbo = frameBuffers->addFBO(E_AttachmentTemplate::TEXTURE, _chain->engine()->getViewportSize()[0], _chain->engine()->getViewportSize()[1]);
+    _HDRfbo->bindToViewportSize(true);
+    _HDRfbo->addAttachment(E_AttachmentSlot::COLOR, E_ColorFormat::RGBA16F);
+}
+
 void HighDynamicRangeNode::run()
 {
     std::shared_ptr<Scene> scene = _chain->engine()->getScene();
     std::shared_ptr<ShaderLibrary> shaderPrograms = _chain->engine()->getShaderLibrary();
     std::shared_ptr<FBOManager> frameBuffers = _chain->engine()->getFBOManager();
 
-    auto sceneFBO = frameBuffers->getSceneFBO(scene);
+    TextureManipulator& texManip = TextureManipulator::Instance();
 
-    unsigned int textureID = frameBuffers->getSceneFBO(scene)->getColorAttachmentID(0);
+    texManip.copyTexture(
+        frameBuffers->getSceneFBO(scene)->getColorAttachmentID(0),
+        _HDRfbo->getColorAttachmentID(0),
+        _chain->engine()->getViewportSize()[0],
+        _chain->engine()->getViewportSize()[1]
+    );
+
+
+    frameBuffers->bindProperFBOFromScene(scene);
+
+    unsigned int textureID = _HDRfbo->getColorAttachmentID(0);
     auto quadShader = shaderPrograms->getShader("Quad_HDR");
 
     shaderPrograms->use(quadShader);
@@ -339,7 +362,6 @@ void DefaultFramebufferNode::run()
     std::shared_ptr<FBOManager> frameBuffers = _chain->engine()->getFBOManager();
 
     std::shared_ptr<FBO> sourceFBO = frameBuffers->getSceneFBO(scene);
-    // std::shared_ptr<FBO> sourceFBO = _chain->getNode<SSAONode>()->getFBO();
 
     glBindFramebuffer(GL_READ_FRAMEBUFFER, sourceFBO->id());    // Source Framebuffer
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);                  // Destination (default) Framebuffer
@@ -349,7 +371,6 @@ void DefaultFramebufferNode::run()
 
     unsigned int viewportWidth = _chain->engine()->getViewportSize()[0];
     unsigned int viewportHeight = _chain->engine()->getViewportSize()[1];
-
 
     glBlitFramebuffer(
         0, 0, 
