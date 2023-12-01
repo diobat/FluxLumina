@@ -52,7 +52,6 @@ void main()
     // vec3 viewDir = normalize(viewPos - FragPos);
     float occlusion = texture(ssaoOcclusion, FragmentIn.TexCoords).r;
 
-    occlusion = occlusion * occlusion; // Lets power it up a bit
     // vec3 totalLight = vec3(0.0);
     // Base lighting
     vec3 totalLight = albedo * 0.3 * occlusion;
