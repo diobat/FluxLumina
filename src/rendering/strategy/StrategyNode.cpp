@@ -346,7 +346,9 @@ void DefaultFramebufferNode::run()
 {
     std::shared_ptr<Scene> scene = _chain->engine()->getScene();
     std::shared_ptr<FBOManager> frameBuffers = _chain->engine()->getFBOManager();
+
     std::shared_ptr<FBO> sourceFBO = frameBuffers->getSceneFBO(scene);
+    // std::shared_ptr<FBO> sourceFBO = _chain->getNode<SSAONode>()->getFBO();
 
     glBindFramebuffer(GL_READ_FRAMEBUFFER, sourceFBO->id());    // Source Framebuffer
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);                  // Destination (default) Framebuffer
@@ -424,7 +426,7 @@ void LightPassNode::run()
 
     shaderPrograms->setUniformInt("ssaoOcclusion", 3);
     glActiveTexture(GL_TEXTURE0 + 3);
-    auto occlusionTextureID = _chain->getNode<SSAONode>()->getFBO()->getColorAttachmentID(0);
+    auto occlusionTextureID = _chain->getNode<SSAONode>()->getFBO()->getColorAttachmentID(1);
     glBindTexture(GL_TEXTURE_2D, occlusionTextureID);
 
 
@@ -564,8 +566,9 @@ SSAONode::SSAONode(const StrategyChain* chain) :
     // Generate the SSAO framebuffer    
     _occlusionFBO = frameBuffers->addFBO(E_AttachmentTemplate::TEXTURE, _chain->engine()->getViewportSize()[0], _chain->engine()->getViewportSize()[1]);
     _occlusionFBO->bindToViewportSize(true);
+    _occlusionFBO->addAttachment(E_AttachmentSlot::COLOR, E_ColorFormat::RED);  // Pre - blur
+    _occlusionFBO->addAttachment(E_AttachmentSlot::COLOR, E_ColorFormat::RED);  // Post - blur
 
-    _occlusionFBO->addAttachment(E_AttachmentSlot::COLOR, E_ColorFormat::RED);
 
     // Generate the kernel
     std::uniform_real_distribution<float> randomFloats(0.0, 1.0); // random floats between 0.0 - 1.0
@@ -643,9 +646,18 @@ void SSAONode::run()
  
     glDrawBuffer(GL_COLOR_ATTACHMENT0);
     glBindVertexArray(shapes::quad::VAO());
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-    glBindVertexArray(0);
-    
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);   
+
+    // Blur the SSAO texture
+    shaderPrograms->use("deferred_SSAO_blur");
+
+    shaderPrograms->setUniformInt("screenTexture", 0);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, _occlusionFBO->getColorAttachmentID(0));
+
+    glDrawBuffer(GL_COLOR_ATTACHMENT1);   
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);   
+
     frameBuffers->unbindFBO();
 }
 
@@ -662,7 +674,7 @@ LightSourceCubeDebugNode::LightSourceCubeDebugNode(const StrategyChain* chain, b
     StrategyNode(chain),
     _depthTest(depthTest)
 {
-       ;
+    ;
 }
 
 void LightSourceCubeDebugNode::run()
