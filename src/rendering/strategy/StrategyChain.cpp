@@ -87,10 +87,6 @@ DeferredShadingStrategyChain::DeferredShadingStrategyChain(GraphicalEngine* engi
     add(std::make_shared<LightVolumeNode>(this));
 
     // Post-processing
-    if(_ranFrom->getSettings()->getBloom() == E_Setting::ON)
-    {
-        add(std::make_shared<BloomNode>(this));  
-    }
     if(_ranFrom->getSettings()->getHighDynamicRange() == E_Setting::ON)
     {
         add(std::make_shared<HighDynamicRangeNode>(this));  

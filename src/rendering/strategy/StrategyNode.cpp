@@ -109,24 +109,15 @@ void FramebufferNode::run()
     // Bind the proper FBO
     frameBuffers->bindProperFBOFromScene(scene);
     // Tell OpenGL how many attachments we are using
-    if(_chain->engine()->getSettings()->getBloom() == E_Setting::ON)
+    std::vector<unsigned int> colorAttachments;
+    for (auto attachment : frameBuffers->getSceneFBO(scene)->getColorAttachments())
     {
-        std::vector<unsigned int> colorAttachments;
-        for (auto attachment : frameBuffers->getSceneFBO(scene)->getColorAttachments())
-        {
-            colorAttachments.push_back(attachment.slot);
-        }
-        glDrawBuffers(colorAttachments.size(), colorAttachments.data());  
+        colorAttachments.push_back(attachment.slot);
     }
-    else
-    {
-        glDrawBuffer(GL_COLOR_ATTACHMENT0);
-    }
+    glDrawBuffers(colorAttachments.size(), colorAttachments.data());  
 
     // Reset color and depth buffers 
     frameBuffers->clearAll();
-
-
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -265,7 +256,7 @@ void BloomNode::run()
     std::shared_ptr<ShaderLibrary> shaderPrograms = _chain->engine()->getShaderLibrary();
     
     // Activate proper shader program
-    auto bloomShader = shaderPrograms->getShader("ShadowCubeMap");
+    auto bloomShader = shaderPrograms->getShader("Bloom");
 
     shaderPrograms->use(bloomShader);
     shaderPrograms->setUniformInt("material.diffuse", 1);   
