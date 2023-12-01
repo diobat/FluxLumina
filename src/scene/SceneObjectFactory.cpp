@@ -475,7 +475,7 @@ void SceneObjectFactory::create_Camera()
 /////////////////////////// CUBEMAPS
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-std::shared_ptr<Cubemap> SceneObjectFactory::create_Skybox(std::vector<std::string> faces)
+std::shared_ptr<Cubemap> SceneObjectFactory::create_Skybox(std::vector<std::string> faces, bool flipUVs)
 {
     std::array<Texture,6> cubemapTex; 
 
@@ -483,6 +483,8 @@ std::shared_ptr<Cubemap> SceneObjectFactory::create_Skybox(std::vector<std::stri
     {
         return nullptr;
     }
+
+    flipUVsOnLoad = flipUVs;
 
     for(unsigned int i = 0; i < faces.size(); i++)
     {

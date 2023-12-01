@@ -61,7 +61,7 @@ public:
     void create_Camera();
 
     // Creating cubemaps
-    std::shared_ptr<Cubemap> create_Skybox(std::vector<std::string> faces);
+    std::shared_ptr<Cubemap> create_Skybox(std::vector<std::string> faces, bool flipUVs = false);
 
 private:
     Scene* _boundScene;
