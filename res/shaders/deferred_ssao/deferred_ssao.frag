@@ -16,8 +16,8 @@ uniform sampler2D noiseTex;
 uniform vec3 samples[64];
 
 int kernelSize = 64;
-float radius = 1.5;
-float bias = 0.045;
+float radius = 0.5;
+float bias = 0.1;
 
 
 layout(std140) uniform mvp_camera 
