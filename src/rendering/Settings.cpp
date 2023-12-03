@@ -5,7 +5,6 @@
 
 #include "rendering/shader/ShaderLibrary.hpp"
 
-
 Settings::Settings(GLFWwindow* _window)    : 
     _window(_window),
     _shadowQualityGlobal(E_ShadowQuality_Global::HIGH),
@@ -38,7 +37,7 @@ Settings::Settings(GLFWwindow* _window)    :
     set(E_Settings::NORMAL_MAPPING, 1);
     set(E_Settings::HEIGHT_MAPPING, 1);
     set(E_Settings::HIGH_DYNAMIC_RANGE, 1);
-    set(E_Settings::BLOOM, 1);
+    set(E_Settings::BLOOM, 0);
     set(E_Settings::SSAO, 1);
 }
 
