@@ -104,6 +104,9 @@ namespace
                     texture._type = E_TexureType::HEIGHT;
                 }
                 break;
+            case aiTextureType_UNKNOWN:
+                texture._type = E_TexureType::ROUGHNESS;
+                break;
             default:
                 texture._type = E_TexureType::DIFFUSE;
                 break;
@@ -336,7 +339,10 @@ std::shared_ptr<Mesh> SceneObjectFactory::processMesh(const std::string &path, a
             std::vector<Texture> normalMaps = loadMaterialTextures(scene, directory, material, aiTextureType_NORMALS);
             textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
         }
-        
+
+        std::vector<Texture> roughnessMaps = loadMaterialTextures(scene, directory, material, aiTextureType_UNKNOWN);        
+        textures.insert(textures.end(), roughnessMaps.begin(), roughnessMaps.end());
+
         float opacity = 1.0f;
         if(material->Get(AI_MATKEY_OPACITY, opacity) == AI_SUCCESS)
         {
