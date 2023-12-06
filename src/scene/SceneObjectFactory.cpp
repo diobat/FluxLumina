@@ -411,6 +411,8 @@ std::vector<Texture> SceneObjectFactory::loadExternalTextures(const std::string 
     std::vector<Texture> materialTextures;
     const auto& loadedTextures = _meshLibrary->getLoadedTextures();
 
+
+    // First load HEIGHT maps
     for(unsigned int i = 0; i < textures.heightMaps.size(); i++)
     {
         bool isPreviouslyLoaded = false;
@@ -435,6 +437,33 @@ std::vector<Texture> SceneObjectFactory::loadExternalTextures(const std::string 
             _meshLibrary->addTexture(texture);
         }
     }
+
+    // Then load LIGHT maps
+    for(unsigned int i = 0; i < textures.lightMaps.size(); i++)
+    {
+        bool isPreviouslyLoaded = false;
+
+        for(unsigned int k = 0; k < loadedTextures.size(); k++)
+        {
+            if(std::strcmp(loadedTextures[k]._path.data(), textures.lightMaps[i].c_str()) == 0)
+            {
+                materialTextures.push_back(loadedTextures[k]);
+                isPreviouslyLoaded = true;
+                break;
+            }
+        }
+
+        if(!isPreviouslyLoaded)
+        {
+            Texture texture = TextureFromFile(textures.lightMaps[i].c_str(), path);
+            setTextureData(texture, aiTextureType_LIGHTMAP);
+            _boundEngine->initializeTexture(texture);
+            materialTextures.push_back(texture);
+            _meshLibrary->addTexture(texture);
+        }
+    }
+
+
     return materialTextures;
 }
 
