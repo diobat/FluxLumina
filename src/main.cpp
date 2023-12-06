@@ -69,7 +69,7 @@ int main(void)
     // Scene setup
     std::vector<std::shared_ptr<Scene>> scenes;
     scenes.push_back(scene);
-    sceneSetup(factory);
+    scene02_Setup(factory);
 
     // User Input handler
     std::shared_ptr<UserInput::glfwKeyboardScanner> userInput = std::make_shared<UserInput::glfwKeyboardScanner>(graphicalEngine.getWindowPtr());

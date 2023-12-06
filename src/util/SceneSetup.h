@@ -2,7 +2,7 @@
     
 #include "scene/SceneObjectFactory.hpp"
 
-void sceneSetup(SceneObjectFactory& factory)
+void scene01_Setup(SceneObjectFactory& factory)
 {
 
     // Camera setup
@@ -32,7 +32,7 @@ void sceneSetup(SceneObjectFactory& factory)
 
     TextureLocations textureLocations;
     textureLocations.heightMaps.push_back("orange_brick_height.jpg");
-    auto& orangeWall = factory.create_Model("res/models/orangeBrickWall/orangeBrickWall.obj", "Basic", true, textureLocations);
+    auto& orangeWall = factory.create_Model("res/models/orangeBrickWall/orangeBrickWall.obj", "Basic", false, textureLocations);
     orangeWall.setPosition({-2.0f, 5.0f, 29.0f});
     orangeWall.setScale(3.5f);
 
@@ -100,10 +100,6 @@ void sceneSetup(SceneObjectFactory& factory)
     light_A->setColor({20.0f, 20.0f, 20.0f});
     light_A->setPosition({13.0f, 25.0f, 13.0f});
     light_A->setAttenuationFactors({1.0f, 0.09f, 0.032f});
-
-    // auto light_B = factory.create_LightSource( E_LightType::POINT_LIGHT);
-    // light_B->setPosition({-11.0f, 5.0f, 13.0f});
-    // light_B->setAttenuationFactors({1.0f, 0.18f, 0.032f});
 
     auto light_B = factory.create_LightSource( E_LightType::POINT_LIGHT);
     light_B->setColor({200.0f, 0.0f, 0.0f});
@@ -174,4 +170,60 @@ void sceneSetup(SceneObjectFactory& factory)
     // cube5.setScale(3.0f);
     // cube5.setPosition(light4->getPosition());
 
+}
+
+void scene02_Setup(SceneObjectFactory& factory)
+{
+
+    // Camera setup
+    factory.create_Camera();
+    
+    // Skybox
+        auto skybox = factory.create_Skybox(
+            {"res/models/skybox/right.jpg",
+                "res/models/skybox/left.jpg",
+                "res/models/skybox/top.jpg",
+                "res/models/skybox/bottom.jpg",
+                "res/models/skybox/front.jpg",
+                "res/models/skybox/back.jpg"});
+
+    // Models
+    TextureLocations textureLocations1;
+    textureLocations1.heightMaps.push_back("rustedIron2_height.png");
+    ModelObject& rusty_sphere = factory.create_Model("res/models/rust-iron-sphere/rust-iron-sphere.glb", "PBR_basic", true, textureLocations1);
+    rusty_sphere.setPosition({0.0f, 3.0f, 0.0f});
+
+
+    TextureLocations textureLocations2;
+    textureLocations2.heightMaps.push_back("worn-metal-studs_height.png");
+    textureLocations2.lightMaps.push_back("worn-metal-studs_ao.png");
+    auto& stud_sphere = factory.create_Model("res/models/metal-studs-sphere/metal-studs-sphere.glb", "PBR_basic", true, textureLocations2);
+    stud_sphere.setPosition({3.0f, 3.0f, 0.0f});
+
+
+    TextureLocations textureLocations3;
+    textureLocations3.heightMaps.push_back("gold-scuffed_height.png");
+    auto& gold_sphere = factory.create_Model("res/models/gold-sphere/gold-sphere.glb", "PBR_basic", true, textureLocations3);
+    gold_sphere.setPosition({-3.0f, 3.0f, 0.0f});
+
+    // Lights 
+    auto light_A = factory.create_LightSource( E_LightType::POINT_LIGHT);
+    light_A->setColor({1.0f, 1.0f, 1.0f});
+    light_A->setPosition({5.0f, 5.0f, 5.0f});
+    light_A->setAttenuationFactors({1.0f, 0.0f, 3.40f});
+
+    auto light_B = factory.create_LightSource( E_LightType::POINT_LIGHT);
+    light_B->setColor({1.0f, 1.0f, 1.0f});
+    light_B->setPosition({5.0f, 5.0f, -5.0f});
+    light_B->setAttenuationFactors({1.0f, 0.0f, 3.40});
+
+    auto light_C = factory.create_LightSource( E_LightType::POINT_LIGHT);
+    light_C->setColor({1.0f, 1.0f, 1.0f});
+    light_C->setPosition({-5.0f, 5.0f, -5.0f});
+    light_C->setAttenuationFactors({1.0f, 0.0f, 3.40f});
+
+    auto light_D = factory.create_LightSource( E_LightType::POINT_LIGHT);
+    light_D->setColor({1.0f, 1.0f, 1.0f});
+    light_D->setPosition({-5.0f, 5.0f, 5.0f});
+    light_D->setAttenuationFactors({1.0f, 0.0f, 3.40f});
 }
