@@ -61,7 +61,7 @@ void main()
 	{
 		vec3 T = normalize(vec3(instanceMatrix * vec4(aTangent,   0.0)));
 		vec3 N = normalize(vec3(instanceMatrix * vec4(aNormal,    0.0)));
-		vec3 B = cross(N, T);	
+		vec3 B = cross(T, N);	
 		VertexOut.TBN = mat3(T, B, N);
 		VertexOut.TS_FragPos = VertexOut.TBN * VertexOut.FragPos;
 		VertexOut.TS_ViewPos = VertexOut.TBN * viewPos;
