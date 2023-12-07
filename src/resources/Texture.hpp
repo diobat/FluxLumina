@@ -12,6 +12,8 @@ enum E_TexureType
     SPECULAR,
     NORMAL,
     HEIGHT,
+    LIGHTMAP,
+    ROUGHNESS,
     CUBEMAP
 };
 

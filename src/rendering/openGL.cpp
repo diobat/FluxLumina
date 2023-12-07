@@ -249,6 +249,18 @@ void openGL::bindTextures(std::shared_ptr<Mesh> mesh)
                 glBindTexture(GL_TEXTURE_2D, mesh->_textures[i]._id);
             }
             break;
+        case ROUGHNESS:
+            _shaderPrograms->setUniformInt("sampleFromRoughness", 1);
+            _shaderPrograms->setUniformInt("material.roughness", 5);
+            glActiveTexture(GL_TEXTURE0 + 5);
+            glBindTexture(GL_TEXTURE_2D, mesh->_textures[i]._id);
+            break;
+        case LIGHTMAP:
+            _shaderPrograms->setUniformInt("sampleFromLightmap", 1);
+            _shaderPrograms->setUniformInt("material.lightmap", 6);
+            glActiveTexture(GL_TEXTURE0 + 6);
+            glBindTexture(GL_TEXTURE_2D, mesh->_textures[i]._id);
+            break;
         case CUBEMAP:
             _shaderPrograms->setUniformInt("cubemap", 5);
             glActiveTexture(GL_TEXTURE0 + 5);

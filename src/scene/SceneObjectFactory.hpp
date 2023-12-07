@@ -29,6 +29,7 @@
 struct TextureLocations
 {
     std::vector<std::string> heightMaps;
+    std::vector<std::string> lightMaps;
 };
 
 /*
