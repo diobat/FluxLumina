@@ -60,4 +60,9 @@ public:
     bool reserveResources() override;
 };
 
-
+class PBSShadingStrategyChain : public StrategyChain
+{
+public:
+    PBSShadingStrategyChain(GraphicalEngine* engine);
+    bool reserveResources() override;
+};

@@ -124,3 +124,36 @@ bool DeferredShadingStrategyChain::reserveResources()
 
     return true;
 }
+
+
+///////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////// PHYSICALLY BASED
+///////////////////////////////////////////////////////////////////////////////////////////
+
+PBSShadingStrategyChain::PBSShadingStrategyChain(GraphicalEngine* engine) : 
+    StrategyChain(engine)
+{   
+    // Setups
+    add(std::make_shared<CameraSetupNode>(this));
+    add(std::make_shared<LightsSetupNode>(this, "PBR_basic"));
+    add(std::make_shared<FramebufferNode>(this));
+
+    // Rendering
+    add(std::make_shared<RenderSkyboxNode>(this));
+    add(std::make_shared<RenderOpaqueNode>(this));
+
+    // Post-processing
+    if(_ranFrom->getSettings()->getHighDynamicRange() == E_Setting::ON)
+    {
+        add(std::make_shared<HighDynamicRangeNode>(this));  
+    }
+
+    // Move to default Framebuffer frame
+    add(std::make_shared<DefaultFramebufferNode>(this));     
+}
+
+bool PBSShadingStrategyChain::reserveResources()
+{
+
+    return true;
+}
