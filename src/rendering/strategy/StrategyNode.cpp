@@ -88,13 +88,20 @@ void ShadowsSetupNode::run()
 /////////////////////////// LIGHTS NODE
 ///////////////////////////////////////////////////////////////////////////////////////////
 
+LightsSetupNode::LightsSetupNode(const StrategyChain* chain, const std::string& shader) : 
+    StrategyNode(chain),
+    _ShaderName(shader)
+{
+    ;
+}
+
 void LightsSetupNode::run()
 {
     std::shared_ptr<Scene> scene = _chain->engine()->getScene();
     std::shared_ptr<LightLibrary> lightLibrary = _chain->engine()->getLightLibrary();
     std::shared_ptr<ShaderLibrary> shaderPrograms = _chain->engine()->getShaderLibrary();
 
-    shaderPrograms->use("Basic");
+    shaderPrograms->use(_ShaderName);
     lightLibrary->prepare(scene->getAllLights());
 }
 

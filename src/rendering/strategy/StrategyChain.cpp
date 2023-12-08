@@ -42,6 +42,10 @@ GraphicalEngine* StrategyChain::engine() const
     return _ranFrom;
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////// FORWARD
+///////////////////////////////////////////////////////////////////////////////////////////
+
 ForwardShadingStrategyChain::ForwardShadingStrategyChain(GraphicalEngine* engine) : 
     StrategyChain(engine)
 {
@@ -67,16 +71,20 @@ ForwardShadingStrategyChain::ForwardShadingStrategyChain(GraphicalEngine* engine
         add(std::make_shared<DefaultFramebufferNode>(this));     
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////// DEFERRED
+///////////////////////////////////////////////////////////////////////////////////////////
+
 DeferredShadingStrategyChain::DeferredShadingStrategyChain(GraphicalEngine* engine) : 
     StrategyChain(engine)
 {   
-    // Setups
+    // Setupsa
     add(std::make_shared<CameraSetupNode>(this));
-    add(std::make_shared<LightsSetupNode>(this));
+    add(std::make_shared<LightsSetupNode>(this, "deferred_light_volumes"));
     add(std::make_shared<FramebufferNode>(this));
 
     // Rendering
-    //add(std::make_shared<RenderSkyboxNode>(this));
+    add(std::make_shared<RenderSkyboxNode>(this));
     add(std::make_shared<GeometryPassNode>(this));
     // add(std::make_shared<LightSourceCubeDebugNode>(this, true));
     if(_ranFrom->getSettings()->getSSAO() == E_Setting::ON)

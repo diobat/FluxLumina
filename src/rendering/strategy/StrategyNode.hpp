@@ -4,6 +4,7 @@
 #include <array>
 #include <vector>
 #include <memory>
+#include <string>
 
 // Third-party includes
 #include <glm/glm.hpp>
@@ -45,8 +46,10 @@ public:
 class LightsSetupNode : public StrategyNode
 {
 public:
-    LightsSetupNode(const StrategyChain* chain) : StrategyNode(chain) {}
+    LightsSetupNode(const StrategyChain* chain, const std::string& shader);
     void run() override;
+private:
+    std::string _ShaderName;
 };
 
 class FramebufferNode : public StrategyNode
