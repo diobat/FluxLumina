@@ -9,8 +9,6 @@
 /////////////////////////// HELPER FUNCTIONS
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-
-
 namespace
 {
     enum class FileType
@@ -55,6 +53,20 @@ namespace
         return texture;
     }
 
+    TextureHDR TextureFromFileHDR(const char* path, const std::string &directory)
+    {
+        std::string filename = std::string(path);
+        filename = ROOT_DIR + directory + '/' + filename;
+
+        stbi_set_flip_vertically_on_load(flipUVsOnLoad);
+
+        TextureHDR texture;
+        texture._pixels = stbi_loadf(filename.c_str(), &texture._width, &texture._height, &texture._components, 0);
+        texture._path = directory + '/' + path;
+
+        return texture;
+    }
+
     Texture TextureFromEmbeddedTexture(const aiTexture* texture, const std::string &directory = "")
     {
 
@@ -73,7 +85,7 @@ namespace
         return embeddedTexture;
     }
 
-    void setTextureData(Texture &texture, aiTextureType type)
+    void setTextureData(TextureBase &texture, aiTextureType type)
     {
         // Set texture parameters
         if (texture._components == 1)
@@ -116,6 +128,11 @@ namespace
     }
 
     void TextureData_Free(Texture &texture)
+    {
+        stbi_image_free(texture._pixels);
+    }
+
+    void TextureData_Free(TextureHDR &texture)
     {
         stbi_image_free(texture._pixels);
     }

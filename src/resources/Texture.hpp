@@ -17,11 +17,10 @@ enum E_TexureType
     CUBEMAP
 };
 
-class Texture
+class TextureBase
 {
 public:
-    Texture();
-    
+    TextureBase();    
     GLuint _id;
     E_TexureType _type;
     std::string _path;
@@ -30,6 +29,16 @@ public:
     GLenum _colorChannels;
     bool _useLinear;
     bool _isLoaded = false;
+};
 
+class Texture : public TextureBase
+{
+public:
     unsigned char * _pixels = nullptr;
+};
+
+class TextureHDR : public TextureBase
+{ 
+public:  
+    float * _pixels = nullptr;
 };

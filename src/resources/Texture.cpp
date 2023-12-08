@@ -1,7 +1,7 @@
 ﻿#include "resources/Texture.hpp"
 
 
-Texture::Texture()
+TextureBase::TextureBase()
     : _useLinear(true), _id(0)
 {
 }

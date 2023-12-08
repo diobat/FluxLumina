@@ -199,6 +199,21 @@ void openGL::initializeTexture(Texture& texture)
     glGenerateMipmap(GL_TEXTURE_2D);
 }   
 
+void openGL::initializeTextureHDR(TextureHDR& texture)
+{
+    // load and create a texture
+    glGenTextures(1, &texture._id);
+    glBindTexture(GL_TEXTURE_2D, texture._id);
+    // set the texture wrapping parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);	
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);	
+    // set texture filtering parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); 
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); 
+    // load image, create texture and generate mipmaps
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, texture._width, texture._height, 0, texture._colorChannels, GL_FLOAT, texture._pixels);
+}
+
 void openGL::bindTextures(std::shared_ptr<Mesh> mesh)
 {
 
