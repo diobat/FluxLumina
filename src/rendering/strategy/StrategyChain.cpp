@@ -52,7 +52,7 @@ ForwardShadingStrategyChain::ForwardShadingStrategyChain(GraphicalEngine* engine
         // Setups
         add(std::make_shared<CameraSetupNode>(this));
         add(std::make_shared<ShadowsSetupNode>(this));
-        add(std::make_shared<LightsSetupNode>(this));
+        add(std::make_shared<LightsSetupNode>(this, "Basic"));
         add(std::make_shared<FramebufferNode>(this));
         // Rendering
         add(std::make_shared<RenderSkyboxNode>(this));
