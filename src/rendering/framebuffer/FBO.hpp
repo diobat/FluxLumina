@@ -15,6 +15,7 @@ enum class E_ColorFormat
     RED,                // 8 bits, fixed point
     RGB,                // 8 bits per channel, fixed point
     RGBA,               // 8 bits per channel, fixed point, alpha
+    RGB16F,             // 16 bits, floating point
     RGBA16F             // 16 bits per channel, floating point, alpha
 };
 
@@ -30,7 +31,8 @@ enum class E_AttachmentTemplate
     TEXTURE,                // Color = Texture  | Depth = Texture       | Stencil = Texture
     RENDERBUFFER,           // Color = Texture  | Depth = Renderbuffer  | Stencil = Renderbuffer
     SHADOW_DEPTH,           // Color = None     | Depth = Texture       | Stencil = None
-    SHADOW_DEPTH_CUBE       // Color = None     | Depth = Cubemap       | Stencil = None
+    SHADOW_DEPTH_CUBE,      // Color = None     | Depth = Cubemap       | Stencil = None
+    LIGHTMAP                // Color = Cubemap  | Depth = Renderbuffer  | Stencil = None
 };
 
 enum class E_AttachmentTypes
@@ -85,7 +87,7 @@ public:
 private:
     void init(const std::array<E_AttachmentTypes, 3>& templateTypes);
 
-    ColorAttachment addColorAttachment(E_ColorFormat colorFormat = E_ColorFormat::RGB);
+    ColorAttachment addColorAttachment(E_AttachmentTypes types,  E_ColorFormat colorFormat = E_ColorFormat::RGB);
     Attachment addDepthAttachment(E_AttachmentTypes type);
     Attachment addStencilAttachment(E_AttachmentTypes type);
 

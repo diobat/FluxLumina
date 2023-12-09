@@ -27,6 +27,9 @@ FBO::FBO(E_AttachmentTemplate format, unsigned int width, unsigned int height) :
             glDrawBuffer(GL_NONE);
             glReadBuffer(GL_NONE);
             break;
+        case E_AttachmentTemplate::LIGHTMAP:
+            init({E_AttachmentTypes::CUBEMAP, E_AttachmentTypes::RENDERBUFFER, E_AttachmentTypes::NONE});
+            break;
     }
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
@@ -49,16 +52,22 @@ void FBO::addAttachment(E_AttachmentSlot type, E_ColorFormat colorFormat)
     switch(type)
     {
         case E_AttachmentSlot::COLOR:
-            if(!(_framebufferTemplate[0] == E_AttachmentTypes::NONE))
+            if(_framebufferTemplate[0] != E_AttachmentTypes::NONE)
             {
-                _colorAttachments.push_back(addColorAttachment(colorFormat));
+                _colorAttachments.push_back(addColorAttachment(_framebufferTemplate[0], colorFormat));
             }
             break;
         case E_AttachmentSlot::DEPTH:
-            _depthAttachment = addDepthAttachment(_framebufferTemplate[1]);
+            if(_framebufferTemplate[1] != E_AttachmentTypes::NONE)
+            {
+                _depthAttachment = addDepthAttachment(_framebufferTemplate[1]);
+            }
             break;
         case E_AttachmentSlot::STENCIL:
-            _stencilAttachment = addStencilAttachment(_framebufferTemplate[2]);
+            if(_framebufferTemplate[2] != E_AttachmentTypes::NONE)
+            {
+                _stencilAttachment = addStencilAttachment(_framebufferTemplate[2]);
+            }
             break;
         default:
             break;
@@ -66,41 +75,90 @@ void FBO::addAttachment(E_AttachmentSlot type, E_ColorFormat colorFormat)
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-ColorAttachment FBO::addColorAttachment(E_ColorFormat colorFormat)
+ColorAttachment FBO::addColorAttachment(E_AttachmentTypes type,  E_ColorFormat colorFormat)
 {
 
     unsigned int _textureId;
-    glGenTextures(1, &_textureId);
-    glBindTexture(GL_TEXTURE_2D, _textureId);
+
+    unsigned int colorOffset = static_cast<unsigned int>(_colorAttachments.size()); 
+
+    unsigned int internalFormat = GL_RGB;
+    unsigned int format = GL_RGB;
+    unsigned int dataType = GL_UNSIGNED_BYTE;
 
     switch(colorFormat)
     {
         case E_ColorFormat::RED:
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, getOriginalSize()[0], getOriginalSize()[1], 0, GL_RED, GL_UNSIGNED_BYTE, NULL);
+            internalFormat = GL_RED;
+            format = GL_RED;
             break;
         case E_ColorFormat::RGBA:
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, getOriginalSize()[0], getOriginalSize()[1], 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+            internalFormat = GL_RGBA;
+            format = GL_RGBA;
+            break;
+        case E_ColorFormat::RGB16F:
+            internalFormat = GL_RGB16F;
+            format = GL_RGB;
+            dataType = GL_FLOAT;
             break;
         case E_ColorFormat::RGBA16F:
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, getOriginalSize()[0], getOriginalSize()[1], 0, GL_RGBA, GL_FLOAT, NULL);
+            internalFormat = GL_RGBA16F;
+            format = GL_RGBA;
+            dataType = GL_FLOAT;
             break;
         case E_ColorFormat::RGB:
         default:
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, getOriginalSize()[0], getOriginalSize()[1], 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+            internalFormat = GL_RGB;
+            format = GL_RGB;
+            dataType = GL_UNSIGNED_BYTE;
             break;
     }
-    
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); 
+    switch(type)
+    {
+        case E_AttachmentTypes::CUBEMAP:
 
-    unsigned int colorOffset = static_cast<unsigned int>(_colorAttachments.size());
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + colorOffset, GL_TEXTURE_2D, _textureId, 0);
-    glBindTexture(GL_TEXTURE_2D, 0);
+            glGenTextures(1, &_textureId);
+            glBindTexture(GL_TEXTURE_CUBE_MAP, _textureId);
 
-    return ColorAttachment({_textureId, E_AttachmentTypes::TEXTURE, GL_COLOR_ATTACHMENT0 + colorOffset, colorFormat});
+            for (unsigned int i = 0; i < 6 ; ++i)
+            {
+               // note that we store each face with 16 bit floating point values
+                glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, internalFormat, getOriginalSize()[0], getOriginalSize()[1], 0, format, dataType, NULL); 
+            }
+
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE); 
+
+            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+            glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+            break;
+
+        case E_AttachmentTypes::TEXTURE:
+        default:
+
+            glGenTextures(1, &_textureId);
+            glBindTexture(GL_TEXTURE_2D, _textureId);
+
+            glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, getOriginalSize()[0], getOriginalSize()[1], 0, format, dataType, NULL);
+            
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + colorOffset, GL_TEXTURE_2D, _textureId, 0);
+
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); 
+
+            glBindTexture(GL_TEXTURE_2D, 0);
+            break;
+    }
+
+    return ColorAttachment({_textureId, type, GL_COLOR_ATTACHMENT0 + colorOffset, colorFormat});
 }
 
 Attachment FBO::addDepthAttachment(E_AttachmentTypes type)
