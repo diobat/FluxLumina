@@ -198,9 +198,15 @@ namespace
 }
 
 LightLibrary::LightLibrary(GraphicalEngine* engine) :
-    _ranFrom(engine)
+    _ranFrom(engine),
+    _lightMap(this)
 {
     ;
+}
+
+GraphicalEngine* LightLibrary::engine() const
+{
+    return _ranFrom;
 }
 
 void LightLibrary::bindFramebufferManager(std::weak_ptr<FBOManager> framebufferManager)
@@ -424,6 +430,11 @@ void LightLibrary::renderShadowMaps(std::shared_ptr<Scene> scene)
                 break;
         }
     }
+}
+
+LightMap& LightLibrary::getLightMap()
+{
+    return _lightMap;
 }
 
 void LightLibrary::renderTextureShadowMap(std::shared_ptr<Scene> scene, std::shared_ptr<LightSource> light)
