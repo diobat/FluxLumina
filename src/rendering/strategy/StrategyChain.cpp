@@ -4,6 +4,8 @@
 #include "rendering/Settings.hpp"
 #include "rendering/framebuffer/Framebuffer_Manager.hpp"
 
+#include "util/VertexShapes.hpp"
+
 StrategyChain::StrategyChain(GraphicalEngine* engine) : 
     _ranFrom(engine),
     _firstRun(true)
@@ -136,11 +138,13 @@ PBSShadingStrategyChain::PBSShadingStrategyChain(GraphicalEngine* engine) :
     // Setups
     add(std::make_shared<CameraSetupNode>(this));
     add(std::make_shared<LightsSetupNode>(this, "PBR_basic"));
+    add(std::make_shared<PBS_IBLSetupNode>(this, "PBR_basic"));
     add(std::make_shared<FramebufferNode>(this));
 
     // Rendering
     add(std::make_shared<RenderSkyboxNode>(this));
     add(std::make_shared<RenderOpaqueNode>(this));
+    //add(std::make_shared<RenderCubeMapNode>(this));
 
     // Post-processing
     if(_ranFrom->getSettings()->getHighDynamicRange() == E_Setting::ON)
@@ -154,6 +158,16 @@ PBSShadingStrategyChain::PBSShadingStrategyChain(GraphicalEngine* engine) :
 
 bool PBSShadingStrategyChain::reserveResources()
 {
+    std::shared_ptr<ShaderLibrary> shaderLibrary = _ranFrom->getShaderLibrary();
+    std::shared_ptr<LightLibrary> lightLibrary = _ranFrom->getLightLibrary();
+
+    lightLibrary->getLightMap().init(2048u);
+    unsigned int skyboxTextureID = lightLibrary->getLightMap().bakeFromTexture(_ranFrom->getScene()->getSkybox().getIBLmap());
+    lightLibrary->getLightMap().convoluteLightMap();
+
+    std::shared_ptr<Cubemap> cubemap = _ranFrom->getScene()->getSkybox().getCubemap();
+    cubemap->getTexture()._id = skyboxTextureID;
+    cubemap->VAO = shapes::cube::VAO();
 
     return true;
 }

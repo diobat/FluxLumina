@@ -178,9 +178,10 @@ void RenderSkyboxNode::run()
     std::shared_ptr<ShaderLibrary> shaderPrograms = _chain->engine()->getShaderLibrary();
 
     //Draw Skybox if it exists
-    if (scene->getSkybox().getCubemap() != nullptr)
+    // if (scene->getSkybox().getCubemap() != nullptr)
+    if(1)
     {
-        auto view = glm::mat4(glm::mat3(scene->getActiveCamera()->getViewMatrix())); // remove translation from the view matrix
+        auto view = scene->getActiveCamera()->getViewMatrix(); // remove translation from the view matrix
         auto projection = scene->getActiveCamera()->getProjectionMatrix();
 
         shaderPrograms->use("Skybox");
@@ -690,7 +691,23 @@ std::shared_ptr<FBO> SSAONode::getFBO() const
 /////////////////////////// PHYSICALLY BASED SHADING NODES
 ///////////////////////////////////////////////////////////////////////////////////////////
 
+PBS_IBLSetupNode::PBS_IBLSetupNode(const StrategyChain* chain, const std::string& shader) : 
+    StrategyNode(chain),
+    _ShaderName(shader)
+{
+    ;
+}
 
+void PBS_IBLSetupNode::run()
+{
+    std::shared_ptr<LightLibrary> lightLibrary = _chain->engine()->getLightLibrary();
+    std::shared_ptr<ShaderLibrary> shaderPrograms = _chain->engine()->getShaderLibrary();
+
+    shaderPrograms->use(_ShaderName);
+    shaderPrograms->setUniformInt("irradianceMap", 20);
+    glActiveTexture(GL_TEXTURE0 + 20);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, lightLibrary->getLightMap().getIrradianceFBO()->getColorAttachmentID(0));
+}
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -752,4 +769,27 @@ void LightSourceCubeDebugNode::run()
 
     glDepthMask(GL_TRUE);  // Prevents depth buffer writes
     glEnable(GL_CULL_FACE);
+}
+
+void RenderCubeMapNode::run()
+{
+    std::shared_ptr<Scene> scene = _chain->engine()->getScene();
+    std::shared_ptr<ShaderLibrary> shaderPrograms = _chain->engine()->getShaderLibrary();
+
+    // Create the lightmap cubemap from the IBL texture
+    std::shared_ptr<TextureHDR> lightmap = _chain->engine()->getScene()->getSkybox().getIBLmap();
+   
+    shaderPrograms->use("Cube_Shaper");
+    
+    shaderPrograms->setUniformInt("textureMap", 1);
+    glActiveTexture(GL_TEXTURE0 + 1);
+    glBindTexture(GL_TEXTURE_2D , lightmap->_id);
+    
+    glBindVertexArray(shapes::cube::VAO());
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+    glBindVertexArray(0);
+
+    // Rendering shadowmaps might have changed the viewport size, so we reset it
+    std::array<int, 2> viewportSize = _chain->engine()->getViewportSize();
+    glViewport(0, 0, viewportSize[0], viewportSize[1]);
 }

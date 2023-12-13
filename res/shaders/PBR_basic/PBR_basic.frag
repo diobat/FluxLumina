@@ -38,7 +38,8 @@ in VertexData{
 uniform Material material;
 uniform int numPointLights;
 uniform PointLight pointLight[10];
-uniform mat4 model;
+
+uniform samplerCube irradianceMap;
 
 layout(std140) uniform viewPosBlock
 {
@@ -55,6 +56,7 @@ float DistributionGGX(vec3 N, vec3 H, float roughness);
 float GeometrySchlickGGX(float NdotV, float roughness);
 float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness);
 vec3 fresnelSchlick(float cosTheta, vec3 F0);
+vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness);
 
 vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir);
 
@@ -110,10 +112,13 @@ void main()
         Lo += (kD * albedo + specular) * radiance * NdotL;
     }
 
-    // Ambient occlusion
-    vec3 ambient = vec3(0.003) * albedo;// * ao;
+    // Ambient component
+    vec3 kS = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness);
+    vec3 kD = 1.0 - kS;
+    vec3 irradiance = texture(irradianceMap, N).rgb;
+    vec3 diffuse    = irradiance * albedo;
+    vec3 ambient    = (kD * diffuse);// * ao; 
     vec3 color = ambient + Lo;
-    color = Lo;
 
     // Gamma correction
     color = color / (color + vec3(1.0));
@@ -161,3 +166,8 @@ vec3 fresnelSchlick(float cosTheta, vec3 F0)
 {
     return F0 + (1.0 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
 }  
+
+vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness)
+{
+    return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
+}   

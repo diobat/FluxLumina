@@ -73,8 +73,9 @@ int openGL::initialize(GLFWwindow* window)
     _instancingManager = std::make_shared<InstancingManager>();
 
     // Initialize Rendering strategy
-    _strategyChain = std::make_shared<ForwardShadingStrategyChain>(this);
+    // _strategyChain = std::make_shared<ForwardShadingStrategyChain>(this);
     // _strategyChain = std::make_shared<DeferredShadingStrategyChain>(this);
+    _strategyChain = std::make_shared<PBSShadingStrategyChain>(this);
 
     return 1;
 }
@@ -323,7 +324,6 @@ bool openGL::isFrameBufferComplete(std::shared_ptr<FBO> fbo) const
     return _frameBuffers->isFrameBufferComplete(fbo);
 }
 
-
 void openGL::initializeSkybox(Skybox &skybox, const std::array<Texture, 6>& textures)
 {
     Cubemap& cubemap = *skybox.getCubemap();
@@ -332,8 +332,6 @@ void openGL::initializeSkybox(Skybox &skybox, const std::array<Texture, 6>& text
     glGenBuffers(1, &cubemap.VBO);
     glBindVertexArray(cubemap.VAO);
     glBindBuffer(GL_ARRAY_BUFFER, cubemap.VBO);
-
-    auto vertices = *cubemap._vertices;
 
     glBufferData(GL_ARRAY_BUFFER, sizeof(cubemap._vertices), &cubemap._vertices, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
@@ -366,16 +364,17 @@ void openGL::renderSkybox(Skybox& skybox)
 
     glDepthFunc(GL_LEQUAL);
 
-    glBindVertexArray(cubemap->VAO);
-    _shaderPrograms->setUniformInt("skyboxCube", 30);
-    glActiveTexture(GL_TEXTURE0 + 30);
+    _shaderPrograms->setUniformInt("skyboxCube", 0);
+    glActiveTexture(GL_TEXTURE0 + 0);
     glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap->getTexture()._id);
-    glDrawArrays(GL_TRIANGLES, 0, 36);
-    glBindVertexArray(0);
 
+    glBindVertexArray(cubemap->VAO);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+
+    glBindVertexArray(0);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
     glActiveTexture(GL_TEXTURE0);
     glDepthFunc(GL_LESS);
-
 }
 
 void openGL::initializeInstanceManager(std::shared_ptr<Scene> scene)

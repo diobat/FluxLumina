@@ -157,6 +157,15 @@ public:
     void run() override;
 };
 
+class PBS_IBLSetupNode : public StrategyNode
+{
+public:
+    PBS_IBLSetupNode(const StrategyChain* chain, const std::string& shaderName);
+    void run() override;
+private:
+    std::string _ShaderName;
+};
+
 ///////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////// DEBUG NODES
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -168,4 +177,11 @@ public:
     void run() override;
 private:
     const bool _depthTest;
+};
+
+class RenderCubeMapNode : public StrategyNode
+{
+public:
+    RenderCubeMapNode(const StrategyChain* chain) : StrategyNode(chain) {}
+    void run() override;
 };

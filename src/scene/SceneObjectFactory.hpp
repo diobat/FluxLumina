@@ -64,6 +64,9 @@ public:
     // Creating cubemaps
     std::shared_ptr<Cubemap> create_Skybox(std::vector<std::string> faces, bool flipUVs = false);
 
+    // Creating IBL textures
+    std::shared_ptr<Cubemap> create_IBL(std::string path, bool flipUVs = false);
+
 private:
     Scene* _boundScene;
     GraphicalEngine* _boundEngine;

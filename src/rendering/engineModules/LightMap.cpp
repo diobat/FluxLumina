@@ -26,7 +26,7 @@ LightMap::LightMap(LightLibrary* library)
 
 }
 
-void LightMap::init()
+void LightMap::init(unsigned int size, unsigned int scale)
 {
     // This function should only be called once as for the moment we only support 1 lightmap per scene
     if (_lightMapFBO != nullptr)
@@ -36,12 +36,27 @@ void LightMap::init()
 
     // Create the lightmap cubemap from the IBL texture
     std::shared_ptr<FBOManager> framebufferManager = _library->engine()->getFBOManager();
+    _size = size;
+
+    // Check that the scale is a power of two
+    if (scale == 0 || (scale & (scale - 1)) != 0)
+    {
+        _scale = 4u;
+    }
+    else
+    {
+        _scale = scale;
+    }
 
     // Create a new Framebuffer to render the Lightmap into
-    _lightMapFBO = framebufferManager->addFBO(E_AttachmentTemplate::LIGHTMAP,512,512);
+    _lightMapFBO = framebufferManager->addFBO(E_AttachmentTemplate::LIGHTMAP,_size,_size);
     _lightMapFBO->reset(); 
     _lightMapFBO->addAttachment(E_AttachmentSlot::COLOR, E_ColorFormat::RGB16F);
-    //_lightMapFBO->addAttachment(E_AttachmentSlot::DEPTH);
+
+    // Create a new Framebuffer to render the Irradiance map into
+    _irradianceFBO = framebufferManager->addFBO(E_AttachmentTemplate::LIGHTMAP,_size/_scale,_size/_scale);
+    _irradianceFBO->reset();
+    _irradianceFBO->addAttachment(E_AttachmentSlot::COLOR, E_ColorFormat::RGB16F);
 }
 
 unsigned int LightMap::bakeFromTexture(std::shared_ptr<TextureHDR> texture)
@@ -59,10 +74,8 @@ unsigned int LightMap::bakeFromTexture(std::shared_ptr<TextureHDR> texture)
 
     shaderPrograms->setUniformMat4("projectionMatrix", captureProjection);
 
-    glViewport(0,0,512,512);
+    glViewport(0,0,_size,_size);
     glBindVertexArray(shapes::cube::VAO());
-
-    unsigned int colorID = _lightMapFBO->getColorAttachmentID(0);
 
     for(int i(0); i < 6 ; ++i)
     {
@@ -74,8 +87,9 @@ unsigned int LightMap::bakeFromTexture(std::shared_ptr<TextureHDR> texture)
         glDrawArrays(GL_TRIANGLES, 0, 36);  
     }
 
-    glBindTexture(GL_TEXTURE_2D, 0);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
     glBindVertexArray(0);
+    framebufferManager->unbindFBO();
 
     // Rendering lightmaps changed the viewport size, so we reset it
     std::array<int, 2> viewportSize = _library->engine()->getViewportSize();
@@ -84,3 +98,51 @@ unsigned int LightMap::bakeFromTexture(std::shared_ptr<TextureHDR> texture)
     return _lightMapFBO->getColorAttachmentID(0);
 }
 
+unsigned int LightMap::convoluteLightMap()
+{
+    std::shared_ptr<FBOManager> framebufferManager = _library->engine()->getFBOManager();
+    std::shared_ptr<ShaderLibrary> shaderPrograms = _library->engine()->getShaderLibrary();
+
+    framebufferManager->bindFBO(_irradianceFBO);
+
+    shaderPrograms->use("Cubemap_Convolution");
+    shaderPrograms->setUniformInt("inputCubemap", 1);
+    glActiveTexture(GL_TEXTURE0 + 1);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, _lightMapFBO->getColorAttachmentID(0));
+    
+    shaderPrograms->setUniformMat4("projectionMatrix", captureProjection);
+    unsigned int realSize = _size/_scale;
+
+    glViewport(0,0,_size/_scale,_size/_scale);
+    glBindVertexArray(shapes::cube::VAO());
+
+    for(int i(0); i < 6 ; ++i)
+    {
+        shaderPrograms->setUniformMat4("viewMatrix", captureViews[i]);
+        
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, _irradianceFBO->getColorAttachmentID(0), 0);
+        framebufferManager->clearAll();
+
+        glDrawArrays(GL_TRIANGLES, 0, 36);  
+    }
+
+    glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+    glBindVertexArray(0);
+    framebufferManager->unbindFBO();
+
+    // Rendering irradiance maps changed the viewport size, so we reset it
+    std::array<int, 2> viewportSize = _library->engine()->getViewportSize();
+    glViewport(0, 0, viewportSize[0], viewportSize[1]);
+
+    return _irradianceFBO->getColorAttachmentID(0);
+}
+
+std::shared_ptr<FBO> LightMap::getLightMapFBO() const
+{
+    return _lightMapFBO;
+}
+
+std::shared_ptr<FBO> LightMap::getIrradianceFBO() const
+{
+    return _irradianceFBO;
+}

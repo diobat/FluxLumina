@@ -556,3 +556,31 @@ std::shared_ptr<Cubemap> SceneObjectFactory::create_Skybox(std::vector<std::stri
 
     return cubemap;
 }
+
+std::shared_ptr<Cubemap> SceneObjectFactory::create_IBL(std::string path, bool flipUVs)
+{
+    std::shared_ptr<Cubemap> cubemap = std::make_shared<Cubemap>();
+
+    flipUVsOnLoad = flipUVs;
+
+    TextureHDR texture = TextureFromFileHDR(path.c_str(), "");
+    setTextureData(texture, aiTextureType_DIFFUSE);
+
+    if(!*texture._pixels)
+    {
+        std::cout << "ERROR::CUBEMAP::TEXTURE_LOADING_FAILED  : " + path << std::endl;
+    }
+
+    _boundEngine->initializeTextureHDR(texture);
+
+    TextureData_Free(texture);
+
+    std::shared_ptr<TextureHDR> texturePtr = std::make_shared<TextureHDR>(texture);
+
+    _boundScene->getSkybox().setIBLmap(texturePtr);
+
+
+
+    return cubemap;
+};
+

@@ -187,6 +187,9 @@ void scene02_Setup(SceneObjectFactory& factory)
                 "res/models/skybox/front.jpg",
                 "res/models/skybox/back.jpg"});
 
+    // IBL map
+    auto ibl = factory.create_IBL("res/models/lightmap/meadow_8k.hdr", true);
+
     // Models
     TextureLocations textureLocations1;
     textureLocations1.heightMaps.push_back("rustedIron2_height.png");
@@ -206,24 +209,24 @@ void scene02_Setup(SceneObjectFactory& factory)
     auto& gold_sphere = factory.create_Model("res/models/gold-sphere/gold-sphere.glb", "PBR_basic", true, textureLocations3);
     gold_sphere.setPosition({-3.0f, 3.0f, 0.0f});
 
-    // Lights 
-    auto light_A = factory.create_LightSource( E_LightType::POINT_LIGHT);
-    light_A->setColor({1.0f, 1.0f, 1.0f});
-    light_A->setPosition({5.0f, 5.0f, 5.0f});
-    light_A->setAttenuationFactors({1.0f, 0.0f, 3.40f});
+    // // Lights 
+    // auto light_A = factory.create_LightSource( E_LightType::POINT_LIGHT);
+    // light_A->setColor({1.0f, 1.0f, 1.0f});
+    // light_A->setPosition({5.0f, 5.0f, 5.0f});
+    // light_A->setAttenuationFactors({1.0f, 0.0f, 3.40f});
 
-    auto light_B = factory.create_LightSource( E_LightType::POINT_LIGHT);
-    light_B->setColor({1.0f, 1.0f, 1.0f});
-    light_B->setPosition({5.0f, 5.0f, -5.0f});
-    light_B->setAttenuationFactors({1.0f, 0.0f, 3.40});
+    // auto light_B = factory.create_LightSource( E_LightType::POINT_LIGHT);
+    // light_B->setColor({1.0f, 1.0f, 1.0f});
+    // light_B->setPosition({5.0f, 5.0f, -5.0f});
+    // light_B->setAttenuationFactors({1.0f, 0.0f, 3.40});
 
-    auto light_C = factory.create_LightSource( E_LightType::POINT_LIGHT);
-    light_C->setColor({1.0f, 1.0f, 1.0f});
-    light_C->setPosition({-5.0f, 5.0f, -5.0f});
-    light_C->setAttenuationFactors({1.0f, 0.0f, 3.40f});
+    // auto light_C = factory.create_LightSource( E_LightType::POINT_LIGHT);
+    // light_C->setColor({1.0f, 1.0f, 1.0f});
+    // light_C->setPosition({-5.0f, 5.0f, -5.0f});
+    // light_C->setAttenuationFactors({1.0f, 0.0f, 3.40f});
 
-    auto light_D = factory.create_LightSource( E_LightType::POINT_LIGHT);
-    light_D->setColor({1.0f, 1.0f, 1.0f});
-    light_D->setPosition({-5.0f, 5.0f, 5.0f});
-    light_D->setAttenuationFactors({1.0f, 0.0f, 3.40f});
+    // auto light_D = factory.create_LightSource( E_LightType::POINT_LIGHT);
+    // light_D->setColor({1.0f, 1.0f, 1.0f});
+    // light_D->setPosition({-5.0f, 5.0f, 5.0f});
+    // light_D->setAttenuationFactors({1.0f, 0.0f, 3.40f});
 }
