@@ -706,7 +706,15 @@ void PBS_IBLSetupNode::run()
     shaderPrograms->use(_ShaderName);
     shaderPrograms->setUniformInt("irradianceMap", 20);
     glActiveTexture(GL_TEXTURE0 + 20);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, lightLibrary->getLightMap().getIrradianceFBO()->getColorAttachmentID(0));
+    glBindTexture(GL_TEXTURE_CUBE_MAP, lightLibrary->getLightMap().getDiffuseIrradianceFBO()->getColorAttachmentID(0));
+
+    shaderPrograms->setUniformInt("prefilterMap", 21);
+    glActiveTexture(GL_TEXTURE0 + 21);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, lightLibrary->getLightMap().getSpecularPreFilterFBO()->getColorAttachmentID(0));
+
+    shaderPrograms->setUniformInt("brdfLUT", 22);
+    glActiveTexture(GL_TEXTURE0 + 22);
+    glBindTexture(GL_TEXTURE_2D, lightLibrary->getLightMap().getSpecularBRDFLUT()->getColorAttachmentID(0));
 }
 
 

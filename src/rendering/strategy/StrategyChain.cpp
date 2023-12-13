@@ -160,14 +160,24 @@ bool PBSShadingStrategyChain::reserveResources()
 {
     std::shared_ptr<ShaderLibrary> shaderLibrary = _ranFrom->getShaderLibrary();
     std::shared_ptr<LightLibrary> lightLibrary = _ranFrom->getLightLibrary();
+    std::shared_ptr<FBOManager> framebufferManager = _ranFrom->getFBOManager();
 
+    // Create lightmap
     lightLibrary->getLightMap().init(2048u);
     unsigned int skyboxTextureID = lightLibrary->getLightMap().bakeFromTexture(_ranFrom->getScene()->getSkybox().getIBLmap());
-    lightLibrary->getLightMap().convoluteLightMap();
+    lightLibrary->getLightMap().PBR_Diffuse_convoluteLightMap();
+    
+    // Create pre-filtered specular map
+    lightLibrary->getLightMap().PBR_Specular_convoluteLightMap();
+    // Create BRDF LUT
+    lightLibrary->getLightMap().PBR_Specular_BRDF_LUT();
 
+    // Assign Lightmap to Skybox
     std::shared_ptr<Cubemap> cubemap = _ranFrom->getScene()->getSkybox().getCubemap();
     cubemap->getTexture()._id = skyboxTextureID;
     cubemap->VAO = shapes::cube::VAO();
+
+
 
     return true;
 }

@@ -69,7 +69,7 @@ public:
     void reset();
     const std::array<unsigned int, 2>& getOriginalSize() const { return _originalSize; }
 
-    void addAttachment(E_AttachmentSlot type, E_ColorFormat colorFormat = E_ColorFormat::RGB);
+    void addAttachment(E_AttachmentSlot type, E_ColorFormat colorFormat = E_ColorFormat::RGB, bool useMipmaps = false);
 
     const std::vector<ColorAttachment>& getColorAttachments() const { return _colorAttachments; }
     unsigned int getColorAttachmentID(unsigned int index) const { return _colorAttachments[index].id; }
@@ -87,7 +87,7 @@ public:
 private:
     void init(const std::array<E_AttachmentTypes, 3>& templateTypes);
 
-    ColorAttachment addColorAttachment(E_AttachmentTypes types,  E_ColorFormat colorFormat = E_ColorFormat::RGB);
+    ColorAttachment addColorAttachment(E_AttachmentTypes types,  E_ColorFormat colorFormat = E_ColorFormat::RGB, bool useMipmaps = false);
     Attachment addDepthAttachment(E_AttachmentTypes type);
     Attachment addStencilAttachment(E_AttachmentTypes type);
 

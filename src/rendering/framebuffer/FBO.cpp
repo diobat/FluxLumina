@@ -46,7 +46,7 @@ void FBO::init(const std::array<E_AttachmentTypes, 3>& templateTypes)
     _framebufferTemplate = templateTypes;
 }
 
-void FBO::addAttachment(E_AttachmentSlot type, E_ColorFormat colorFormat)
+void FBO::addAttachment(E_AttachmentSlot type, E_ColorFormat colorFormat, bool useMipmaps)
 {
     glBindFramebuffer(GL_FRAMEBUFFER, _id);
     switch(type)
@@ -54,7 +54,7 @@ void FBO::addAttachment(E_AttachmentSlot type, E_ColorFormat colorFormat)
         case E_AttachmentSlot::COLOR:
             if(_framebufferTemplate[0] != E_AttachmentTypes::NONE)
             {
-                _colorAttachments.push_back(addColorAttachment(_framebufferTemplate[0], colorFormat));
+                _colorAttachments.push_back(addColorAttachment(_framebufferTemplate[0], colorFormat, useMipmaps));
             }
             break;
         case E_AttachmentSlot::DEPTH:
@@ -75,7 +75,7 @@ void FBO::addAttachment(E_AttachmentSlot type, E_ColorFormat colorFormat)
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-ColorAttachment FBO::addColorAttachment(E_AttachmentTypes type,  E_ColorFormat colorFormat)
+ColorAttachment FBO::addColorAttachment(E_AttachmentTypes type,  E_ColorFormat colorFormat, bool useMipmaps)
 {
 
     unsigned int _textureId;
@@ -128,7 +128,15 @@ ColorAttachment FBO::addColorAttachment(E_AttachmentTypes type,  E_ColorFormat c
             }
 
             glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            if(useMipmaps)
+            {
+                glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR); 
+                glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+            }
+            else
+            {
+                glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR); 
+            }
             glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
             glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
             glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
