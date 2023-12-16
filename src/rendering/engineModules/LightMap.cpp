@@ -51,7 +51,7 @@ void LightMap::init(unsigned int size, unsigned int scale)
     // Create a new Framebuffer to render the Lightmap into
     _lightMapFBO = framebufferManager->addFBO(E_AttachmentTemplate::LIGHTMAP,_size,_size);
     _lightMapFBO->reset(); 
-    _lightMapFBO->addAttachment(E_AttachmentSlot::COLOR, E_ColorFormat::RGB16F);
+    _lightMapFBO->addAttachment(E_AttachmentSlot::COLOR, E_ColorFormat::RGB16F, true);
 
     // Create a new Framebuffer to render the diffuse irradiance map into
     _diffuseIrradianceFBO = framebufferManager->addFBO(E_AttachmentTemplate::LIGHTMAP,_size/_scale,_size/_scale);

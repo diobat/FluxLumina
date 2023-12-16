@@ -162,22 +162,32 @@ bool PBSShadingStrategyChain::reserveResources()
     std::shared_ptr<LightLibrary> lightLibrary = _ranFrom->getLightLibrary();
     std::shared_ptr<FBOManager> framebufferManager = _ranFrom->getFBOManager();
 
+    int cubemapSize = 2048;
+
     // Create lightmap
-    lightLibrary->getLightMap().init(2048u);
+    lightLibrary->getLightMap().init(static_cast<unsigned int>(cubemapSize));
     unsigned int skyboxTextureID = lightLibrary->getLightMap().bakeFromTexture(_ranFrom->getScene()->getSkybox().getIBLmap());
     lightLibrary->getLightMap().PBR_Diffuse_convoluteLightMap();
-    
+
+    // Generate environment cubemap mipmaps to facilitate artifact-free filtering
+    glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTextureID);
+    glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+
     // Create pre-filtered specular map
     lightLibrary->getLightMap().PBR_Specular_convoluteLightMap();
     // Create BRDF LUT
     lightLibrary->getLightMap().PBR_Specular_BRDF_LUT();
 
+    // Create a uniform buffer that stores the cubemap size
+    shaderLibrary->createUniformBuffer("IBL_cubemap_size");
+    std::tuple<int> cubemapSizeTuple = std::make_tuple(cubemapSize);
+    shaderLibrary->getUniformBuffer("IBL_cubemap_size").update(cubemapSizeTuple);
+
+
     // Assign Lightmap to Skybox
     std::shared_ptr<Cubemap> cubemap = _ranFrom->getScene()->getSkybox().getCubemap();
     cubemap->getTexture()._id = skyboxTextureID;
     cubemap->VAO = shapes::cube::VAO();
-
-
 
     return true;
 }
