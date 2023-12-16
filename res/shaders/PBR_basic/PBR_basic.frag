@@ -62,8 +62,6 @@ float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness);
 vec3 fresnelSchlick(float cosTheta, vec3 F0);
 vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness);
 
-vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir);
-
 void main()
 {
     // Normal and view vectors
@@ -133,10 +131,6 @@ void main()
 
     vec3 ambient    = (kD * diffuse + specular);// * ao; 
     vec3 color = ambient + Lo;
-
-    // // Gamma correction
-    // color = color / (color + vec3(1.0));
-    // color = pow(color, vec3(1.0/2.2));
 
     fragColor = vec4(color, 1.0);
 }
