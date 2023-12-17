@@ -12,5 +12,11 @@ out vec4 FragColor;
 
 void main()
 {    
-    FragColor = texture(skyboxCube, TexCoords);
+    // vec3 color = texture(skyboxCube, TexCoords).rgb;
+    vec3 color = textureLod(skyboxCube, TexCoords, 1.0).rgb; 
+
+    //color = color / (color + vec3(1.0));
+    //color = pow(color, vec3(1.0/2.2)); 
+  
+    FragColor = vec4(color,1.0);
 }

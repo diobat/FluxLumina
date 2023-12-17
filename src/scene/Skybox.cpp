@@ -15,3 +15,24 @@ std::shared_ptr<Cubemap> Skybox::getCubemap() const
 {
     return _cubeMap;
 }
+
+void Skybox::setIBLmap(std::shared_ptr<TextureHDR> IBLmap)
+{
+    _IBLmap = IBLmap;
+}
+
+std::shared_ptr<TextureHDR> Skybox::getIBLmap() const
+{
+    return _IBLmap;
+}
+
+void Skybox::setIBLcubemap(std::shared_ptr<Cubemap> IBLcubemap)
+{
+    _IBLcubeMap = IBLcubemap;
+}
+
+std::shared_ptr<Cubemap> Skybox::getIBLcubemap() const
+{
+    return _IBLcubeMap;
+}
+

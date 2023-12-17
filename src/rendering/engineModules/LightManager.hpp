@@ -10,6 +10,7 @@
 #include "scene/Scene.hpp"
 #include "rendering/shader/ShaderLibrary.hpp"
 #include "rendering/framebuffer/Framebuffer_Manager.hpp"
+#include "rendering/engineModules/LightMap.hpp"
 
 // STL headers
 #include <unordered_map>
@@ -46,12 +47,16 @@ class LightLibrary
 public:
 	LightLibrary(GraphicalEngine* engine);
 
+	GraphicalEngine* engine() const;
+
 	void bindFramebufferManager(std::weak_ptr<FBOManager> framebufferManager);
 	void bindShaderLibrary(std::weak_ptr<ShaderLibrary> shaderLibrary);
     bool prepare(const LightContents& lights);
 
 	void alignShadowMaps(std::shared_ptr<Scene> scene);
 	void renderShadowMaps(std::shared_ptr<Scene> scene);
+
+	LightMap& getLightMap();
 
 private:
 	void lightSetup(unsigned int lightIndex, const DirectionalLight &light);
@@ -65,6 +70,8 @@ private:
 	std::weak_ptr<ShaderLibrary> _shaderLibrary;
 
 	std::unordered_map<boost::uuids::uuid, ShadowMap,  boost::hash<boost::uuids::uuid>> _shadowMaps;
+	
+	LightMap _lightMap;
 
 	GraphicalEngine* _ranFrom;
 };	

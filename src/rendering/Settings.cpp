@@ -21,7 +21,8 @@ Settings::Settings(GLFWwindow* _window)    :
     _heightMapping(E_Setting::ON),
     _highDynamicRange(E_Setting::ON),
     _bloom(E_Setting::ON),
-    _ssao(E_Setting::ON)
+    _ssao(E_Setting::ON),
+    _seamlessCubemapSampling(E_Setting::ON)
 {
     /* Make the window's context current */
     glfwMakeContextCurrent(_window);
@@ -39,6 +40,7 @@ Settings::Settings(GLFWwindow* _window)    :
     set(E_Settings::HIGH_DYNAMIC_RANGE, 1);
     set(E_Settings::BLOOM, 0);
     set(E_Settings::SSAO, 1);
+    set(E_Settings::SEAMLESS_CUBEMAP_SAMPLING, 1);
 }
 
 void Settings::set(E_Settings setting, int value)
@@ -135,6 +137,17 @@ void Settings::set(E_Settings setting, int value)
     case E_Settings::SSAO:
         _ssao = static_cast<E_Setting>(value);
         break;
+    case E_Settings::SEAMLESS_CUBEMAP_SAMPLING:
+        _seamlessCubemapSampling = static_cast<E_Setting>(value);
+        if(value)
+        {
+            glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);  
+        }
+        else
+        {
+            glDisable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+        }
+        break;
     default:
         break;
     }
@@ -213,4 +226,9 @@ E_Setting Settings::getBloom() const
 E_Setting Settings::getSSAO() const
 {
     return _ssao;
+}
+
+E_Setting Settings::getSeamlessCubemapSampling() const
+{
+    return _seamlessCubemapSampling;
 }

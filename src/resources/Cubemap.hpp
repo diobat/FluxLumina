@@ -20,7 +20,6 @@ class Cubemap
 {
 public:
     Cubemap();
-    //Cubemap(std::array<std::string, 6> &textures);
 
     unsigned int VAO, VBO;
     float _vertices[108];
@@ -29,5 +28,4 @@ public:
 
 private:
     Texture _texture;
-    //std::array<std::string, 6> _texturePaths;
 };

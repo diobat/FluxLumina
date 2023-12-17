@@ -3,7 +3,7 @@
 // First-party includes
 #include "rendering/GLFW_Wrapper.hpp"
 
-enum class E_Settings{SHADOW_QUALITY_GLOBAL,SHADOW_GLOBAL, SHADOW_DIRECTIONAL, SHADOW_POINT, SHADOW_SPOT, ANTI_ALIASING_QUALITY, TRANSPARENCY, GAMMA_CORRECTION, FACE_CULLING, DEPTH_TEST, NORMAL_MAPPING, HEIGHT_MAPPING, HIGH_DYNAMIC_RANGE, BLOOM, SSAO};
+enum class E_Settings{SHADOW_QUALITY_GLOBAL,SHADOW_GLOBAL, SHADOW_DIRECTIONAL, SHADOW_POINT, SHADOW_SPOT, ANTI_ALIASING_QUALITY, TRANSPARENCY, GAMMA_CORRECTION, FACE_CULLING, DEPTH_TEST, NORMAL_MAPPING, HEIGHT_MAPPING, HIGH_DYNAMIC_RANGE, BLOOM, SSAO, SEAMLESS_CUBEMAP_SAMPLING};
 
 enum class E_Setting{OFF, ON};
 enum class E_ShadowQuality_Global{LOW, MEDIUM, HIGH, ULTRA};
@@ -31,6 +31,7 @@ public:
     E_Setting getHighDynamicRange() const;
     E_Setting getBloom() const;
     E_Setting getSSAO() const;
+    E_Setting getSeamlessCubemapSampling() const;
 
 private:
     GLFWwindow* _window;
@@ -50,4 +51,5 @@ private:
     E_Setting _highDynamicRange;
     E_Setting _bloom;
     E_Setting _ssao;
+    E_Setting _seamlessCubemapSampling;
 };
