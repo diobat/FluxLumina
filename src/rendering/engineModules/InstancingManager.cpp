@@ -22,10 +22,10 @@ InstancingGroup::~InstancingGroup()
 
     if(mesh != nullptr)
     {
-        glDisableVertexArrayAttrib(mesh->VAO, 4);
-        glDisableVertexArrayAttrib(mesh->VAO, 5);
-        glDisableVertexArrayAttrib(mesh->VAO, 6);
-        glDisableVertexArrayAttrib(mesh->VAO, 7);
+        //glDisableVertexArrayAttrib(mesh->VAO, 4);
+        //glDisableVertexArrayAttrib(mesh->VAO, 5);
+        //glDisableVertexArrayAttrib(mesh->VAO, 6);
+        //glDisableVertexArrayAttrib(mesh->VAO, 7);
     }
 }
 
