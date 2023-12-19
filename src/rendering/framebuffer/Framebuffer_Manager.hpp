@@ -54,6 +54,6 @@ private:
     std::unordered_map<std::shared_ptr<Scene>, std::shared_ptr<FBO>> _fboSceneMap;
     bool _forceDefault;
 
-    // The engine currently running this chain
+    // The engine currently running this manager
     GraphicalEngine* _ranFrom;
 };

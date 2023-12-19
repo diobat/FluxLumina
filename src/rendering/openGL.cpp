@@ -26,7 +26,6 @@ int openGL::initialize(GLFWwindow* window)
 
     /* Set the viewport */
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-    // glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glViewport(0, 0, _viewportWidth, _viewportHeight);
 
     // Set window resize code
@@ -66,8 +65,6 @@ int openGL::initialize(GLFWwindow* window)
 
     // Initialize LightManager
     _lightLibrary = std::make_shared<LightLibrary>(this);
-    _lightLibrary->bindFramebufferManager(_frameBuffers);
-    _lightLibrary->bindShaderLibrary(_shaderPrograms);
 
     // Initialize Instancing Manager
     _instancingManager = std::make_shared<InstancingManager>();

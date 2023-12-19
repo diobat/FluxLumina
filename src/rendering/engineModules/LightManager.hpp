@@ -8,8 +8,6 @@
 
 //First party headers
 #include "scene/Scene.hpp"
-#include "rendering/shader/ShaderLibrary.hpp"
-#include "rendering/framebuffer/Framebuffer_Manager.hpp"
 #include "rendering/engineModules/LightMap.hpp"
 
 // STL headers
@@ -49,8 +47,6 @@ public:
 
 	GraphicalEngine* engine() const;
 
-	void bindFramebufferManager(std::weak_ptr<FBOManager> framebufferManager);
-	void bindShaderLibrary(std::weak_ptr<ShaderLibrary> shaderLibrary);
     bool prepare(const LightContents& lights);
 
 	void alignShadowMaps(std::shared_ptr<Scene> scene);
@@ -66,12 +62,10 @@ private:
 	void renderTextureShadowMap(std::shared_ptr<Scene> scene, std::shared_ptr<LightSource> light);
 	void renderCubeShadowMap(std::shared_ptr<Scene> scene, std::shared_ptr<LightSource> light);
 
-	std::weak_ptr<FBOManager> _framebufferManager;
-	std::weak_ptr<ShaderLibrary> _shaderLibrary;
-
 	std::unordered_map<boost::uuids::uuid, ShadowMap,  boost::hash<boost::uuids::uuid>> _shadowMaps;
 	
 	LightMap _lightMap;
 
-	GraphicalEngine* _ranFrom;
+    // The engine currently running this manager
+    GraphicalEngine* _ranFrom;
 };	

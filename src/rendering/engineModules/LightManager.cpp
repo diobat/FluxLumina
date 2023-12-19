@@ -1,9 +1,10 @@
 #include "rendering/engineModules/LightManager.hpp"
 
 #include "rendering/GraphicalEngine.hpp"
+#include "rendering/shader/ShaderLibrary.hpp"
+#include "rendering/framebuffer/Framebuffer_Manager.hpp"
 
 #include <stdexcept>
-
 
 namespace
 {
@@ -209,19 +210,9 @@ GraphicalEngine* LightLibrary::engine() const
     return _ranFrom;
 }
 
-void LightLibrary::bindFramebufferManager(std::weak_ptr<FBOManager> framebufferManager)
-{
-    _framebufferManager = framebufferManager;
-}
-
-void LightLibrary::bindShaderLibrary(std::weak_ptr<ShaderLibrary> shaderLibrary)
-{
-    _shaderLibrary = shaderLibrary;
-}
-
 bool LightLibrary::prepare(const LightContents& lights)
 {
-    auto shaders = _shaderLibrary.lock();
+    std::shared_ptr<ShaderLibrary> shaders = _ranFrom->getShaderLibrary();
 
     auto& directionalLights = lights.directionalLights;
     int directionalLightsCount = static_cast<int>(directionalLights.size()); // We need to cast to int because the uniform is an int, otherwise we'd get a warning
@@ -252,7 +243,7 @@ bool LightLibrary::prepare(const LightContents& lights)
 
 void LightLibrary::lightSetup(unsigned int lightIndex, const DirectionalLight &light)
 {
-    auto shaders = _shaderLibrary.lock();
+    std::shared_ptr<ShaderLibrary> shaders = _ranFrom->getShaderLibrary();
 
     // Direction
     glm::vec3 direction = conversion::toVec3(light.getDirection());
@@ -267,7 +258,7 @@ void LightLibrary::lightSetup(unsigned int lightIndex, const DirectionalLight &l
 
 void LightLibrary::lightSetup(unsigned int lightIndex, const PointLight &light)
 {
-    auto shaders = _shaderLibrary.lock();
+    std::shared_ptr<ShaderLibrary> shaders = _ranFrom->getShaderLibrary();
 
     // Position
     glm::vec3 position = conversion::toVec3(light.getPosition());
@@ -309,7 +300,7 @@ void LightLibrary::lightSetup(unsigned int lightIndex, const PointLight &light)
 
 void LightLibrary::lightSetup(unsigned int lightIndex, const SpotLight &light)
 {
-    auto shaders = _shaderLibrary.lock();
+    std::shared_ptr<ShaderLibrary> shaders = _ranFrom->getShaderLibrary();
 
        // Position
     glm::vec3 position = conversion::toVec3(light.getPosition());
@@ -337,7 +328,6 @@ void LightLibrary::lightSetup(unsigned int lightIndex, const SpotLight &light)
     shaders->setUniformFloat("spotLight[" + std::to_string(lightIndex) + "].outerCutOff", glm::cos(glm::radians(cutoff[1])));
 
     // Shadow Maps - Light Space Matrix
-
     if( _ranFrom->getSettings()->getShadowGlobal() == E_Setting::OFF ||
         _ranFrom->getSettings()->getShadowSpot() == E_Setting::OFF)
     {
@@ -361,14 +351,14 @@ void LightLibrary::lightSetup(unsigned int lightIndex, const SpotLight &light)
 
 void LightLibrary::alignShadowMaps(std::shared_ptr<Scene> scene)
 {
+    std::shared_ptr<FBOManager> framebuffers = _ranFrom->getFBOManager();
+
     auto lights = scene->getAllLights();
 
     std::vector<std::shared_ptr<LightSource>> allLightSources;
     // allLightSources.insert(allLightSources.end(), lights.directionalLights.begin(), lights.directionalLights.end());
     allLightSources.insert(allLightSources.end(), lights.pointLights.begin(), lights.pointLights.end());
     allLightSources.insert(allLightSources.end(), lights.spotLights.begin(), lights.spotLights.end());
-
-    auto framebuffers = _framebufferManager.lock();
 
     for(auto& light : allLightSources)
     {   
@@ -439,8 +429,8 @@ LightMap& LightLibrary::getLightMap()
 
 void LightLibrary::renderTextureShadowMap(std::shared_ptr<Scene> scene, std::shared_ptr<LightSource> light)
 {
-    auto shaders = _shaderLibrary.lock();
-    auto framebuffers = _framebufferManager.lock();
+    std::shared_ptr<ShaderLibrary> shaders = _ranFrom->getShaderLibrary();
+    std::shared_ptr<FBOManager> framebuffers = _ranFrom->getFBOManager();
 
     if(shaders == nullptr)
     {
@@ -494,8 +484,8 @@ void LightLibrary::renderTextureShadowMap(std::shared_ptr<Scene> scene, std::sha
 
 void LightLibrary::renderCubeShadowMap(std::shared_ptr<Scene> scene, std::shared_ptr<LightSource> light)
 {
-    auto shaders = _shaderLibrary.lock();
-    auto framebuffers = _framebufferManager.lock();
+    std::shared_ptr<ShaderLibrary> shaders = _ranFrom->getShaderLibrary();
+    std::shared_ptr<FBOManager> framebuffers = _ranFrom->getFBOManager();
     
     if(shaders == nullptr)
     {
