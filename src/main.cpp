@@ -59,7 +59,7 @@ int main(void)
     std::shared_ptr<MeshLibrary> meshLibrary = std::make_shared<MeshLibrary>();
 
     openGL graphicalEngine;
-    graphicalEngine.initialize(window);
+    graphicalEngine.initialize(window, E_RenderStrategy::ForwardShading);
     graphicalEngine.bindScene(scene);
     graphicalEngine.bindMeshLibrary(meshLibrary);
 

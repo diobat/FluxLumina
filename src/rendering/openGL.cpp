@@ -68,9 +68,19 @@ int openGL::initialize(GLFWwindow* window)
     _instancingManager = std::make_shared<InstancingManager>();
 
     // Initialize Rendering strategy
-    // _strategyChain = std::make_shared<ForwardShadingStrategyChain>(this);
-    // _strategyChain = std::make_shared<DeferredShadingStrategyChain>(this);
-    _strategyChain = std::make_shared<PBSShadingStrategyChain>(this);
+    switch (strategy)
+    {
+        case E_RenderStrategy::DeferredShading:
+            _strategyChain = std::make_shared<DeferredShadingStrategyChain>(this);
+            break;
+        case E_RenderStrategy::PBSShading:
+            _strategyChain = std::make_shared<PBSShadingStrategyChain>(this);
+            break;
+        default:
+        case E_RenderStrategy::ForwardShading:
+            _strategyChain = std::make_shared<ForwardShadingStrategyChain>(this);
+            break;
+    }
 
     return 1;
 }

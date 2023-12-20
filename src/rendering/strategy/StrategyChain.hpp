@@ -8,6 +8,12 @@
 // First-party headers
 #include "rendering/strategy/StrategyNode.hpp"
 
+enum class E_RenderStrategy : unsigned int
+{
+    ForwardShading,
+    DeferredShading,
+    PBSShading
+};
 
 class GraphicalEngine;
 
