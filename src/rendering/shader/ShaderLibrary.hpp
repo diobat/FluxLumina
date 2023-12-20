@@ -19,7 +19,7 @@
 class ShaderLibrary
 {
 public:
-    ShaderLibrary();
+    ShaderLibrary(const std::string &folderName = "");
     ~ShaderLibrary();
 
     // Shader creation

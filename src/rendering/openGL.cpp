@@ -44,9 +44,7 @@ int openGL::initialize(GLFWwindow* window)
     _frameBuffers = std::make_shared<FBOManager>(this);
 
     // Shader Library initialization
-    _shaderPrograms = std::make_shared<ShaderLibrary>();
-
-    _shaderPrograms->scan("res/shaders/");
+    _shaderPrograms = std::make_shared<ShaderLibrary>("res/shaders/");
 
     _shaderPrograms->getShader("Basic")->addSupportedFeature(E_ShaderProgramFeatures::E_AUTO_INSTANCING);
     _shaderPrograms->getShader("transparency")->addSupportedFeature(E_ShaderProgramFeatures::E_TRANSPARENCY);

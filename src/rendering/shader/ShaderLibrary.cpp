@@ -6,11 +6,12 @@
 
 #include <stdexcept>
 
-ShaderLibrary::ShaderLibrary()  :
+ShaderLibrary::ShaderLibrary(const std::string &folderName) :
     _activeShader(0),
     _shaders(_contents->_shaders),
     _contents(std::make_shared<ShaderLibraryContents>())
 {
+    scan(folderName);
     ;
 }
 
