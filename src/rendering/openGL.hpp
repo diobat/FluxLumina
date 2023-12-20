@@ -26,17 +26,14 @@ class openGL : public GraphicalEngine
 {
 public:
 
-	int initialize(GLFWwindow* window);
+	int initialize(GLFWwindow* window, E_RenderStrategy strategy = E_RenderStrategy::ForwardShading);
 
+	// Render a frame by applying the loaded strategy
 	void renderFrame(std::shared_ptr<Scene> scene) override;
 
 	// Window
 	void resizeWindow(GLFWwindow *window, int width, int height);
 	GLFWwindow* getWindowPtr();
-
-	// Features
-	void enable(GLuint feature);
-	void disable(GLuint feature);
 
 	// Models
 	void initializeMesh(std::shared_ptr<Mesh>& mesh) override;
@@ -46,16 +43,6 @@ public:
 	void renderModel(ModelObject &model) override;
 	void renderInstancedMeshes(std::shared_ptr<InstancingManager> instancingManager = nullptr) override;
 	void renderSkybox(Skybox &skybox) override;
-
-	// Shaders
-	unsigned int getShaderProgramID(unsigned int shaderIndex);
-
-	// Framebuffers
-	std::shared_ptr<FBO> addFBO(E_AttachmentTemplate format, int width, int height);
-	void bindFBO(unsigned int fboIndex);
-	void unbindFBO();
-	unsigned int getFBOIndex(std::shared_ptr<FBO> fbo) const;
-	bool isFrameBufferComplete(std::shared_ptr<FBO>) const;
 
 	// Cubemaps
 	void initializeSkybox(Skybox &skybox, const std::array<Texture, 6>& textures) override;

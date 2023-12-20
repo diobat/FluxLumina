@@ -5,17 +5,7 @@ GLFWwindow* openGL::getWindowPtr()
     return _window;
 }
 
-void openGL::enable(GLuint feature)
-{
-    glEnable(feature);
-}
-
-void openGL::disable(GLuint feature)
-{
-    glDisable(feature);
-}
-
-int openGL::initialize(GLFWwindow* window)
+int openGL::initialize(GLFWwindow* window, E_RenderStrategy strategy)
 {
     _window = window;
 
@@ -293,41 +283,6 @@ void openGL::bindTextures(std::shared_ptr<Mesh> mesh)
     }
 }
 
-unsigned int openGL::getShaderProgramID(unsigned int shaderIndex)
-{
-    return _shaderPrograms->getShader(shaderIndex)->getProgramId();
-}
-
-std::shared_ptr<FBO> openGL::addFBO(E_AttachmentTemplate format, int width, int height)
-{
-    if (width <= 0 || height <= 0)
-    {
-        glfwGetWindowSize(_window, &width, &height);
-    }
-
-    std::shared_ptr<FBO> fbo = _frameBuffers->addFBO(format, width, height);
-    return fbo;
-}
-
-void openGL::bindFBO(unsigned int fboIndex)
-{
-    _frameBuffers->bindFBO(fboIndex);
-}
-
-void openGL::unbindFBO()
-{
-    _frameBuffers->unbindFBO();
-}
-
-unsigned int openGL::getFBOIndex(std::shared_ptr<FBO> fbo) const
-{
-    return _frameBuffers->getFBOIndex(fbo);
-}
-
-bool openGL::isFrameBufferComplete(std::shared_ptr<FBO> fbo) const
-{
-    return _frameBuffers->isFrameBufferComplete(fbo);
-}
 
 void openGL::initializeSkybox(Skybox &skybox, const std::array<Texture, 6>& textures)
 {

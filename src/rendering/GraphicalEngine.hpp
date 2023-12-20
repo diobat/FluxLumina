@@ -34,8 +34,6 @@ public:
 	std::shared_ptr<Scene> getScene(unsigned int sceneIndex = 0) const;
 	std::vector<std::shared_ptr<Scene>> getScenes() const { return _scenes; }
 
-	virtual unsigned int getShaderProgramID(unsigned int shaderIndex) = 0;
-
 	void bindMeshLibrary(std::shared_ptr<MeshLibrary> meshLibrary);
 
 	std::shared_ptr<FBOManager> getFBOManager() { return _frameBuffers; };
