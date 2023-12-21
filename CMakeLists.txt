@@ -18,19 +18,19 @@ file(GLOB_RECURSE SOURCE_FILES
 	${CMAKE_SOURCE_DIR}/src/*.cpp
 	${CMAKE_SOURCE_DIR}/res/shaders/*)
 
-# Add header files
-file(GLOB_RECURSE HEADER_FILES 
-	${CMAKE_SOURCE_DIR}/src/*.h
-	${CMAKE_SOURCE_DIR}/src/*.hpp)
-
 # Configure assets header file
 configure_file(src/helpers/RootDir.h.in src/helpers/RootDir.h)
+
+# Define the include DIRs
 include_directories(
-	${CMAKE_BINARY_DIR}/src
+	"${CMAKE_SOURCE_DIR}/src"
+	"${CMAKE_SOURCE_DIR}/include"
+  "${CMAKE_BINARY_DIR}/src"
 )
 
+
 # Define the executable
-add_executable(${PROJECT_NAME} ${HEADER_FILES} ${SOURCE_FILES})
+add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 
 # Fetch dependencies remotely
 include(FetchContent)
@@ -100,26 +100,33 @@ target_link_libraries(${PROJECT_NAME} PRIVATE assimp)
 message(STATUS "ASSIMP -> ${assimp_SOURCE_DIR}")
 
 ######################################## BOOST
-# Boost is different than the others, we need to build it
+# Boost is different than the others. Due to its size we don't want to build it, we want to download it
+# as a pre-compiled library and link it to our project.
 message(STATUS "Downloading pre-compiled boost library sources. This may take some time...")
 set(FETCHCONTENT_QUIET FALSE) # Prints the output of the build process to terminal
 set(DOWNLOAD_EXTRACT_TIMESTAMP TRUE)
+
+set(BOOST_INCLUDE_LIBRARIES date_time filesystem uuid)
+set(BOOST_ENABLE_CMAKE ON)
+set(Boost_NO_SYSTEM_PATHS ON)
+
+set(Boost_USE_STATIC_LIBS ON) 
+set(Boost_USE_MULTITHREADED ON)  
+set(Boost_USE_STATIC_RUNTIME OFF)
+
 FetchContent_Declare(
     Boost
-    URL https://github.com/boostorg/boost/releases/download/boost-1.84.0/boost-1.84.0.7z # downloading a zip release speeds up the download
+    URL https://github.com/boostorg/boost/releases/download/boost-1.84.0/boost-1.84.0.7z
     USES_TERMINAL_DOWNLOAD TRUE 
     GIT_PROGRESS TRUE   
     DOWNLOAD_NO_EXTRACT FALSE
 )
-set(Boost_USE_STATIC_LIBS ON) 
-set(Boost_USE_MULTITHREADED ON)  
-set(Boost_USE_STATIC_RUNTIME OFF) 
-set(BOOST_INCLUDE_LIBRARIES log date_time filesystem uuid)
-set(BOOST_ENABLE_CMAKE ON)
-set(BOOST_ROOT ${boost_BUILD_DIR})
-set(Boost_NO_SYSTEM_PATHS TRUE)
+
+
 FetchContent_MakeAvailable(Boost)
-target_link_libraries(${PROJECT_NAME} PRIVATE Boost::filesystem Boost::log Boost::log_setup Boost::date_time Boost::uuid)
+target_link_libraries(${PROJECT_NAME} PRIVATE Boost::filesystem Boost::date_time Boost::uuid)
+
+message(STATUS "BOOST -> ${Boost_BINARY_DIR}")
 
 ######################################## END OF EXTERNAL DEPENDENCIES
 
@@ -129,13 +136,5 @@ set(CMAKE_WARN_DEPRECATED ON CACHE BOOL "" FORCE)
 # OpenGL
 find_package(OpenGL REQUIRED)
 
-# Define the include DIRs
-include_directories(
-	"${CMAKE_SOURCE_DIR}/src"
-	"${CMAKE_SOURCE_DIR}/include"
-)
-
 # Link the dependency libraries to the target
 target_link_libraries(${PROJECT_NAME} PRIVATE opengl32)
-
-source_group(TREE ${CMAKE_SOURCE_DIR} FILES ${HEADER_FILES} ${SOURCE_FILES})

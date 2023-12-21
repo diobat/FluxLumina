@@ -4,7 +4,6 @@
 #include "rendering/openGL.hpp"
 #include "scene/SceneObjectFactory.hpp"
 #include "util/SceneSetup.h"
-#include "Util/Logger.hpp"
 
 // Third-party includes
 #include <memory>
@@ -33,7 +32,6 @@ void update(openGL& graphicalEngine, std::vector<std::shared_ptr<Scene>> scenes,
         graphicalEngine.renderFrame(scenes[0]);
 
         // Check and log errors
-        //Logger::Instance().logGLErrors("Main Loop:");        
        
         /* Swap front and back buffers */
         glfwSwapBuffers(graphicalEngine.getWindowPtr());
