@@ -101,7 +101,7 @@ message(STATUS "ASSIMP -> ${assimp_SOURCE_DIR}")
 
 ######################################## BOOST
 # Boost is different than the others, we need to build it
-message(STATUS "Downloading and building boost library sources. This will take some time...")
+message(STATUS "Downloading pre-compiled boost library sources. This may take some time...")
 set(FETCHCONTENT_QUIET FALSE) # Prints the output of the build process to terminal
 set(DOWNLOAD_EXTRACT_TIMESTAMP TRUE)
 FetchContent_Declare(
