@@ -36,7 +36,6 @@ public:
 	GLFWwindow* getWindowPtr();
 
 	// Models
-	void initializeMesh(std::shared_ptr<Mesh>& mesh) override;
 	void initializeTexture(Texture& texture) override;
 	void initializeTextureHDR(TextureHDR& texture) override;
 	void bindTextures(std::shared_ptr<Mesh> mesh) override;

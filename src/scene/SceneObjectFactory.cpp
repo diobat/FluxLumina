@@ -193,7 +193,6 @@ ModelObject &SceneObjectFactory::create_Model(const std::string &modelPath, cons
 
 void SceneObjectFactory::load_ModelMeshes(Model& model, const std::string& path)
 {
-
     // check if model is already loaded
     if(_meshLibrary != nullptr && !_meshLibrary->isMeshLoaded(path))
     {
@@ -222,7 +221,7 @@ void SceneObjectFactory::load_ModelMeshes(Model& model, const std::string& path)
     model.meshes = _meshLibrary->getMeshes(path);
 }
 
-// processes a node in a recursive fashion. Processes each individual mesh located at the node and repeats this process on its children nodes (if any).
+// processes nodes recursively
 void SceneObjectFactory::processNode(const std::string &path, aiNode *node, const aiScene *scene)
 {
     std::vector<std::shared_ptr<Mesh>> newMeshes;
@@ -230,17 +229,12 @@ void SceneObjectFactory::processNode(const std::string &path, aiNode *node, cons
     // process each mesh located at the current node
     for (unsigned int i = 0; i < node->mNumMeshes; i++)
     {
-        // the node object only contains indices to index the actual objects in the scene.
-        // the scene contains all the data, node is just to keep stuff organized (like relations between nodes).
         aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
 
         newMeshes.push_back(processMesh(path, mesh, scene));
     }
-    
-    for(auto& mesh : newMeshes)
-    {
-        _boundEngine->initializeMesh(mesh);
-    }
+
+    // Update mesh library
     _meshLibrary->addMesh(path, newMeshes);
 
     // after we've processed all of the meshes (if any) we then recursively process each of the children nodes

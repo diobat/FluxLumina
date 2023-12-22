@@ -18,6 +18,7 @@ int openGL::initialize(GLFWwindow* window, E_RenderStrategy strategy)
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glViewport(0, 0, _viewportWidth, _viewportHeight);
 
+
     // Set window resize code
     glfwSetWindowUserPointer(_window, this);
     auto func = [](GLFWwindow* window, int width, int height)
@@ -144,39 +145,7 @@ void openGL::resizeWindow(GLFWwindow* window, int width, int height)
 
 }
 
-void openGL::initializeMesh(std::shared_ptr<Mesh>& mesh)
-{
-    // create buffers/arrays
-    glGenVertexArrays(1, &mesh->VAO);
-    glGenBuffers(1, &mesh->VBO);
-    glGenBuffers(1, &mesh->EBO);
 
-    glBindVertexArray(mesh->VAO);
-    // load data into vertex buffers
-    glBindBuffer(GL_ARRAY_BUFFER, mesh->VBO);
-    glBufferData(GL_ARRAY_BUFFER, mesh->_vertices.size() * sizeof(Vertex), &mesh->_vertices[0], GL_STATIC_DRAW);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh->_indices.size() * sizeof(unsigned int), &mesh->_indices[0], GL_STATIC_DRAW);
-
-    // set the vertex attribute pointers
-    // vertex Positions
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)0);
-    // vertex normals
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, Normal));
-    // vertex texture coords
-    glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, TexCoords));
-    // vertex color info
-    glEnableVertexAttribArray(3);
-    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, Color));
-    // vertex tangent info
-    glEnableVertexAttribArray(4);
-    glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, Tangent));
-
-    glBindVertexArray(0);
-}
 
 void openGL::initializeTexture(Texture& texture)
 {
@@ -190,7 +159,6 @@ void openGL::initializeTexture(Texture& texture)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 
-    //glTexStorage2D(GL_TEXTURE_2D, 2 /* mip map levels */, GL_RGB8, texture._width, texture._height);
     glTexImage2D(GL_TEXTURE_2D, 0, texture._colorChannels, texture._width, texture._height, 0, texture._colorChannels, GL_UNSIGNED_BYTE, texture._pixels);
     glGenerateMipmap(GL_TEXTURE_2D);
 }   
