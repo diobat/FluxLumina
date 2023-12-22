@@ -3,7 +3,7 @@
 // First-party includes
 #include "rendering/GLFW_Wrapper.hpp"
 
-enum class E_Settings{SHADOW_QUALITY_GLOBAL,SHADOW_GLOBAL, SHADOW_DIRECTIONAL, SHADOW_POINT, SHADOW_SPOT, ANTI_ALIASING_QUALITY, TRANSPARENCY, GAMMA_CORRECTION, FACE_CULLING, DEPTH_TEST, NORMAL_MAPPING, HEIGHT_MAPPING, HIGH_DYNAMIC_RANGE, BLOOM, SSAO, SEAMLESS_CUBEMAP_SAMPLING, VSYNC, POLYGON_LINES};
+enum class E_Settings{SHADOW_QUALITY_GLOBAL,SHADOW_GLOBAL, SHADOW_DIRECTIONAL, SHADOW_POINT, SHADOW_SPOT, ANTI_ALIASING_QUALITY, TRANSPARENCY, GAMMA_CORRECTION, FACE_CULLING, DEPTH_TEST, NORMAL_MAPPING, HEIGHT_MAPPING, HIGH_DYNAMIC_RANGE, BLOOM, SSAO, SEAMLESS_CUBEMAP_SAMPLING, VSYNC, POLYGON_LINES, GRAPHICAL_DEBUG_OUTPUT};
 
 enum class E_Setting{OFF, ON};
 enum class E_ShadowQuality_Global{LOW, MEDIUM, HIGH, ULTRA};
@@ -34,6 +34,7 @@ public:
     E_Setting getSeamlessCubemapSampling() const;
     E_Setting getvSync() const;
     E_PolygonMode getPolygonMode() const;
+    E_Setting getGLDebugOutput() const;
 
 private:
     GLFWwindow* _window;
@@ -56,5 +57,6 @@ private:
     E_Setting _seamlessCubemapSampling;
     E_Setting _vSync;
     E_PolygonMode _polygonMode;
+    E_Setting _graphicalDebugOutput;
     
 };
