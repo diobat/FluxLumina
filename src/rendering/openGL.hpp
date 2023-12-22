@@ -1,39 +1,25 @@
 #pragma once
 
-// STD library includes
-#include <iostream>
+// First party includes
+#include "rendering/GraphicalEngine.hpp"
+#include "rendering/strategy/StrategyChain.hpp"
 
 // GLFW include
 #include "rendering/GLFW_Wrapper.hpp"
 
-// GLM - Math is a gateway science
-#define  GLM_FORCE_RADIANS
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
-// First party includes
-#include "rendering/GraphicalEngine.hpp"
-#include "rendering/shader/ShaderLibrary.hpp"
-#include "resources/Texture.hpp"
-#include "rendering/framebuffer/Framebuffer_Manager.hpp"
-#include "rendering/engineModules/InstancingManager.hpp"
-#include "rendering/engineModules/LightManager.hpp"
-#include "user_input/glfwUserInputScanner.hpp"
-#include "util/Arithmetic.hpp"
-
 class openGL : public GraphicalEngine
 {
 public:
+	openGL(std::shared_ptr<Scene> scene , E_RenderStrategy strategy);
 
-	int initialize(GLFWwindow* window, E_RenderStrategy strategy = E_RenderStrategy::ForwardShading);
+	int initialize(std::shared_ptr<Scene> scene , E_RenderStrategy strategy);
 
-	// Render a frame by applying the loaded strategy
-	void renderFrame(std::shared_ptr<Scene> scene) override;
+	// Update the engine internal state
+	void update();
 
-	GLFWwindow* getWindowPtr();
-	
 private:
+	// Render a frame by applying the loaded trategy
+	void renderFrame(std::shared_ptr<Scene> scene) override;
 	// Window
 	void resizeWindowCallback(GLFWwindow *window, int width, int height);
 

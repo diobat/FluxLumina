@@ -1,5 +1,15 @@
 #include "GraphicalEngine.hpp"
 
+#include "rendering/MeshLibrary.hpp"
+#include "rendering/strategy/StrategyChain.hpp"
+#include "rendering/shader/ShaderLibrary.hpp"
+#include "rendering/engineModules/LightManager.hpp"
+#include "rendering/engineModules/InstancingManager.hpp"
+#include "rendering/framebuffer/Framebuffer_Manager.hpp"
+#include "rendering/libraries/TextureLibrary.hpp"
+#include "rendering/Settings.hpp"
+#include "user_input/glfwUserInputScanner.hpp"
+
 GraphicalEngine::GraphicalEngine()
 {
     ;

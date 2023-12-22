@@ -1,13 +1,28 @@
 #include "rendering/openGL.hpp"
+#include "rendering/openGLContext.hpp"
 
-GLFWwindow* openGL::getWindowPtr()
+// First-party includes
+#include "rendering/shader/ShaderLibrary.hpp"
+#include "user_input/glfwUserInputScanner.hpp"
+#include "rendering/framebuffer/Framebuffer_Manager.hpp"
+#include "rendering/Settings.hpp"
+#include "rendering/MeshLibrary.hpp"
+#include "rendering/libraries/TextureLibrary.hpp"
+#include "rendering/engineModules/LightManager.hpp"
+#include "rendering/engineModules/InstancingManager.hpp"
+
+
+openGL::openGL(std::shared_ptr<Scene> scene , E_RenderStrategy strategy)
 {
-    return _window;
+    initialize(scene, strategy);
 }
 
-int openGL::initialize(GLFWwindow* window, E_RenderStrategy strategy)
+int openGL::initialize(std::shared_ptr<Scene> scene, E_RenderStrategy strategy)
 {
-    _window = window;
+    _scenes.clear();
+    _scenes.push_back(scene);
+
+    _window = InitializeOpenGLContext();
 
     /* Make the window's context current */
     glfwMakeContextCurrent(_window);
@@ -79,6 +94,10 @@ int openGL::initialize(GLFWwindow* window, E_RenderStrategy strategy)
             break;
     }
 
+    // Initialize User Input
+    _userInput = std::make_shared<glfwKeyboardScanner>(_window);
+    _userInput->bindToScene(_scenes[0]);
+
     return 1;
 }
 
@@ -112,4 +131,32 @@ void openGL::resizeWindowCallback(GLFWwindow* window, int width, int height)
     _frameBuffers->resizeViewPortBoundFBOs();
 
     glViewport(0, 0, _viewportWidth, _viewportHeight);
+}
+
+void openGL::update()
+{
+    float startTime = static_cast<float>(glfwGetTime());
+    float newTime  = 0.0f;
+    float gameTime = 0.0f;
+    float deltaTime = 0.0f;
+    std::string windowTitle;
+
+    while (!glfwWindowShouldClose(_window))
+    {
+        /* Update game time value */
+        newTime  = static_cast<float>(glfwGetTime());
+        deltaTime = newTime - gameTime - startTime;
+        gameTime = newTime - startTime;
+
+        openGLContext::updateFPSCounter(deltaTime);
+
+        renderFrame(_scenes[0]);
+       
+        /* Swap front and back buffers */
+        glfwSwapBuffers(_window);
+        /* Poll for and process events */
+        glfwPollEvents();
+
+        _userInput->tickCallback();
+    }
 }

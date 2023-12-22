@@ -1,5 +1,9 @@
 #include "rendering/libraries/TextureLibrary.hpp"
+
 #include "rendering/GraphicalEngine.hpp"
+#include "rendering/shader/ShaderLibrary.hpp"
+#include "rendering/Settings.hpp"
+
 #include "util/VertexShapes.hpp"
 
 #include <stb_image.h>

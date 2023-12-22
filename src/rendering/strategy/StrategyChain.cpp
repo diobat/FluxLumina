@@ -3,6 +3,10 @@
 #include "rendering/GraphicalEngine.hpp"
 #include "rendering/Settings.hpp"
 #include "rendering/framebuffer/Framebuffer_Manager.hpp"
+#include "rendering/engineModules/InstancingManager.hpp"
+#include "rendering/shader/ShaderLibrary.hpp"
+#include "rendering/engineModules/LightManager.hpp"
+
 
 #include "util/VertexShapes.hpp"
 

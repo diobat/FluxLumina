@@ -3,14 +3,17 @@
 // First-party includes
 #include "scene/Scene.hpp"
 
-#include "rendering/MeshLibrary.hpp"
-#include "rendering/strategy/StrategyChain.hpp"
-#include "rendering/shader/ShaderLibrary.hpp"
-#include "rendering/engineModules/LightManager.hpp"
-#include "rendering/engineModules/InstancingManager.hpp"
-#include "rendering/framebuffer/Framebuffer_Manager.hpp"
-#include "rendering/libraries/TextureLibrary.hpp"
-#include "rendering/Settings.hpp"
+class MeshLibrary;
+class TextureLibrary;
+class FBOManager;
+class ShaderLibrary;
+class LightLibrary;
+class InstancingManager;
+class StrategyChain;
+class Settings;
+class glfwKeyboardScanner;
+
+
 
 class GraphicalEngine
 {
@@ -64,6 +67,8 @@ protected:
 	// Engine settings
 	std::shared_ptr<Settings> _settings;
 
+	// User Inputs
+	std::shared_ptr<glfwKeyboardScanner> _userInput;
 
 };
 

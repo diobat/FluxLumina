@@ -1,6 +1,11 @@
 #include "rendering/framebuffer/Framebuffer_Manager.hpp"
 
 #include "rendering/GraphicalEngine.hpp"
+#include "rendering/Settings.hpp"
+#include "rendering/engineModules/InstancingManager.hpp"
+#include "rendering/libraries/TextureLibrary.hpp"
+#include "rendering/shader/ShaderLibrary.hpp"
+
 
 FBOManager::FBOManager(GraphicalEngine *engine) : 
     _ranFrom(engine),

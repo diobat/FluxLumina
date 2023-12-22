@@ -1,5 +1,7 @@
 #include "scene/SceneObjectFactory.hpp"
 
+#include "rendering/libraries/TextureLibrary.hpp"
+
 #include "helpers/RootDir.h"
 
 #define STB_IMAGE_IMPLEMENTATION
