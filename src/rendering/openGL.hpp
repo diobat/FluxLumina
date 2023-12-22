@@ -43,8 +43,6 @@ private:
 	// Window
 	void resizeWindowCallback(GLFWwindow *window, int width, int height);
 
-	void cameraSetup(std::shared_ptr<Scene> scene);
-
 	// GLFW window
 	GLFWwindow* _window;
 
