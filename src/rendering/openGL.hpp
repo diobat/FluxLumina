@@ -31,7 +31,6 @@ public:
 	// Render a frame by applying the loaded strategy
 	void renderFrame(std::shared_ptr<Scene> scene) override;
 
-
 	GLFWwindow* getWindowPtr();
 
 	// Models

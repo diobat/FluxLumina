@@ -30,9 +30,4 @@ std::shared_ptr<Scene> GraphicalEngine::getScene(unsigned int sceneIndex) const
     return _scenes[sceneIndex];
 }
 
-void GraphicalEngine::bindMeshLibrary(std::shared_ptr<MeshLibrary> meshLibrary)
-{
-    _meshLibrary = meshLibrary;
-}
-
 

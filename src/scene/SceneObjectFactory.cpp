@@ -142,11 +142,10 @@ namespace
 /////////////////////////// INITIALIZATION
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-SceneObjectFactory::SceneObjectFactory(Scene* scene, GraphicalEngine* engine, MeshLibrary* meshLibrary)
+SceneObjectFactory::SceneObjectFactory(Scene* scene, GraphicalEngine* engine)
 {
     _boundScene = scene;
     _boundEngine = engine;
-    _meshLibrary = meshLibrary;
 
     if(scene != nullptr)
     {
@@ -194,7 +193,7 @@ ModelObject &SceneObjectFactory::create_Model(const std::string &modelPath, cons
 void SceneObjectFactory::load_ModelMeshes(Model& model, const std::string& path)
 {
     // check if model is already loaded
-    if(_meshLibrary != nullptr && !_meshLibrary->isMeshLoaded(path))
+    if(_boundEngine->getMeshLibrary() != nullptr && !_boundEngine->getMeshLibrary()->isMeshLoaded(path))
     {
         // read file via ASSIMP
         Assimp::Importer importer;
@@ -218,7 +217,7 @@ void SceneObjectFactory::load_ModelMeshes(Model& model, const std::string& path)
     }
 
     model.directory = path;
-    model.meshes = _meshLibrary->getMeshes(path);
+    model.meshes = _boundEngine->getMeshLibrary()->getMeshes(path);
 }
 
 // processes nodes recursively
@@ -235,7 +234,7 @@ void SceneObjectFactory::processNode(const std::string &path, aiNode *node, cons
     }
 
     // Update mesh library
-    _meshLibrary->addMesh(path, newMeshes);
+    _boundEngine->getMeshLibrary()->addMesh(path, newMeshes);
 
     // after we've processed all of the meshes (if any) we then recursively process each of the children nodes
     for (unsigned int i = 0; i < node->mNumChildren; i++)
@@ -375,7 +374,7 @@ std::shared_ptr<Mesh> SceneObjectFactory::processMesh(const std::string &path, a
 std::vector<Texture> SceneObjectFactory::loadMaterialTextures(const aiScene* scene, const std::string &path, aiMaterial *mat, aiTextureType type)
 {
     std::vector<Texture> materialTextures;
-    const auto& loadedTextures = _meshLibrary->getLoadedTextures();
+    const auto& loadedTextures = _boundEngine->getMeshLibrary()->getLoadedTextures();
 
     for(unsigned int i = 0; i < mat->GetTextureCount(type); i++)
     {
@@ -411,7 +410,7 @@ std::vector<Texture> SceneObjectFactory::loadMaterialTextures(const aiScene* sce
             setTextureData(texture, type);
             _boundEngine->initializeTexture(texture);
             materialTextures.push_back(texture);
-            _meshLibrary->addTexture(texture);
+            _boundEngine->getMeshLibrary()->addTexture(texture);
         }
     }
     return materialTextures;
@@ -420,7 +419,7 @@ std::vector<Texture> SceneObjectFactory::loadMaterialTextures(const aiScene* sce
 std::vector<Texture> SceneObjectFactory::loadExternalTextures(const std::string &path, const TextureLocations & textures) const
 {
     std::vector<Texture> materialTextures;
-    const auto& loadedTextures = _meshLibrary->getLoadedTextures();
+    const auto& loadedTextures = _boundEngine->getMeshLibrary()->getLoadedTextures();
 
 
     // First load HEIGHT maps
@@ -445,7 +444,7 @@ std::vector<Texture> SceneObjectFactory::loadExternalTextures(const std::string 
             texture._type = E_TexureType::HEIGHT;   // Wavefront misclassifies normal maps as height maps, temporarily fix
             _boundEngine->initializeTexture(texture);
             materialTextures.push_back(texture);
-            _meshLibrary->addTexture(texture);
+            _boundEngine->getMeshLibrary()->addTexture(texture);
         }
     }
 
@@ -470,7 +469,7 @@ std::vector<Texture> SceneObjectFactory::loadExternalTextures(const std::string 
             setTextureData(texture, aiTextureType_LIGHTMAP);
             _boundEngine->initializeTexture(texture);
             materialTextures.push_back(texture);
-            _meshLibrary->addTexture(texture);
+            _boundEngine->getMeshLibrary()->addTexture(texture);
         }
     }
 

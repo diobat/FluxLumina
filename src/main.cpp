@@ -18,7 +18,7 @@ void update(openGL& graphicalEngine, std::vector<std::shared_ptr<Scene>> scenes,
     float gameTime = 0.0f;
     float deltaTime = 0.0f;
     std::string windowTitle;
-    
+
     while (!glfwWindowShouldClose(graphicalEngine.getWindowPtr()))
     {
         /* Update game time value */
@@ -52,15 +52,13 @@ int main(void)
 
     // Scene initialization
     std::shared_ptr<Scene> scene = std::make_shared<Scene>();
-    std::shared_ptr<MeshLibrary> meshLibrary = std::make_shared<MeshLibrary>();
 
     openGL graphicalEngine;
-    graphicalEngine.initialize(window, E_RenderStrategy::ForwardShading);
+    graphicalEngine.initialize(window, E_RenderStrategy::PBSShading);
     graphicalEngine.bindScene(scene);
-    graphicalEngine.bindMeshLibrary(meshLibrary);
 
     // Init object factory
-    SceneObjectFactory factory(scene.get(), &graphicalEngine, meshLibrary.get());
+    SceneObjectFactory factory(scene.get(), &graphicalEngine);
 
     // Scene setup
     std::vector<std::shared_ptr<Scene>> scenes;

@@ -31,6 +31,12 @@ int openGL::initialize(GLFWwindow* window, E_RenderStrategy strategy)
     // Settings module initialization
     _settings = std::make_shared<Settings>(_window);
 
+    // Mesh Library initialization
+    _meshLibrary = std::make_shared<MeshLibrary>();
+
+    // Texture Library initialization
+    _textureLibrary = std::make_shared<TextureLibrary>(this);
+
     // Framebuffer Manager initialization
     _frameBuffers = std::make_shared<FBOManager>(this);
 
@@ -145,8 +151,6 @@ void openGL::resizeWindowCallback(GLFWwindow* window, int width, int height)
 
 }
 
-
-
 void openGL::initializeTexture(Texture& texture)
 {
     // load and create a texture
@@ -255,17 +259,18 @@ void openGL::bindTextures(std::shared_ptr<Mesh> mesh)
 void openGL::initializeSkybox(Skybox &skybox, const std::array<Texture, 6>& textures)
 {
     Cubemap& cubemap = *skybox.getCubemap();
-    // VAO and VBO
-    glGenVertexArrays(1, &cubemap.VAO);
-    glGenBuffers(1, &cubemap.VBO);
-    glBindVertexArray(cubemap.VAO);
-    glBindBuffer(GL_ARRAY_BUFFER, cubemap.VBO);
 
-    glBufferData(GL_ARRAY_BUFFER, sizeof(cubemap._vertices), &cubemap._vertices, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    glBindVertexArray(0); // Unbind VAO
-    glBindBuffer(GL_ARRAY_BUFFER, 0); // Unbind VBO
+    // VAO and VBO
+    // glGenVertexArrays(1, &cubemap.VAO);
+    // glGenBuffers(1, &cubemap.VBO);
+    // glBindVertexArray(cubemap.VAO);
+    // glBindBuffer(GL_ARRAY_BUFFER, cubemap.VBO);
+
+    // glBufferData(GL_ARRAY_BUFFER, sizeof(cubemap._vertices), &cubemap._vertices, GL_STATIC_DRAW);
+    // glEnableVertexAttribArray(0);
+    // glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    // glBindVertexArray(0); // Unbind VAO
+    // glBindBuffer(GL_ARRAY_BUFFER, 0); // Unbind VBO
 
     // Setup textures of the cubemap
 

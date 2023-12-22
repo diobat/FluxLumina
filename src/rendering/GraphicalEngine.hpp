@@ -11,6 +11,7 @@
 #include "rendering/engineModules/LightManager.hpp"
 #include "rendering/engineModules/InstancingManager.hpp"
 #include "rendering/framebuffer/Framebuffer_Manager.hpp"
+#include "rendering/libraries/TextureLibrary.hpp"
 #include "rendering/Settings.hpp"
 
 class GraphicalEngine
@@ -33,8 +34,8 @@ public:
 	std::shared_ptr<Scene> getScene(unsigned int sceneIndex = 0) const;
 	std::vector<std::shared_ptr<Scene>> getScenes() const { return _scenes; }
 
-	void bindMeshLibrary(std::shared_ptr<MeshLibrary> meshLibrary);
-
+	std::shared_ptr<MeshLibrary> getMeshLibrary() { return _meshLibrary; };
+	std::shared_ptr<TextureLibrary> getTextureLibrary() { return _textureLibrary; };
 	std::shared_ptr<FBOManager> getFBOManager() { return _frameBuffers; };
 	std::shared_ptr<ShaderLibrary> getShaderLibrary() { return _shaderPrograms; };
 	std::shared_ptr<LightLibrary> getLightLibrary() { return _lightLibrary; };
@@ -48,7 +49,12 @@ protected:
 	int _viewportWidth, _viewportHeight;
 
 	std::vector<std::shared_ptr<Scene>> _scenes;
+
+	// Meshes
 	std::shared_ptr<MeshLibrary> _meshLibrary;
+
+	// Textures
+	std::shared_ptr<TextureLibrary> _textureLibrary;
 
 	// Framebuffer
 	std::shared_ptr<FBOManager> _frameBuffers;
@@ -67,6 +73,8 @@ protected:
 
 	// Engine settings
 	std::shared_ptr<Settings> _settings;
+
+
 };
 
 
