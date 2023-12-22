@@ -73,6 +73,16 @@ ForwardShadingStrategyChain::ForwardShadingStrategyChain(GraphicalEngine* engine
         add(std::make_shared<DefaultFramebufferNode>(this));     
 }
 
+bool ForwardShadingStrategyChain::reserveResources()
+{
+    std::shared_ptr<InstancingManager> instancingManager = _ranFrom->getInstancingManager();
+    std::shared_ptr<ShaderLibrary> shaderLibrary = _ranFrom->getShaderLibrary();
+
+    instancingManager->setupInstancing(shaderLibrary->getShader("Basic")->getProgramId(), _ranFrom->getScene(0));
+
+    return true;
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////// DEFERRED
 ///////////////////////////////////////////////////////////////////////////////////////////

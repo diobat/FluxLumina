@@ -39,9 +39,6 @@ public:
 	void renderInstancedMeshes(std::shared_ptr<InstancingManager> instancingManager = nullptr) override;
 	void renderSkybox(Skybox &skybox) override;
 
-	// Instancing
-	void initializeInstanceManager(std::shared_ptr<Scene> scene);
-
 private:
 	// Window
 	void resizeWindowCallback(GLFWwindow *window, int width, int height);

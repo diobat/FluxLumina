@@ -11,8 +11,6 @@
 void update(openGL& graphicalEngine, std::vector<std::shared_ptr<Scene>> scenes, std::shared_ptr<UserInput::glfwKeyboardScanner>& userInput)
 {
 
-    graphicalEngine.initializeInstanceManager(scenes[0]);
-
     float startTime = static_cast<float>(glfwGetTime());
     float newTime  = 0.0f;
     float gameTime = 0.0f;

@@ -242,9 +242,3 @@ void openGL::renderSkybox(Skybox& skybox)
     glActiveTexture(GL_TEXTURE0);
     glDepthFunc(GL_LESS);
 }
-
-void openGL::initializeInstanceManager(std::shared_ptr<Scene> scene)
-{
-    _instancingManager->setupInstancing(_shaderPrograms->getShader("Basic")->getProgramId(), _scenes[0]);
-}
-
