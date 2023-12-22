@@ -19,7 +19,7 @@ void update(openGL& graphicalEngine, std::vector<std::shared_ptr<Scene>> scenes,
     float gameTime = 0.0f;
     float deltaTime = 0.0f;
     std::string windowTitle;
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    
     while (!glfwWindowShouldClose(graphicalEngine.getWindowPtr()))
     {
         /* Update game time value */

@@ -161,6 +161,24 @@ void Settings::set(E_Settings setting, int value)
             glfwSwapInterval(0);
         }
         break;
+    case E_Settings::POLYGON_LINES:
+        _polygonMode = static_cast<E_PolygonMode>(value);
+        switch (_polygonMode)
+        {
+        case E_PolygonMode::FILL:
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+            break;
+        case E_PolygonMode::LINES:
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+            break;
+        case E_PolygonMode::POINTS:
+            glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
+            break;
+        default:
+            break;
+        }
+        break;
+
     default:
         break;
     }
@@ -244,4 +262,14 @@ E_Setting Settings::getSSAO() const
 E_Setting Settings::getSeamlessCubemapSampling() const
 {
     return _seamlessCubemapSampling;
+}
+
+E_Setting Settings::getvSync() const
+{
+    return _vSync;
+}
+
+E_PolygonMode Settings::getPolygonMode() const
+{
+    return _polygonMode;
 }
