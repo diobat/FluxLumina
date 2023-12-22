@@ -1,11 +1,9 @@
 #pragma once
 
 // First-party includes
-#include "resources/Mesh.hpp"
-#include "resources/Texture.hpp"
 #include "scene/Scene.hpp"
-#include "rendering/MeshLibrary.hpp"
 
+#include "rendering/MeshLibrary.hpp"
 #include "rendering/strategy/StrategyChain.hpp"
 #include "rendering/shader/ShaderLibrary.hpp"
 #include "rendering/engineModules/LightManager.hpp"
@@ -17,14 +15,9 @@
 class GraphicalEngine
 {
 public:
-	GraphicalEngine();
-	
-	virtual void bindTextures(std::shared_ptr<Mesh> mesh) = 0;
+	GraphicalEngine();	
 
 	virtual void renderFrame(std::shared_ptr<Scene>) = 0{};
-	virtual void renderModel(ModelObject& model) = 0;
-	virtual void renderInstancedMeshes(std::shared_ptr<InstancingManager> instanceManager) = 0;
-	virtual void renderSkybox(Skybox& skybox) = 0;
 
 	void bindScene(std::shared_ptr<Scene> scene);
 	void unbindScene(std::shared_ptr<Scene> scene);

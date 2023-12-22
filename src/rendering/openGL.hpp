@@ -32,13 +32,7 @@ public:
 	void renderFrame(std::shared_ptr<Scene> scene) override;
 
 	GLFWwindow* getWindowPtr();
-
-	// Models
-	void bindTextures(std::shared_ptr<Mesh> mesh) override;
-	void renderModel(ModelObject &model) override;
-	void renderInstancedMeshes(std::shared_ptr<InstancingManager> instancingManager = nullptr) override;
-	void renderSkybox(Skybox &skybox) override;
-
+	
 private:
 	// Window
 	void resizeWindowCallback(GLFWwindow *window, int width, int height);

@@ -209,3 +209,59 @@ void FBOManager::resizeViewPortBoundFBOs()
         }
     }
 }
+
+// Render Calls
+
+
+void FBOManager::renderModel(ModelObject &model)
+{
+    std::shared_ptr<ShaderLibrary> shaderLibrary = _ranFrom->getShaderLibrary();
+
+    shaderLibrary->setUniformMat4("model", model.getModelMatrix());
+
+    for (auto &one_mesh : model.getModel()->meshes)
+    {
+        _ranFrom->getTextureLibrary()->bindTextures(one_mesh);
+        glBindVertexArray(one_mesh->VAO);
+        int vertexCount = static_cast<int>(one_mesh->_indices.size());
+        glDrawElements(GL_TRIANGLES, vertexCount, GL_UNSIGNED_INT, 0);
+        glBindVertexArray(0);
+
+        glBindTexture(GL_TEXTURE_2D, 0); // Unbind texture
+    }
+}
+
+void FBOManager::renderInstancedMeshes()
+{
+    std::shared_ptr<InstancingManager> instancingManager = _ranFrom->getInstancingManager();
+
+    for(auto& instancingGroup : instancingManager->getInstancingGroups())
+    {
+        _ranFrom->getTextureLibrary()->bindTextures(instancingGroup.second.mesh); 
+        glBindVertexArray(instancingGroup.second.mesh->VAO);
+        int vertexCount = static_cast<int>(instancingGroup.second.mesh->_indices.size());
+        int instanceCount = static_cast<int>(instancingGroup.second.modelObjects.size());
+        glDrawElementsInstanced(GL_TRIANGLES, vertexCount, GL_UNSIGNED_INT, 0, instanceCount);
+    }
+    // Unbind the VAO
+    glBindVertexArray(0);
+}
+
+void FBOManager::renderSkybox(Cubemap& cubemap)
+{
+    std::shared_ptr<ShaderLibrary> shaderLibrary = _ranFrom->getShaderLibrary();
+
+    glDepthFunc(GL_LEQUAL);
+
+    shaderLibrary->setUniformInt("skyboxCube", 0);
+    glActiveTexture(GL_TEXTURE0 + 0);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap.getTexture()._id);
+
+    glBindVertexArray(cubemap.VAO);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+
+    glBindVertexArray(0);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+    glActiveTexture(GL_TEXTURE0);
+    glDepthFunc(GL_LESS);
+}
