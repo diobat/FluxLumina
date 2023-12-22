@@ -23,7 +23,7 @@ int openGL::initialize(GLFWwindow* window, E_RenderStrategy strategy)
     glfwSetWindowUserPointer(_window, this);
     auto func = [](GLFWwindow* window, int width, int height)
     {
-        static_cast<openGL*>(glfwGetWindowUserPointer(window))->resizeWindow(window, width, height);
+        static_cast<openGL*>(glfwGetWindowUserPointer(window))->resizeWindowCallback(window, width, height);
     };
     glfwSetWindowSizeCallback(_window, func);
     // End window resize code
@@ -118,7 +118,7 @@ void openGL::renderInstancedMeshes(std::shared_ptr<InstancingManager> instancing
     glBindVertexArray(0);
 }
 
-void openGL::resizeWindow(GLFWwindow* window, int width, int height)
+void openGL::resizeWindowCallback(GLFWwindow* window, int width, int height)
 {
     _viewportWidth = width;
     _viewportHeight = height;

@@ -31,8 +31,7 @@ public:
 	// Render a frame by applying the loaded strategy
 	void renderFrame(std::shared_ptr<Scene> scene) override;
 
-	// Window
-	void resizeWindow(GLFWwindow *window, int width, int height);
+
 	GLFWwindow* getWindowPtr();
 
 	// Models
@@ -50,6 +49,9 @@ public:
 	void initializeInstanceManager(std::shared_ptr<Scene> scene);
 
 private:
+	// Window
+	void resizeWindowCallback(GLFWwindow *window, int width, int height);
+
 	void cameraSetup(std::shared_ptr<Scene> scene);
 
 	// GLFW window
