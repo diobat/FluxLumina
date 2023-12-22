@@ -1,7 +1,7 @@
 // First-party includes
 #include "rendering/GLFW_Wrapper.hpp"
 
-#include "rendering/openGL.hpp"
+#include "rendering/FluxLumina.hpp"
 #include "scene/SceneObjectFactory.hpp"
 #include "util/SceneSetup.h"
 
@@ -13,7 +13,7 @@ int main(void)
     // Scene initialization
     std::shared_ptr<Scene> scene = std::make_shared<Scene>();
 
-    openGL graphicalEngine(scene, E_RenderStrategy::ForwardShading);
+    FluxLumina graphicalEngine(scene, E_RenderStrategy::ForwardShading);
 
     // Init object factory
     SceneObjectFactory factory(scene.get(), &graphicalEngine);

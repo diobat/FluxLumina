@@ -7,10 +7,10 @@
 // GLFW include
 #include "rendering/GLFW_Wrapper.hpp"
 
-class openGL : public GraphicalEngine
+class FluxLumina : public GraphicalEngine
 {
 public:
-	openGL(std::shared_ptr<Scene> scene , E_RenderStrategy strategy);
+	FluxLumina(std::shared_ptr<Scene> scene , E_RenderStrategy strategy);
 
 	int initialize(std::shared_ptr<Scene> scene , E_RenderStrategy strategy);
 

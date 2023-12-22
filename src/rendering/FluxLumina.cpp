@@ -1,4 +1,4 @@
-#include "rendering/openGL.hpp"
+#include "rendering/FluxLumina.hpp"
 #include "rendering/openGLContext.hpp"
 
 // First-party includes
@@ -12,12 +12,12 @@
 #include "rendering/engineModules/InstancingManager.hpp"
 
 
-openGL::openGL(std::shared_ptr<Scene> scene , E_RenderStrategy strategy)
+FluxLumina::FluxLumina(std::shared_ptr<Scene> scene , E_RenderStrategy strategy)
 {
     initialize(scene, strategy);
 }
 
-int openGL::initialize(std::shared_ptr<Scene> scene, E_RenderStrategy strategy)
+int FluxLumina::initialize(std::shared_ptr<Scene> scene, E_RenderStrategy strategy)
 {
     _scenes.clear();
     _scenes.push_back(scene);
@@ -38,7 +38,7 @@ int openGL::initialize(std::shared_ptr<Scene> scene, E_RenderStrategy strategy)
     glfwSetWindowUserPointer(_window, this);
     auto func = [](GLFWwindow* window, int width, int height)
     {
-        static_cast<openGL*>(glfwGetWindowUserPointer(window))->resizeWindowCallback(window, width, height);
+        static_cast<FluxLumina*>(glfwGetWindowUserPointer(window))->resizeWindowCallback(window, width, height);
     };
     glfwSetWindowSizeCallback(_window, func);
     // End window resize code
@@ -102,12 +102,12 @@ int openGL::initialize(std::shared_ptr<Scene> scene, E_RenderStrategy strategy)
 }
 
 // Next step is to encapsulate this in a method that also handles Framebuffer changes
-void openGL::renderFrame(std::shared_ptr<Scene> scene)
+void FluxLumina::renderFrame(std::shared_ptr<Scene> scene)
 {
     _strategyChain->run();
 }
 
-void openGL::resizeWindowCallback(GLFWwindow* window, int width, int height)
+void FluxLumina::resizeWindowCallback(GLFWwindow* window, int width, int height)
 {
     _viewportWidth = width;
     _viewportHeight = height;
@@ -133,7 +133,7 @@ void openGL::resizeWindowCallback(GLFWwindow* window, int width, int height)
     glViewport(0, 0, _viewportWidth, _viewportHeight);
 }
 
-void openGL::update()
+void FluxLumina::update()
 {
     float startTime = static_cast<float>(glfwGetTime());
     float newTime  = 0.0f;
