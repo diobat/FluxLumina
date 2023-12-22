@@ -34,15 +34,10 @@ public:
 	GLFWwindow* getWindowPtr();
 
 	// Models
-	void initializeTexture(Texture& texture) override;
-	void initializeTextureHDR(TextureHDR& texture) override;
 	void bindTextures(std::shared_ptr<Mesh> mesh) override;
 	void renderModel(ModelObject &model) override;
 	void renderInstancedMeshes(std::shared_ptr<InstancingManager> instancingManager = nullptr) override;
 	void renderSkybox(Skybox &skybox) override;
-
-	// Cubemaps
-	void initializeSkybox(Skybox &skybox, const std::array<Texture, 6>& textures) override;
 
 	// Instancing
 	void initializeInstanceManager(std::shared_ptr<Scene> scene);

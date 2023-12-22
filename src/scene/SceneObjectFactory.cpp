@@ -127,15 +127,6 @@ namespace
         texture._useLinear = true;
     }
 
-    void TextureData_Free(Texture &texture)
-    {
-        stbi_image_free(texture._pixels);
-    }
-
-    void TextureData_Free(TextureHDR &texture)
-    {
-        stbi_image_free(texture._pixels);
-    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -408,7 +399,7 @@ std::vector<Texture> SceneObjectFactory::loadMaterialTextures(const aiScene* sce
             }
 
             setTextureData(texture, type);
-            _boundEngine->initializeTexture(texture);
+            _boundEngine->getTextureLibrary()->generate_GL_texture(texture);
             materialTextures.push_back(texture);
             _boundEngine->getMeshLibrary()->addTexture(texture);
         }
@@ -442,7 +433,7 @@ std::vector<Texture> SceneObjectFactory::loadExternalTextures(const std::string 
             Texture texture = TextureFromFile(textures.heightMaps[i].c_str(), path);
             setTextureData(texture, aiTextureType_HEIGHT);
             texture._type = E_TexureType::HEIGHT;   // Wavefront misclassifies normal maps as height maps, temporarily fix
-            _boundEngine->initializeTexture(texture);
+            _boundEngine->getTextureLibrary()->generate_GL_texture(texture);
             materialTextures.push_back(texture);
             _boundEngine->getMeshLibrary()->addTexture(texture);
         }
@@ -467,7 +458,7 @@ std::vector<Texture> SceneObjectFactory::loadExternalTextures(const std::string 
         {
             Texture texture = TextureFromFile(textures.lightMaps[i].c_str(), path);
             setTextureData(texture, aiTextureType_LIGHTMAP);
-            _boundEngine->initializeTexture(texture);
+            _boundEngine->getTextureLibrary()->generate_GL_texture(texture);
             materialTextures.push_back(texture);
             _boundEngine->getMeshLibrary()->addTexture(texture);
         }
@@ -542,12 +533,13 @@ std::shared_ptr<Cubemap> SceneObjectFactory::create_Skybox(std::vector<std::stri
             std::cout << "ERROR::CUBEMAP::TEXTURE_LOADING_FAILED " << i << std::endl;
         }
     }
-    std::shared_ptr<Cubemap> cubemap = std::make_shared<Cubemap>();
-    cubemap->getTexture()._type = E_TexureType::CUBEMAP;
-    _boundScene->getSkybox().setCubemap(cubemap);
-    _boundEngine->initializeSkybox(_boundScene->getSkybox(), cubemapTex);
+    Cubemap cubemap;
+    cubemap.getTexture()._type = E_TexureType::CUBEMAP;
+    std::shared_ptr<Cubemap> cubemapPtr = _boundEngine->getTextureLibrary()->generate_GL_cubemap(cubemap, cubemapTex);
 
-    return cubemap;
+    _boundScene->getSkybox().setCubemap(cubemapPtr);
+
+    return cubemapPtr;
 }
 
 std::shared_ptr<Cubemap> SceneObjectFactory::create_IBL(std::string path, bool flipUVs)
@@ -564,15 +556,11 @@ std::shared_ptr<Cubemap> SceneObjectFactory::create_IBL(std::string path, bool f
         std::cout << "ERROR::CUBEMAP::TEXTURE_LOADING_FAILED  : " + path << std::endl;
     }
 
-    _boundEngine->initializeTextureHDR(texture);
-
-    TextureData_Free(texture);
+    _boundEngine->getTextureLibrary()->generate_GL_textureHDR(texture);
 
     std::shared_ptr<TextureHDR> texturePtr = std::make_shared<TextureHDR>(texture);
 
     _boundScene->getSkybox().setIBLmap(texturePtr);
-
-
 
     return cubemap;
 };

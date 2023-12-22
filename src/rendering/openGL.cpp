@@ -151,37 +151,6 @@ void openGL::resizeWindowCallback(GLFWwindow* window, int width, int height)
 
 }
 
-void openGL::initializeTexture(Texture& texture)
-{
-    // load and create a texture
-    glGenTextures(1, &texture._id);
-    glBindTexture(GL_TEXTURE_2D, texture._id);
-    // set the texture wrapping parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    // set texture filtering parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-
-    glTexImage2D(GL_TEXTURE_2D, 0, texture._colorChannels, texture._width, texture._height, 0, texture._colorChannels, GL_UNSIGNED_BYTE, texture._pixels);
-    glGenerateMipmap(GL_TEXTURE_2D);
-}   
-
-void openGL::initializeTextureHDR(TextureHDR& texture)
-{
-    // load and create a texture
-    glGenTextures(1, &texture._id);
-    glBindTexture(GL_TEXTURE_2D, texture._id);
-    // set the texture wrapping parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);	
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);	
-    // set texture filtering parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); 
-    // load image, create texture and generate mipmaps
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, texture._width, texture._height, 0, texture._colorChannels, GL_FLOAT, texture._pixels);
-}
-
 void openGL::bindTextures(std::shared_ptr<Mesh> mesh)
 {
 
@@ -253,42 +222,6 @@ void openGL::bindTextures(std::shared_ptr<Mesh> mesh)
             break;
         }
     }
-}
-
-
-void openGL::initializeSkybox(Skybox &skybox, const std::array<Texture, 6>& textures)
-{
-    Cubemap& cubemap = *skybox.getCubemap();
-
-    // VAO and VBO
-    // glGenVertexArrays(1, &cubemap.VAO);
-    // glGenBuffers(1, &cubemap.VBO);
-    // glBindVertexArray(cubemap.VAO);
-    // glBindBuffer(GL_ARRAY_BUFFER, cubemap.VBO);
-
-    // glBufferData(GL_ARRAY_BUFFER, sizeof(cubemap._vertices), &cubemap._vertices, GL_STATIC_DRAW);
-    // glEnableVertexAttribArray(0);
-    // glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    // glBindVertexArray(0); // Unbind VAO
-    // glBindBuffer(GL_ARRAY_BUFFER, 0); // Unbind VBO
-
-    // Setup textures of the cubemap
-
-    Texture& cubemapTexture = cubemap.getTexture();
-    glGenTextures(1, &cubemapTexture._id);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture._id);
-    // load and create a texture
-    for (int i(0); i < textures.size() ; ++i)
-    {
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, textures[i]._colorChannels, textures[i]._width, textures[i]._height, 0, textures[i]._colorChannels, GL_UNSIGNED_BYTE, textures[i]._pixels);
-    }
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, 0); // Unbind texture
-
 }
 
 void openGL::renderSkybox(Skybox& skybox)

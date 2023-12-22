@@ -19,9 +19,6 @@ class GraphicalEngine
 public:
 	GraphicalEngine();
 	
-	virtual void initializeTexture(Texture &texture) = 0;
-	virtual void initializeTextureHDR(TextureHDR& texture) = 0;
-	virtual void initializeSkybox(Skybox &skybox, const std::array<Texture, 6>& textures) = 0;
 	virtual void bindTextures(std::shared_ptr<Mesh> mesh) = 0;
 
 	virtual void renderFrame(std::shared_ptr<Scene>) = 0{};

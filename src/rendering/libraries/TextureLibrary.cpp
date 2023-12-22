@@ -1,5 +1,6 @@
 #include "rendering/libraries/TextureLibrary.hpp"
-#include "rendering/GraphicalEngine.hpp"	
+#include "rendering/GraphicalEngine.hpp"
+#include "util/VertexShapes.hpp"
 
 #include <stb_image.h>
 
@@ -64,17 +65,7 @@ std::shared_ptr<TextureHDR> TextureLibrary::generate_GL_textureHDR(TextureHDR& t
 std::shared_ptr<Cubemap> TextureLibrary::generate_GL_cubemap(Cubemap &cubemap, const std::array<Texture, 6>& textures)
 {
 
-    // VAO and VBO
-    // glGenVertexArrays(1, &cubemap.VAO);
-    // glGenBuffers(1, &cubemap.VBO);
-    // glBindVertexArray(cubemap.VAO);
-    // glBindBuffer(GL_ARRAY_BUFFER, cubemap.VBO);
-
-    // glBufferData(GL_ARRAY_BUFFER, sizeof(cubemap._vertices), &cubemap._vertices, GL_STATIC_DRAW);
-    // glEnableVertexAttribArray(0);
-    // glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    // glBindVertexArray(0); // Unbind VAO
-    // glBindBuffer(GL_ARRAY_BUFFER, 0); // Unbind VBO
+    cubemap.VAO = shapes::cube::VAO();
 
     // Setup textures of the cubemap
 
