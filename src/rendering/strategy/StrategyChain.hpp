@@ -57,6 +57,7 @@ class ForwardShadingStrategyChain : public StrategyChain
 {
 public:
     ForwardShadingStrategyChain(GraphicalEngine* engine);
+    bool reserveResources() override;
 };
 
 class DeferredShadingStrategyChain : public StrategyChain

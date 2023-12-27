@@ -39,10 +39,7 @@ struct TextureLocations
 class SceneObjectFactory
 {
 public:
-    SceneObjectFactory(
-        Scene* scene = nullptr, 
-        GraphicalEngine* engine = nullptr,
-        MeshLibrary* meshLibrary = nullptr);
+    SceneObjectFactory(Scene* scene = nullptr, GraphicalEngine* engine = nullptr);
 
     void bindScene(Scene* scene);
     void bindEngine(GraphicalEngine* engine);
@@ -70,5 +67,4 @@ public:
 private:
     Scene* _boundScene;
     GraphicalEngine* _boundEngine;
-    MeshLibrary* _meshLibrary;
 };

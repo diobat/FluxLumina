@@ -47,6 +47,11 @@ public:
 
     void resizeViewPortBoundFBOs();
 
+    // Render Calls
+    void renderModel(ModelObject &model);
+	void renderInstancedMeshes();
+	void renderSkybox(Cubemap& cubemap);
+
 private:
     std::vector<std::shared_ptr<FBO>> _frameBufferObjects;
     int _currentFBOIndex;

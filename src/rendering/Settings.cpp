@@ -23,7 +23,9 @@ Settings::Settings(GLFWwindow* _window)    :
     _bloom(E_Setting::ON),
     _ssao(E_Setting::ON),
     _seamlessCubemapSampling(E_Setting::ON),
-    _vSync(E_Setting::ON)
+    _vSync(E_Setting::ON),
+    _polygonMode(E_PolygonMode::FILL),
+    _graphicalDebugOutput(E_Setting::OFF)
 {
     /* Make the window's context current */
     glfwMakeContextCurrent(_window);
@@ -43,6 +45,8 @@ Settings::Settings(GLFWwindow* _window)    :
     set(E_Settings::SSAO, 1);
     set(E_Settings::SEAMLESS_CUBEMAP_SAMPLING, 1);
     set(E_Settings::VSYNC, 1);
+    set(E_Settings::POLYGON_LINES, 0);
+    set(E_Settings::GRAPHICAL_DEBUG_OUTPUT, 0);
 }
 
 void Settings::set(E_Settings setting, int value)
@@ -161,6 +165,38 @@ void Settings::set(E_Settings setting, int value)
             glfwSwapInterval(0);
         }
         break;
+    case E_Settings::POLYGON_LINES:
+        _polygonMode = static_cast<E_PolygonMode>(value);
+        switch (_polygonMode)
+        {
+        case E_PolygonMode::FILL:
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+            break;
+        case E_PolygonMode::LINES:
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+            break;
+        case E_PolygonMode::POINTS:
+            glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
+            break;
+        default:
+            break;
+        }
+        break;
+    case E_Settings::GRAPHICAL_DEBUG_OUTPUT:
+        _graphicalDebugOutput = static_cast<E_Setting>(value);
+        if(value)
+        {
+            glEnable(GL_DEBUG_OUTPUT);
+            glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+            //glDebugMessageCallback(MessageCallback, 0);
+        }
+        else
+        {
+            glDisable(GL_DEBUG_OUTPUT);
+            glDisable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+        }
+        break;
+
     default:
         break;
     }
@@ -244,4 +280,19 @@ E_Setting Settings::getSSAO() const
 E_Setting Settings::getSeamlessCubemapSampling() const
 {
     return _seamlessCubemapSampling;
+}
+
+E_Setting Settings::getvSync() const
+{
+    return _vSync;
+}
+
+E_PolygonMode Settings::getPolygonMode() const
+{
+    return _polygonMode;
+}
+
+E_Setting Settings::getGLDebugOutput() const
+{
+    return _graphicalDebugOutput;
 }

@@ -10,21 +10,19 @@
 // First-party includes
 #include "scene/Scene.hpp"
 
-namespace UserInput
+
+class glfwKeyboardScanner
 {
+public:
+	glfwKeyboardScanner(GLFWwindow* window);
+	void tickCallback();
+	void bindToScene(std::shared_ptr<Scene> scene);
+	void readInputs();
 
-	class glfwKeyboardScanner
-	{
-	public:
-		glfwKeyboardScanner(GLFWwindow* window);
-		void tickCallback();
-		void bindToScene(std::shared_ptr<Scene> scene);
-		void readInputs();
+private:
+	GLFWwindow* _window;
+	std::shared_ptr<Scene> _scene;
+};
 
-	private:
-		GLFWwindow* _window;
-		std::shared_ptr<Scene> _scene;
-	};
-}
 
 

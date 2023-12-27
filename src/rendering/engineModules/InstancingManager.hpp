@@ -3,10 +3,6 @@
 // GLFW include
 #include "rendering/GLFW_Wrapper.hpp"
 
-// GLM - Math is a gateway science
-#define  GLM_FORCE_RADIANS
-#include <glm/glm.hpp>
-
 // First party includes
 #include "resources/Mesh.hpp"
 #include "scene/ModelObject.hpp"

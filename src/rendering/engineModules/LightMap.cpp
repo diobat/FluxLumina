@@ -1,7 +1,10 @@
 #include "rendering/engineModules/LightMap.hpp"
-#include "rendering/engineModules/LightManager.hpp"
 
 #include "rendering/GraphicalEngine.hpp"
+#include "rendering/engineModules/LightManager.hpp"
+#include "rendering/framebuffer/Framebuffer_Manager.hpp"
+#include "rendering/shader/ShaderLibrary.hpp"
+
 #include "util/VertexShapes.hpp"
 
 namespace

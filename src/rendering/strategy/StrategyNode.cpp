@@ -136,10 +136,11 @@ void RenderOpaqueNode::run()
 {
     std::shared_ptr<Scene> scene = _chain->engine()->getScene();
     std::shared_ptr<ShaderLibrary> shaderPrograms = _chain->engine()->getShaderLibrary();
-    std::shared_ptr<InstancingManager> instancingManager = _chain->engine()->getInstancingManager();
+    std::shared_ptr<FBOManager> frameBuffers = _chain->engine()->getFBOManager();
+    //std::shared_ptr<InstancingManager> instancingManager = _chain->engine()->getInstancingManager();
 
     shaderPrograms->use("Basic");
-    _chain->engine()->renderInstancedMeshes(instancingManager);
+    frameBuffers->renderInstancedMeshes();
 
 
     for(auto shader : shaderPrograms->getShaders())
@@ -163,7 +164,7 @@ void RenderOpaqueNode::run()
             {
                 continue;
             }
-            _chain->engine()->renderModel(*modelObject);
+            frameBuffers->renderModel(*modelObject);
         }
     }
 }
@@ -176,6 +177,7 @@ void RenderSkyboxNode::run()
 {
     std::shared_ptr<Scene> scene = _chain->engine()->getScene();
     std::shared_ptr<ShaderLibrary> shaderPrograms = _chain->engine()->getShaderLibrary();
+    std::shared_ptr<FBOManager> frameBuffers = _chain->engine()->getFBOManager();
 
     //Draw Skybox if it exists
     // if (scene->getSkybox().getCubemap() != nullptr)
@@ -188,9 +190,8 @@ void RenderSkyboxNode::run()
         shaderPrograms->setUniformMat4("view", view);
         shaderPrograms->setUniformMat4("projection", projection);
 
-        _chain->engine()->renderSkybox(scene->getSkybox());
+        frameBuffers->renderSkybox(*scene->getSkybox().getCubemap());
     }
-
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -201,6 +202,7 @@ void RenderTransparentNode::run()
 {
     std::shared_ptr<Scene> scene = _chain->engine()->getScene();
     std::shared_ptr<ShaderLibrary> shaderPrograms = _chain->engine()->getShaderLibrary();
+    std::shared_ptr<FBOManager> frameBuffers = _chain->engine()->getFBOManager();
 
 
     for(unsigned int shaderIndex : shaderPrograms->getShaderIndexesPerFeature(E_ShaderProgramFeatures::E_TRANSPARENCY))
@@ -222,11 +224,10 @@ void RenderTransparentNode::run()
         {
             for (std::map<float, std::shared_ptr<ModelObject>>::reverse_iterator it = sortedTransparentModels.rbegin(); it != sortedTransparentModels.rend(); ++it)
             {
-                _chain->engine()->renderModel(*it->second);
+                frameBuffers->renderModel(*it->second);
             }
         }
     }
-
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -405,13 +406,14 @@ void GeometryPassNode::run()
 {
     std::shared_ptr<Scene> scene = _chain->engine()->getScene();
     std::shared_ptr<ShaderLibrary> shaderPrograms = _chain->engine()->getShaderLibrary();
-    std::shared_ptr<InstancingManager> instancingManager = _chain->engine()->getInstancingManager();
+    //std::shared_ptr<InstancingManager> instancingManager = _chain->engine()->getInstancingManager();
+    std::shared_ptr<FBOManager> frameBuffers = _chain->engine()->getFBOManager();
 
     // Activate proper shader program
     auto& geometryShaderProgram = shaderPrograms->getShader("deferred_geometry");
     shaderPrograms->use(geometryShaderProgram);
 
-    _chain->engine()->renderInstancedMeshes(instancingManager);
+    frameBuffers->renderInstancedMeshes();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////

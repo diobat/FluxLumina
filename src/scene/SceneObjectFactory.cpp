@@ -1,5 +1,7 @@
 #include "scene/SceneObjectFactory.hpp"
 
+#include "rendering/libraries/TextureLibrary.hpp"
+
 #include "helpers/RootDir.h"
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -119,6 +121,9 @@ namespace
             case aiTextureType_UNKNOWN:
                 texture._type = E_TexureType::ROUGHNESS;
                 break;
+            case aiTextureType_LIGHTMAP:
+                texture._type = E_TexureType::LIGHTMAP;
+                break;
             default:
                 texture._type = E_TexureType::DIFFUSE;
                 break;
@@ -127,26 +132,16 @@ namespace
         texture._useLinear = true;
     }
 
-    void TextureData_Free(Texture &texture)
-    {
-        stbi_image_free(texture._pixels);
-    }
-
-    void TextureData_Free(TextureHDR &texture)
-    {
-        stbi_image_free(texture._pixels);
-    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////// INITIALIZATION
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-SceneObjectFactory::SceneObjectFactory(Scene* scene, GraphicalEngine* engine, MeshLibrary* meshLibrary)
+SceneObjectFactory::SceneObjectFactory(Scene* scene, GraphicalEngine* engine)
 {
     _boundScene = scene;
     _boundEngine = engine;
-    _meshLibrary = meshLibrary;
 
     if(scene != nullptr)
     {
@@ -193,9 +188,8 @@ ModelObject &SceneObjectFactory::create_Model(const std::string &modelPath, cons
 
 void SceneObjectFactory::load_ModelMeshes(Model& model, const std::string& path)
 {
-
     // check if model is already loaded
-    if(_meshLibrary != nullptr && !_meshLibrary->isMeshLoaded(path))
+    if(_boundEngine->getMeshLibrary() != nullptr && !_boundEngine->getMeshLibrary()->isMeshLoaded(path))
     {
         // read file via ASSIMP
         Assimp::Importer importer;
@@ -219,10 +213,10 @@ void SceneObjectFactory::load_ModelMeshes(Model& model, const std::string& path)
     }
 
     model.directory = path;
-    model.meshes = _meshLibrary->getMeshes(path);
+    model.meshes = _boundEngine->getMeshLibrary()->getMeshes(path);
 }
 
-// processes a node in a recursive fashion. Processes each individual mesh located at the node and repeats this process on its children nodes (if any).
+// processes nodes recursively
 void SceneObjectFactory::processNode(const std::string &path, aiNode *node, const aiScene *scene)
 {
     std::vector<std::shared_ptr<Mesh>> newMeshes;
@@ -230,18 +224,13 @@ void SceneObjectFactory::processNode(const std::string &path, aiNode *node, cons
     // process each mesh located at the current node
     for (unsigned int i = 0; i < node->mNumMeshes; i++)
     {
-        // the node object only contains indices to index the actual objects in the scene.
-        // the scene contains all the data, node is just to keep stuff organized (like relations between nodes).
         aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
 
         newMeshes.push_back(processMesh(path, mesh, scene));
     }
-    
-    for(auto& mesh : newMeshes)
-    {
-        _boundEngine->initializeMesh(mesh);
-    }
-    _meshLibrary->addMesh(path, newMeshes);
+
+    // Update mesh library
+    _boundEngine->getMeshLibrary()->addMesh(path, newMeshes);
 
     // after we've processed all of the meshes (if any) we then recursively process each of the children nodes
     for (unsigned int i = 0; i < node->mNumChildren; i++)
@@ -381,7 +370,7 @@ std::shared_ptr<Mesh> SceneObjectFactory::processMesh(const std::string &path, a
 std::vector<Texture> SceneObjectFactory::loadMaterialTextures(const aiScene* scene, const std::string &path, aiMaterial *mat, aiTextureType type)
 {
     std::vector<Texture> materialTextures;
-    const auto& loadedTextures = _meshLibrary->getLoadedTextures();
+    const auto& loadedTextures = _boundEngine->getMeshLibrary()->getLoadedTextures();
 
     for(unsigned int i = 0; i < mat->GetTextureCount(type); i++)
     {
@@ -415,9 +404,9 @@ std::vector<Texture> SceneObjectFactory::loadMaterialTextures(const aiScene* sce
             }
 
             setTextureData(texture, type);
-            _boundEngine->initializeTexture(texture);
+            _boundEngine->getTextureLibrary()->generate_GL_texture(texture);
             materialTextures.push_back(texture);
-            _meshLibrary->addTexture(texture);
+            _boundEngine->getMeshLibrary()->addTexture(texture);
         }
     }
     return materialTextures;
@@ -426,7 +415,7 @@ std::vector<Texture> SceneObjectFactory::loadMaterialTextures(const aiScene* sce
 std::vector<Texture> SceneObjectFactory::loadExternalTextures(const std::string &path, const TextureLocations & textures) const
 {
     std::vector<Texture> materialTextures;
-    const auto& loadedTextures = _meshLibrary->getLoadedTextures();
+    const auto& loadedTextures = _boundEngine->getMeshLibrary()->getLoadedTextures();
 
 
     // First load HEIGHT maps
@@ -449,9 +438,9 @@ std::vector<Texture> SceneObjectFactory::loadExternalTextures(const std::string 
             Texture texture = TextureFromFile(textures.heightMaps[i].c_str(), path);
             setTextureData(texture, aiTextureType_HEIGHT);
             texture._type = E_TexureType::HEIGHT;   // Wavefront misclassifies normal maps as height maps, temporarily fix
-            _boundEngine->initializeTexture(texture);
+            _boundEngine->getTextureLibrary()->generate_GL_texture(texture);
             materialTextures.push_back(texture);
-            _meshLibrary->addTexture(texture);
+            _boundEngine->getMeshLibrary()->addTexture(texture);
         }
     }
 
@@ -474,9 +463,9 @@ std::vector<Texture> SceneObjectFactory::loadExternalTextures(const std::string 
         {
             Texture texture = TextureFromFile(textures.lightMaps[i].c_str(), path);
             setTextureData(texture, aiTextureType_LIGHTMAP);
-            _boundEngine->initializeTexture(texture);
+            _boundEngine->getTextureLibrary()->generate_GL_texture(texture);
             materialTextures.push_back(texture);
-            _meshLibrary->addTexture(texture);
+            _boundEngine->getMeshLibrary()->addTexture(texture);
         }
     }
 
@@ -549,12 +538,13 @@ std::shared_ptr<Cubemap> SceneObjectFactory::create_Skybox(std::vector<std::stri
             std::cout << "ERROR::CUBEMAP::TEXTURE_LOADING_FAILED " << i << std::endl;
         }
     }
-    std::shared_ptr<Cubemap> cubemap = std::make_shared<Cubemap>();
-    cubemap->getTexture()._type = E_TexureType::CUBEMAP;
-    _boundScene->getSkybox().setCubemap(cubemap);
-    _boundEngine->initializeSkybox(_boundScene->getSkybox(), cubemapTex);
+    Cubemap cubemap;
+    cubemap.getTexture()._type = E_TexureType::CUBEMAP;
+    std::shared_ptr<Cubemap> cubemapPtr = _boundEngine->getTextureLibrary()->generate_GL_cubemap(cubemap, cubemapTex);
 
-    return cubemap;
+    _boundScene->getSkybox().setCubemap(cubemapPtr);
+
+    return cubemapPtr;
 }
 
 std::shared_ptr<Cubemap> SceneObjectFactory::create_IBL(std::string path, bool flipUVs)
@@ -571,15 +561,11 @@ std::shared_ptr<Cubemap> SceneObjectFactory::create_IBL(std::string path, bool f
         std::cout << "ERROR::CUBEMAP::TEXTURE_LOADING_FAILED  : " + path << std::endl;
     }
 
-    _boundEngine->initializeTextureHDR(texture);
-
-    TextureData_Free(texture);
+    _boundEngine->getTextureLibrary()->generate_GL_textureHDR(texture);
 
     std::shared_ptr<TextureHDR> texturePtr = std::make_shared<TextureHDR>(texture);
 
     _boundScene->getSkybox().setIBLmap(texturePtr);
-
-
 
     return cubemap;
 };

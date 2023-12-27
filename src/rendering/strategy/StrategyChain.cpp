@@ -3,6 +3,10 @@
 #include "rendering/GraphicalEngine.hpp"
 #include "rendering/Settings.hpp"
 #include "rendering/framebuffer/Framebuffer_Manager.hpp"
+#include "rendering/engineModules/InstancingManager.hpp"
+#include "rendering/shader/ShaderLibrary.hpp"
+#include "rendering/engineModules/LightManager.hpp"
+
 
 #include "util/VertexShapes.hpp"
 
@@ -71,6 +75,16 @@ ForwardShadingStrategyChain::ForwardShadingStrategyChain(GraphicalEngine* engine
         }
         // Move to default Framebuffer frame
         add(std::make_shared<DefaultFramebufferNode>(this));     
+}
+
+bool ForwardShadingStrategyChain::reserveResources()
+{
+    std::shared_ptr<InstancingManager> instancingManager = _ranFrom->getInstancingManager();
+    std::shared_ptr<ShaderLibrary> shaderLibrary = _ranFrom->getShaderLibrary();
+
+    instancingManager->setupInstancing(shaderLibrary->getShader("Basic")->getProgramId(), _ranFrom->getScene(0));
+
+    return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////

@@ -20,7 +20,7 @@ namespace openGLContext
     GLFWwindow* window;
     int WINDOW_WIDTH = 2048;
     int WINDOW_HEIGHT = 1536;
-    std::string windowTitle = "Espigão Simulator 3000";
+    std::string windowTitle = "FluxLumina";
 
     int CreateOpenGLWindow();
     int InitializeOpenGLContext();
