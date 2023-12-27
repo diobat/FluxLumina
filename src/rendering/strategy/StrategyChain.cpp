@@ -166,12 +166,13 @@ bool PBSShadingStrategyChain::reserveResources()
 
     // Create lightmap
     lightLibrary->getLightMap().init(static_cast<unsigned int>(cubemapSize));
-    unsigned int skyboxTextureID = lightLibrary->getLightMap().bakeFromTexture(_ranFrom->getScene()->getSkybox().getIBLmap());
-    lightLibrary->getLightMap().PBR_Diffuse_convoluteLightMap();
+    unsigned int skyboxTextureID =lightLibrary->getLightMap().bakeFromTexture(_ranFrom->getScene()->getSkybox().getIBLmap());
 
-    // Generate environment cubemap mipmaps to facilitate artifact-free filtering
+   // Generate environment cubemap mipmaps to facilitate artifact-free filtering
     glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTextureID);
     glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+
+    lightLibrary->getLightMap().PBR_Diffuse_convoluteLightMap();
 
     // Create pre-filtered specular map
     lightLibrary->getLightMap().PBR_Specular_convoluteLightMap();
