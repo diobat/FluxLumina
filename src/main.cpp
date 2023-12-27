@@ -55,10 +55,7 @@ int main(void)
     std::shared_ptr<Scene> scene = std::make_shared<Scene>();
     std::shared_ptr<MeshLibrary> meshLibrary = std::make_shared<MeshLibrary>();
 
-    openGL graphicalEngine;
-    graphicalEngine.initialize(window, E_RenderStrategy::ForwardShading);
-    graphicalEngine.bindScene(scene);
-    graphicalEngine.bindMeshLibrary(meshLibrary);
+    FluxLumina graphicalEngine(scene, E_RenderStrategy::PBSShading);
 
     // Init object factory
     SceneObjectFactory factory(scene.get(), &graphicalEngine, meshLibrary.get());
@@ -67,10 +64,6 @@ int main(void)
     std::vector<std::shared_ptr<Scene>> scenes;
     scenes.push_back(scene);
     scene02_Setup(factory);
-
-    // User Input handler
-    std::shared_ptr<UserInput::glfwKeyboardScanner> userInput = std::make_shared<UserInput::glfwKeyboardScanner>(graphicalEngine.getWindowPtr());
-    userInput->bindToScene(scene);
 
     // Begin main loop
     update(graphicalEngine, scenes, userInput);
