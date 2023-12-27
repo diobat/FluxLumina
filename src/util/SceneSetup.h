@@ -8,8 +8,8 @@ void scene01_Setup(SceneObjectFactory& factory)
     // Camera setup
     factory.create_Camera();
     
-    ModelObject& backpack = factory.create_Model("res/models/backpack/backpack.obj", "Basic", true);
-    backpack.setPosition({15.0f, 3.0f, -16.5f});
+    // ModelObject& backpack = factory.create_Model("res/models/backpack/backpack.obj", "Basic", true);
+    // backpack.setPosition({15.0f, 3.0f, -16.5f});
 
     // Skybox setup
     auto skybox = factory.create_Skybox(
@@ -30,17 +30,17 @@ void scene01_Setup(SceneObjectFactory& factory)
     // auto &window3 = factory.create_Model("res/models/window/window.obj", 2);
     // window3.setPosition({-25.0f, 10.0f, -16.0f});
 
-    TextureLocations textureLocations;
-    textureLocations.heightMaps.push_back("orange_brick_height.jpg");
-    auto& orangeWall = factory.create_Model("res/models/orangeBrickWall/orangeBrickWall.obj", "Basic", false, textureLocations);
-    orangeWall.setPosition({-2.0f, 5.0f, 29.0f});
-    orangeWall.setScale(3.5f);
+    // TextureLocations textureLocations;
+    // textureLocations.heightMaps.push_back("orange_brick_height.jpg");
+    // auto& orangeWall = factory.create_Model("res/models/orangeBrickWall/orangeBrickWall.obj", "Basic", false, textureLocations);
+    // orangeWall.setPosition({-2.0f, 5.0f, 29.0f});
+    // orangeWall.setScale(3.5f);
 
-    auto& wall = factory.create_Model("res/models/brickWall/brickWall.obj", "Basic");
-    wall.setPosition({-10.0f, 5.0f, 29.0f});
-    wall.setScale(3.5f);
+    // auto& wall = factory.create_Model("res/models/brickWall/brickWall.obj", "Basic");
+    // wall.setPosition({-10.0f, 5.0f, 29.0f});
+    // wall.setScale(3.5f);
 
-    ModelObject &ground = factory.create_Model("res/models/Ground3.obj", "Basic");
+    ModelObject &ground = factory.create_Model("res/models/Ground/Ground.obj", "Basic");
     ground.setScale(3.5f);
     ground.setPosition({0.0f, 0.0f, 0.0f});
 
@@ -68,11 +68,30 @@ void scene01_Setup(SceneObjectFactory& factory)
     {
         for(int j(0); j < n; ++j)
         {
-            auto& statue = factory.create_Model("res/models/Statue/Statue_fixed.obj", "Basic");
+            auto& statue = factory.create_Model("res/models/Statue/statue_highPoly.glb", "Basic");
             statue.setPosition({(i * spacing) - offset, 0.0f, (j * spacing) - offset});
         }
     }
 
+    // place columns long the outer edges of the grid of statues
+    for(int i(0); i < n; ++i)
+    {
+        auto& column1 = factory.create_Model("res/models/Column/column.glb", "Basic");
+        column1.setScale(1.5f);
+        column1.setPosition({(i * spacing) - offset, 0.0f, -offset - spacing});
+
+        auto& column2 = factory.create_Model("res/models/Column/column.glb", "Basic");
+        column2.setScale(1.5f);
+        column2.setPosition({(i * spacing) - offset, 0.0f, offset + spacing});
+
+        auto& column3 = factory.create_Model("res/models/Column/column.glb", "Basic");
+        column3.setScale(1.5f);
+        column3.setPosition({-offset - spacing, 0.0f, (i * spacing) - offset});
+
+        auto& column4 = factory.create_Model("res/models/Column/column.glb", "Basic");
+        column4.setScale(1.5f);
+        column4.setPosition({offset + spacing, 0.0f, (i * spacing) - offset});
+    }
 
     // auto& statue = factory.create_Model("res/models/Statue/Statue_fixed.obj", 0);
     // statue.setPosition({0.0f, 0.0f, 5.0f});
@@ -103,8 +122,8 @@ void scene01_Setup(SceneObjectFactory& factory)
 
     auto light_B = factory.create_LightSource( E_LightType::POINT_LIGHT);
     light_B->setColor({200.0f, 0.0f, 0.0f});
-    light_B->setPosition({-4.0f, 8.0f, 17.5f});
-    light_B->setAttenuationFactors({1.0f, 0.0f, 5.80f});
+    light_B->setPosition({0.0f, 5.0f, 17.5f});
+    light_B->setAttenuationFactors({1.0f, 0.0f, 3.40f});
 
     auto light_C = factory.create_LightSource( E_LightType::POINT_LIGHT);
     light_C->setColor({0.0f, 200.0f, 0.0f});
@@ -114,7 +133,7 @@ void scene01_Setup(SceneObjectFactory& factory)
     auto light_D = factory.create_LightSource( E_LightType::POINT_LIGHT);
     light_D->setColor({0.0f, 0.0f, 200.0f});
     light_D->setPosition({-13.0f, 5.0f, -13.0f});
-    light_D->setAttenuationFactors({1.0f, 0.55f, 0.40f});
+    light_D->setAttenuationFactors({1.0f, 0.0f, 3.40f});
 
     // lets add like 25 random lights
 
@@ -179,23 +198,24 @@ void scene02_Setup(SceneObjectFactory& factory)
     factory.create_Camera();
     
     // Skybox
-        auto skybox = factory.create_Skybox(
-            {"res/models/skybox/right.jpg",
-                "res/models/skybox/left.jpg",
-                "res/models/skybox/top.jpg",
-                "res/models/skybox/bottom.jpg",
-                "res/models/skybox/front.jpg",
-                "res/models/skybox/back.jpg"});
+    auto skybox = factory.create_Skybox(
+        {"res/models/skybox/right.jpg",
+            "res/models/skybox/left.jpg",
+            "res/models/skybox/top.jpg",
+            "res/models/skybox/bottom.jpg",
+            "res/models/skybox/front.jpg",
+            "res/models/skybox/back.jpg"});
 
     // IBL map
     auto ibl = factory.create_IBL("res/models/lightmap/meadow_8k.hdr", true);
 
     // Models
+
     TextureLocations textureLocations1;
     textureLocations1.heightMaps.push_back("rustedIron2_height.png");
+    textureLocations1.lightMaps.push_back("rustedIron2_ao.png");
     ModelObject& rusty_sphere = factory.create_Model("res/models/rust-iron-sphere/rust-iron-sphere.glb", "PBR_basic", true, textureLocations1);
     rusty_sphere.setPosition({0.0f, 3.0f, 0.0f});
-
 
     TextureLocations textureLocations2;
     textureLocations2.heightMaps.push_back("worn-metal-studs_height.png");
@@ -203,30 +223,42 @@ void scene02_Setup(SceneObjectFactory& factory)
     auto& stud_sphere = factory.create_Model("res/models/metal-studs-sphere/metal-studs-sphere.glb", "PBR_basic", true, textureLocations2);
     stud_sphere.setPosition({3.0f, 3.0f, 0.0f});
 
-
     TextureLocations textureLocations3;
     textureLocations3.heightMaps.push_back("gold-scuffed_height.png");
+    textureLocations3.lightMaps.push_back("gold-scuffed_ao.png");
     auto& gold_sphere = factory.create_Model("res/models/gold-sphere/gold-sphere.glb", "PBR_basic", true, textureLocations3);
     gold_sphere.setPosition({-3.0f, 3.0f, 0.0f});
 
+    TextureLocations textureLocations4;
+    textureLocations4.heightMaps.push_back("plasticpattern1-height.png");
+    textureLocations4.lightMaps.push_back("plasticpattern1-ao.png");
+    auto& plastic_sphere = factory.create_Model("res/models/plastic-sphere/plastic-sphere.glb", "PBR_basic", true, textureLocations4);
+    plastic_sphere.setPosition({6.0f, 3.0f, 0.0f});
+
+    TextureLocations textureLocations5;
+    textureLocations5.heightMaps.push_back("Gravel023_4K-PNG_Displacement.png");
+    textureLocations5.lightMaps.push_back("Gravel023_4K-PNG_AmbientOcclusion.png");
+    auto& gravel_sphere = factory.create_Model("res/models/gravel-sphere/gravel-sphere.glb", "PBR_basic", true, textureLocations5);
+    gravel_sphere.setPosition({-6.0f, 3.0f, 0.0f});
+
     // // Lights 
-    // auto light_A = factory.create_LightSource( E_LightType::POINT_LIGHT);
-    // light_A->setColor({1.0f, 1.0f, 1.0f});
-    // light_A->setPosition({5.0f, 5.0f, 5.0f});
-    // light_A->setAttenuationFactors({1.0f, 0.0f, 3.40f});
+    auto light_A = factory.create_LightSource( E_LightType::POINT_LIGHT);
+    light_A->setColor({1.0f, 1.0f, 1.0f});
+    light_A->setPosition({5.0f, 5.0f, 5.0f});
+    light_A->setAttenuationFactors({1.0f, 0.0f, 3.40f});
 
-    // auto light_B = factory.create_LightSource( E_LightType::POINT_LIGHT);
-    // light_B->setColor({1.0f, 1.0f, 1.0f});
-    // light_B->setPosition({5.0f, 5.0f, -5.0f});
-    // light_B->setAttenuationFactors({1.0f, 0.0f, 3.40});
+    auto light_B = factory.create_LightSource( E_LightType::POINT_LIGHT);
+    light_B->setColor({1.0f, 1.0f, 1.0f});
+    light_B->setPosition({5.0f, 5.0f, -5.0f});
+    light_B->setAttenuationFactors({1.0f, 0.0f, 3.40});
 
-    // auto light_C = factory.create_LightSource( E_LightType::POINT_LIGHT);
-    // light_C->setColor({1.0f, 1.0f, 1.0f});
-    // light_C->setPosition({-5.0f, 5.0f, -5.0f});
-    // light_C->setAttenuationFactors({1.0f, 0.0f, 3.40f});
+    auto light_C = factory.create_LightSource( E_LightType::POINT_LIGHT);
+    light_C->setColor({1.0f, 1.0f, 1.0f});
+    light_C->setPosition({-5.0f, 5.0f, -5.0f});
+    light_C->setAttenuationFactors({1.0f, 0.0f, 3.40f});
 
-    // auto light_D = factory.create_LightSource( E_LightType::POINT_LIGHT);
-    // light_D->setColor({1.0f, 1.0f, 1.0f});
-    // light_D->setPosition({-5.0f, 5.0f, 5.0f});
-    // light_D->setAttenuationFactors({1.0f, 0.0f, 3.40f});
+    auto light_D = factory.create_LightSource( E_LightType::POINT_LIGHT);
+    light_D->setColor({1.0f, 1.0f, 1.0f});
+    light_D->setPosition({-5.0f, 5.0f, 5.0f});
+    light_D->setAttenuationFactors({1.0f, 0.0f, 3.40f});
 }
