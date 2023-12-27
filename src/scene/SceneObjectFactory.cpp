@@ -121,6 +121,9 @@ namespace
             case aiTextureType_UNKNOWN:
                 texture._type = E_TexureType::ROUGHNESS;
                 break;
+            case aiTextureType_LIGHTMAP:
+                texture._type = E_TexureType::LIGHTMAP;
+                break;
             default:
                 texture._type = E_TexureType::DIFFUSE;
                 break;
