@@ -1,8 +1,11 @@
 #pragma once
 
-// First-party includes
-#include "scene/Scene.hpp"
+#include <memory>
+#include <vector>
+#include <array>
 
+class Scene;
+class SceneObjectFactory;
 class MeshLibrary;
 class TextureLibrary;
 class FBOManager;
@@ -12,8 +15,6 @@ class InstancingManager;
 class StrategyChain;
 class Settings;
 class glfwKeyboardScanner;
-
-
 
 class GraphicalEngine
 {
@@ -27,6 +28,7 @@ public:
 	std::shared_ptr<Scene> getScene(unsigned int sceneIndex = 0) const;
 	std::vector<std::shared_ptr<Scene>> getScenes() const { return _scenes; }
 
+	std::shared_ptr<SceneObjectFactory> getSceneObjectFactory() { return _sceneObjectFactory; };
 	std::shared_ptr<MeshLibrary> getMeshLibrary() { return _meshLibrary; };
 	std::shared_ptr<TextureLibrary> getTextureLibrary() { return _textureLibrary; };
 	std::shared_ptr<FBOManager> getFBOManager() { return _frameBuffers; };
@@ -42,6 +44,9 @@ protected:
 	int _viewportWidth, _viewportHeight;
 
 	std::vector<std::shared_ptr<Scene>> _scenes;
+
+	// SceneObjectFactory
+	std::shared_ptr<SceneObjectFactory> _sceneObjectFactory;
 
 	// Meshes
 	std::shared_ptr<MeshLibrary> _meshLibrary;

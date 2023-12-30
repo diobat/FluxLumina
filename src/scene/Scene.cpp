@@ -1,5 +1,8 @@
 #include "Scene.hpp"
 
+#include <stdexcept>
+#include <boost/uuid/uuid_io.hpp>
+
 Scene::Scene() : activeCameraID(0),
 				 _ambientLight(0.2f, {1.0f, 1.0f, 1.0f}),
 				 _id(boost::uuids::random_generator()())
@@ -95,4 +98,34 @@ AmbientLight &Scene::getAmbientLight()
 Skybox &Scene::getSkybox()
 {
 	return _skybox;
+}
+
+std::shared_ptr<SceneObject> Scene::get(const boost::uuids::uuid &id)
+{
+
+	for (auto &model : _objects.models.getModels())
+	{
+		if (model->id() == id)
+		{
+			return std::dynamic_pointer_cast<SceneObject>(model);
+		}
+	}
+
+	for (auto &pointLight : _objects.lights.pointLights)
+	{
+		if (pointLight->id() == id)
+		{
+			return std::dynamic_pointer_cast<SceneObject>(pointLight);
+		}
+	}
+
+	for (auto &spotLight : _objects.lights.spotLights)
+	{
+		if (spotLight->id() == id)
+		{
+			return std::dynamic_pointer_cast<SceneObject>(spotLight);
+		}
+	}
+
+	return nullptr;
 }

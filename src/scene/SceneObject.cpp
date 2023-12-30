@@ -53,3 +53,8 @@ bool SceneObject::enabled() const
 {
     return _toRender;
 }
+
+boost::uuids::uuid SceneObject::id() const
+{
+    return _id;
+}

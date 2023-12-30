@@ -29,7 +29,7 @@ public:
 
     bool enabled() const;
 
-    boost::uuids::uuid _id;
+    boost::uuids::uuid id() const;
 
 protected:
     // Renderable object properties
@@ -38,6 +38,8 @@ protected:
 private:
     
     bool _toRender;
+
+    boost::uuids::uuid _id;
     // std::weak_ptr<SceneObject> _parent;
     // std::vector<std::weak_ptr<SceneObject>> _children;
 };

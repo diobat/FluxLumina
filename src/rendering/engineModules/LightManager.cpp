@@ -284,13 +284,13 @@ void LightLibrary::lightSetup(unsigned int lightIndex, const PointLight &light)
         return;
     }
 
-    if(_shadowMaps.find(light._id) == _shadowMaps.end())
+    if(_shadowMaps.find(light.id()) == _shadowMaps.end())
     {
         return;
         throw std::runtime_error("Shadow map not found");
     }
 
-    ShadowMap& shaMap = _shadowMaps[light._id];
+    ShadowMap& shaMap = _shadowMaps[light.id()];
     shaders->setUniformFloat("pointLight[" + std::to_string(lightIndex) + "].farPlane", shaMap._farPlane);
     shaders->setUniformInt("pointLight[" + std::to_string(lightIndex) + "].shadowMap", 15 + lightIndex);
 
@@ -335,13 +335,13 @@ void LightLibrary::lightSetup(unsigned int lightIndex, const SpotLight &light)
         return;
     }
 
-    if(_shadowMaps.find(light._id) == _shadowMaps.end())
+    if(_shadowMaps.find(light.id()) == _shadowMaps.end())
     {
         return;
         throw std::runtime_error("Shadow map not found");
     }
     
-    ShadowMap& shaMap = _shadowMaps[light._id];
+    ShadowMap& shaMap = _shadowMaps[light.id()];
     shaders->setUniformMat4("spotLightSpaceMatrix[" + std::to_string(lightIndex) + "]", shaMap.getLightSpaceMatrix());
     shaders->setUniformInt("spotLight[" + std::to_string(lightIndex) + "].shadowMap", 5 + lightIndex);
 
@@ -366,7 +366,7 @@ void LightLibrary::alignShadowMaps(std::shared_ptr<Scene> scene)
         bool matchFound = false;
         for(auto& shadowMap : _shadowMaps)
         {
-            if(shadowMap.first == light->_id)
+            if(shadowMap.first == light->id())
             {
                 matchFound = true;
                 shadowMap.second.alignShadowMap(light);
@@ -394,7 +394,7 @@ void LightLibrary::alignShadowMaps(std::shared_ptr<Scene> scene)
             shadowMap.setShadowBuffer(fbo);
             shadowMap.alignShadowMap(light);
             shadowMap.setDimensions(shadowMapResolution);
-            _shadowMaps.insert(std::make_pair(light->_id, shadowMap));
+            _shadowMaps.insert(std::make_pair(light->id(), shadowMap));
         }
     }
 }
@@ -450,12 +450,12 @@ void LightLibrary::renderTextureShadowMap(std::shared_ptr<Scene> scene, std::sha
        shaders->use(shadowMapperShader);  
     }
 
-    if(_shadowMaps.find(light->_id) == _shadowMaps.end())
+    if(_shadowMaps.find(light->id()) == _shadowMaps.end())
     {
         throw std::runtime_error("Shadow map not found");
     }
 
-    ShadowMap& shaMap = _shadowMaps[light->_id];
+    ShadowMap& shaMap = _shadowMaps[light->id()];
 
     shaders->setUniformMat4("lightSpaceMatrix", shaMap.getLightSpaceMatrix());
 
@@ -506,12 +506,12 @@ void LightLibrary::renderCubeShadowMap(std::shared_ptr<Scene> scene, std::shared
     }
 
     // Check if the light about to be rendered has an allocated framebuffer
-    if(_shadowMaps.find(light->_id) == _shadowMaps.end())
+    if(_shadowMaps.find(light->id()) == _shadowMaps.end())
     {
         throw std::runtime_error("Shadow map not found");
     }
 
-    ShadowMap& shaMap = _shadowMaps[light->_id];
+    ShadowMap& shaMap = _shadowMaps[light->id()];
 
     auto light_point_position = light->getPosition();
 

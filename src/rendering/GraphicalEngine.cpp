@@ -1,5 +1,7 @@
 #include "GraphicalEngine.hpp"
 
+#include "scene/Scene.hpp"
+#include "scene/SceneObjectFactory.hpp"
 #include "rendering/MeshLibrary.hpp"
 #include "rendering/strategy/StrategyChain.hpp"
 #include "rendering/shader/ShaderLibrary.hpp"
@@ -9,6 +11,8 @@
 #include "rendering/libraries/TextureLibrary.hpp"
 #include "rendering/Settings.hpp"
 #include "user_input/glfwUserInputScanner.hpp"
+
+
 
 GraphicalEngine::GraphicalEngine()
 {

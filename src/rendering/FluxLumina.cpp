@@ -2,6 +2,8 @@
 #include "rendering/openGLContext.hpp"
 
 // First-party includes
+#include "scene/SceneObjectFactory.hpp"
+#include "rendering/strategy/StrategyChain.hpp"
 #include "rendering/shader/ShaderLibrary.hpp"
 #include "user_input/glfwUserInputScanner.hpp"
 #include "rendering/framebuffer/Framebuffer_Manager.hpp"
@@ -98,6 +100,9 @@ int FluxLumina::initialize(std::shared_ptr<Scene> scene, E_RenderStrategy strate
     _userInput = std::make_shared<glfwKeyboardScanner>(_window);
     _userInput->bindToScene(_scenes[0]);
 
+    // SceneObjectFactory initialization
+    _sceneObjectFactory = std::make_shared<SceneObjectFactory>(scene.get(), this);
+
     return 1;
 }
 
@@ -158,5 +163,96 @@ void FluxLumina::update()
         glfwPollEvents();
 
         _userInput->tickCallback();
+    }
+}
+
+boost::uuids::uuid FluxLumina::create_Model(
+    const std::string &modelPath, 
+    const std::string& shader, 
+    bool flipUVs, 
+    std::array<std::vector<std::string>, 2> textureLocationStrings
+    )
+{
+    TextureLocations textureLocations = {
+        textureLocationStrings[0],
+        textureLocationStrings[1]
+    };
+    return _sceneObjectFactory->create_Model(modelPath, shader, flipUVs, textureLocations).id();
+}
+
+void FluxLumina::create_Camera()
+{
+    _sceneObjectFactory->create_Camera();
+}
+
+boost::uuids::uuid FluxLumina::create_LightSource(unsigned int type)
+{
+    E_LightType light_type = static_cast<E_LightType>(type);
+
+    return _sceneObjectFactory->create_LightSource(light_type)->id();
+}
+
+unsigned int FluxLumina::create_IBL(const std::string& path, bool flipUVs)
+{
+    return _sceneObjectFactory->create_IBL(path, flipUVs)->getTexture()._id;
+}
+
+void FluxLumina::create_Skybox(const std::vector<std::string>& path)
+{
+    _sceneObjectFactory->create_Skybox(path);
+}
+
+void FluxLumina::setPosition(boost::uuids::uuid UUID, std::array<float, 3> position)
+{
+    _scenes[0]->get(UUID)->setPosition(position);
+}
+
+void FluxLumina::setRotation(boost::uuids::uuid UUID, std::array<float, 3> rotation)
+{
+    _scenes[0]->get(UUID)->rotate(rotation[0], rotation[1], rotation[2]);
+}
+
+void FluxLumina::setScale(boost::uuids::uuid UUID, float scale)
+{
+    _scenes[0]->get(UUID)->setScale(scale);
+}
+
+void FluxLumina::setColor(boost::uuids::uuid UUID, std::array<float, 3> color)
+{
+    std::shared_ptr<LightSource> light = std::dynamic_pointer_cast<LightSource>(_scenes[0]->get(UUID));
+
+    if (light != nullptr)
+    {
+        light->setColor(color);
+    }   
+}
+
+void FluxLumina::setAttenuationFactors(boost::uuids::uuid UUID, std::array<float, 3> attenuationFactors)
+{
+    std::shared_ptr<LightSource> light = std::dynamic_pointer_cast<LightSource>(_scenes[0]->get(UUID));
+
+    if (light != nullptr)
+    {
+        light->setAttenuationFactors(attenuationFactors);
+    }
+}
+
+void FluxLumina::setDirection(boost::uuids::uuid UUID, std::array<float, 3> direction)
+{
+    std::shared_ptr<SpotLight> light = std::dynamic_pointer_cast<SpotLight>(_scenes[0]->get(UUID));
+
+    if (light != nullptr)
+    {
+        light->pointAt(direction);
+    }
+}
+
+void FluxLumina::setSpotlightRadius(boost::uuids::uuid UUID, float radius)
+{
+    std::shared_ptr<SpotLight> light = std::dynamic_pointer_cast<SpotLight>(_scenes[0]->get(UUID));
+
+    if (light != nullptr)
+    {
+        light->setCutoff(radius);
     }
 }

@@ -13,7 +13,7 @@ int main(void)
     // Scene initialization
     std::shared_ptr<Scene> scene = std::make_shared<Scene>();
 
-    FluxLumina graphicalEngine(scene, E_RenderStrategy::PBSShading);
+    FluxLumina graphicalEngine(scene, E_RenderStrategy::ForwardShading);
 
     // Init object factory
     SceneObjectFactory factory(scene.get(), &graphicalEngine);
@@ -21,7 +21,7 @@ int main(void)
     // Scene setup
     std::vector<std::shared_ptr<Scene>> scenes;
     scenes.push_back(scene);
-    scene02_Setup(factory);
+    scene01_Setup(graphicalEngine);
 
     // Begin main loop
     graphicalEngine.update();

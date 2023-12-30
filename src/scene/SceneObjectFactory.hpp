@@ -28,6 +28,8 @@
 */
 struct TextureLocations
 {
+    TextureLocations(std::vector<std::string> heightMaps = {}, std::vector<std::string> lightMaps = {}) : heightMaps(heightMaps), lightMaps(lightMaps) {};
+
     std::vector<std::string> heightMaps;
     std::vector<std::string> lightMaps;
 };

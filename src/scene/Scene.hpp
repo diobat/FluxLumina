@@ -48,6 +48,8 @@ public:
 	std::shared_ptr<Camera> &getActiveCamera();
 	Skybox& getSkybox();
 
+	std::shared_ptr<SceneObject> get(const boost::uuids::uuid& id);
+
 private:
 	void addDirectionalLight(std::shared_ptr<DirectionalLight> directionalLightToAdd);
 	void addPointLight(std::shared_ptr<PointLight> pointLightToAdd);
