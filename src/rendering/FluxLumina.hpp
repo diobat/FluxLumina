@@ -7,12 +7,11 @@
 // First party includes
 #include "rendering/GraphicalEngine.hpp"
 
-// GLFW include
-#include "rendering/GLFW_Wrapper.hpp"
-
 // Third party includes
 #include "boost/uuid/uuid.hpp"
 
+
+class GLFWwindow;
 
 enum class E_RenderStrategy : unsigned int
 {

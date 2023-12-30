@@ -4,12 +4,12 @@
 #include <memory>
 #include <map>
 
-// GLFW includes
-#include "rendering/GLFW_Wrapper.hpp"
 
 // First-party includes
 #include "scene/Scene.hpp"
 
+
+class GLFWwindow;
 
 class glfwKeyboardScanner
 {

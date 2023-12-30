@@ -1,6 +1,9 @@
 #include "rendering/FluxLumina.hpp"
 #include "rendering/openGLContext.hpp"
 
+// GLFW include
+#include "rendering/GLFW_Wrapper.hpp"
+
 // First-party includes
 #include "scene/SceneObjectFactory.hpp"
 #include "rendering/strategy/StrategyChain.hpp"
