@@ -45,7 +45,7 @@ FetchContent_Declare(
   GIT_TAG        	3.3.2
 )
 FetchContent_MakeAvailable(glfw)
-target_link_libraries(${PROJECT_NAME} PRIVATE glfw)
+target_link_libraries(${PROJECT_NAME} PUBLIC glfw)
 message(STATUS "GLFW -> ${glfw_SOURCE_DIR}")
 
 ######################################## GLAD
@@ -60,7 +60,7 @@ set(GLAD_GENERATOR 		  "c"	        CACHE STRING "Language to generate the bindin
 
 FetchContent_MakeAvailable(glad)
 
-target_link_libraries(${PROJECT_NAME} PRIVATE glad)
+target_link_libraries(${PROJECT_NAME} PUBLIC glad)
 message(STATUS "GLAD -> ${glad_SOURCE_DIR}")
 
 ######################################## STB_IMAGE
@@ -72,7 +72,7 @@ FetchContent_Declare(
   BUILD_COMMAND 	""
 )
 FetchContent_MakeAvailable(stb)
-target_include_directories(${PROJECT_NAME} PRIVATE "${stb_SOURCE_DIR}")
+target_include_directories(${PROJECT_NAME} PUBLIC "${stb_SOURCE_DIR}")
 message(STATUS "STB -> ${stb_SOURCE_DIR}")
 
 ######################################## GLM
@@ -84,7 +84,7 @@ FetchContent_Declare(
   BUILD_COMMAND 	""
 )
 FetchContent_MakeAvailable(glm)
-target_include_directories(${PROJECT_NAME} PRIVATE "${glm_SOURCE_DIR}")
+target_include_directories(${PROJECT_NAME} PUBLIC "${glm_SOURCE_DIR}")
 message(STATUS "GLM -> ${glm_SOURCE_DIR}")
 
 ######################################## ASSIMP
@@ -96,7 +96,7 @@ FetchContent_Declare(
 set(ASSIMP_NO_EXPORT ON CACHE BOOL "Disable Assimp's export functionality")
 set(ASSIMP_BUILD_ALL_EXPORTERS_BY_DEFAULT OFF CACHE BOOL "Disable Assimp's export functionality")
 FetchContent_MakeAvailable(assimp)
-target_link_libraries(${PROJECT_NAME} PRIVATE assimp)
+target_link_libraries(${PROJECT_NAME} PUBLIC assimp)
 message(STATUS "ASSIMP -> ${assimp_SOURCE_DIR}")
 
 ######################################## BOOST
@@ -124,7 +124,7 @@ FetchContent_Declare(
 
 
 FetchContent_MakeAvailable(Boost)
-target_link_libraries(${PROJECT_NAME} PRIVATE Boost::filesystem Boost::date_time Boost::uuid)
+target_link_libraries(${PROJECT_NAME} PUBLIC Boost::filesystem Boost::date_time Boost::uuid)
 
 message(STATUS "BOOST -> ${Boost_BINARY_DIR}")
 
