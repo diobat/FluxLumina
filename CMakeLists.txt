@@ -21,16 +21,19 @@ file(GLOB_RECURSE SOURCE_FILES
 # Configure assets header file
 configure_file(src/helpers/RootDir.h.in src/helpers/RootDir.h)
 
+# Define the executable
+add_library(${PROJECT_NAME} ${SOURCE_FILES})
+
 # Define the include DIRs
-include_directories(
+target_include_directories( ${PROJECT_NAME} PRIVATE
 	"${CMAKE_SOURCE_DIR}/src"
 	"${CMAKE_SOURCE_DIR}/project_includes"
-	"${CMAKE_SOURCE_DIR}/include"
   "${CMAKE_BINARY_DIR}/src"
 )
 
-# Define the executable
-add_library(${PROJECT_NAME} ${SOURCE_FILES})
+target_include_directories( ${PROJECT_NAME} PUBLIC
+  "${CMAKE_SOURCE_DIR}/include"
+)
 
 # Fetch dependencies remotely
 include(FetchContent)
@@ -46,6 +49,7 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(glfw)
 target_link_libraries(${PROJECT_NAME} PUBLIC glfw)
+# install(TARGETS glfw EXPORT ${PROJECT_NAME}Config)
 message(STATUS "GLFW -> ${glfw_SOURCE_DIR}")
 
 ######################################## GLAD
@@ -61,6 +65,7 @@ set(GLAD_GENERATOR 		  "c"	        CACHE STRING "Language to generate the bindin
 FetchContent_MakeAvailable(glad)
 
 target_link_libraries(${PROJECT_NAME} PUBLIC glad)
+# install(TARGETS glad EXPORT ${PROJECT_NAME}Config)
 message(STATUS "GLAD -> ${glad_SOURCE_DIR}")
 
 ######################################## STB_IMAGE
@@ -124,7 +129,11 @@ FetchContent_Declare(
 
 
 FetchContent_MakeAvailable(Boost)
+# SET(BOOST_MODULES Boost::filesystem Boost::date_time Boost::uuid)
 target_link_libraries(${PROJECT_NAME} PUBLIC Boost::filesystem Boost::date_time Boost::uuid)
+# target_link_libraries(${PROJECT_NAME} PUBLIC ${BOOST_MODULES})
+# install(EXPORT ${PROJECT_NAME}Config NAMESPACE Boost:: )
+# install(TARGETS filesystem date_time Boost_USE_MULTITHREADED EXPORT ${PROJECT_NAME}Config)
 
 message(STATUS "BOOST -> ${Boost_BINARY_DIR}")
 
@@ -137,7 +146,7 @@ set(CMAKE_WARN_DEPRECATED ON CACHE BOOL "" FORCE)
 find_package(OpenGL REQUIRED)
 
 # Link the dependency libraries to the target
-target_link_libraries(${PROJECT_NAME} PRIVATE opengl32)
+target_link_libraries(${PROJECT_NAME} PRIVATE OpenGL::GL)
 
 
 # Define the include DIRs for the consumers of the library
@@ -147,8 +156,10 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 )
 install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Config 
   ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
   INCLUDES DESTINATION include
 )
 install(DIRECTORY include/ DESTINATION include)
-#install(EXPORT ${PROJECT_NAME}Config FILE FluxLuminaConfig.cmake DESTINATION cmake)
+
+# install(EXPORT ${PROJECT_NAME}Config FILE FluxLuminaConfig.cmake DESTINATION cmake)
 
