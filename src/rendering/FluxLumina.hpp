@@ -5,7 +5,7 @@
 #include <vector>
 
 // First party includes
-#include "rendering/GraphicalEngine.hpp"
+#include "GraphicalEngine.hpp"
 
 // Third party includes
 #include "boost/uuid/uuid.hpp"
@@ -23,9 +23,9 @@ enum class E_RenderStrategy : unsigned int
 class FluxLumina : public GraphicalEngine
 {
 public:
-	FluxLumina(std::shared_ptr<Scene> scene , E_RenderStrategy strategy);
+	FluxLumina(E_RenderStrategy strategy);
 
-	int initialize(std::shared_ptr<Scene> scene , E_RenderStrategy strategy);
+	int initialize(E_RenderStrategy strategy);
 
 	// Update the engine internal state, and render a frame. This is an indefinitely blocking call.
 	void update();

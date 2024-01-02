@@ -5,6 +5,8 @@
 #include "rendering/GLFW_Wrapper.hpp"
 
 // First-party includes
+#include <scene/Scene.hpp>
+
 #include "scene/SceneObjectFactory.hpp"
 #include "rendering/strategy/StrategyChain.hpp"
 #include "rendering/shader/ShaderLibrary.hpp"
@@ -17,15 +19,16 @@
 #include "rendering/engineModules/InstancingManager.hpp"
 
 
-FluxLumina::FluxLumina(std::shared_ptr<Scene> scene , E_RenderStrategy strategy)
+FluxLumina::FluxLumina( E_RenderStrategy strategy)
 {
-    initialize(scene, strategy);
+    initialize(strategy);
 }
 
-int FluxLumina::initialize(std::shared_ptr<Scene> scene, E_RenderStrategy strategy)
+int FluxLumina::initialize(E_RenderStrategy strategy)
 {
     _scenes.clear();
-    _scenes.push_back(scene);
+    _scenes.emplace_back(std::make_shared<Scene>());
+    //_scenes.push_back(scene);
 
     _window = InitializeOpenGLContext();
 
@@ -104,7 +107,7 @@ int FluxLumina::initialize(std::shared_ptr<Scene> scene, E_RenderStrategy strate
     _userInput->bindToScene(_scenes[0]);
 
     // SceneObjectFactory initialization
-    _sceneObjectFactory = std::make_shared<SceneObjectFactory>(scene.get(), this);
+    _sceneObjectFactory = std::make_shared<SceneObjectFactory>(_scenes[0].get(), this);
 
     return 1;
 }
@@ -167,6 +170,8 @@ void FluxLumina::update()
 
         _userInput->tickCallback();
     }
+
+    glfwTerminate();
 }
 
 boost::uuids::uuid FluxLumina::create_Model(
