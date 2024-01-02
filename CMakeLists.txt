@@ -30,7 +30,7 @@ include_directories(
 
 
 # Define the executable
-add_executable(${PROJECT_NAME} ${SOURCE_FILES})
+add_library(${PROJECT_NAME} ${SOURCE_FILES})
 
 # Fetch dependencies remotely
 include(FetchContent)
