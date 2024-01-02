@@ -33,8 +33,8 @@ add_library(${PROJECT_NAME} STATIC ${SOURCE_FILES} ${HEADER_FILES})
 # Fetch dependencies remotely
 include(FetchContent)
 
-# Supress dev warnings on subprojects
-set(CMAKE_WARN_DEPRECATED OFF CACHE BOOL "" FORCE)
+# # Supress dev warnings on subprojects
+# set(CMAKE_WARN_DEPRECATED OFF CACHE BOOL "" FORCE)
 
 ######################################## GLFW
 FetchContent_Declare(
@@ -138,8 +138,8 @@ message(STATUS "BOOST -> ${Boost_BINARY_DIR}")
 
 ######################################## END OF EXTERNAL DEPENDENCIES
 
-# Restore dev warnings
-set(CMAKE_WARN_DEPRECATED ON CACHE BOOL "" FORCE)
+# # Restore dev warnings
+# set(CMAKE_WARN_DEPRECATED ON CACHE BOOL "" FORCE)
 
 
 # OpenGL
@@ -171,10 +171,10 @@ install(DIRECTORY include/ DESTINATION include)
 install(EXPORT ${PROJECT_NAME}Config FILE FluxLuminaConfig.cmake DESTINATION cmake)
 
 
-# install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Config 
-#   ARCHIVE DESTINATION lib
-#   PUBLIC_HEADER DESTINATION include
-# )
+install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Config 
+  ARCHIVE DESTINATION lib
+  PUBLIC_HEADER DESTINATION include
+)
 
 # Create and install the CMake configuration files
 include(CMakePackageConfigHelpers)
@@ -194,3 +194,9 @@ install(FILES
     "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
     DESTINATION lib/cmake/${PROJECT_NAME}
 )
+
+install(FILES FluxLumina.hpp GraphicalEngine.hpp
+        DESTINATION inc)
+
+install(FILES my-api.h ${CMAKE_BINARY_DIR}/Release/FluxLumina.lib
+        DESTINATION lib)
