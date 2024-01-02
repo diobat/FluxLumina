@@ -165,10 +165,10 @@ target_link_libraries(${PROJECT_NAME} PRIVATE OpenGL::GL)
 
 target_include_directories(${PROJECT_NAME} PUBLIC
     $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/project_includes>
-    $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/src>
-    $<INSTALL_INTERFACE:include>
-    $<INSTALL_INTERFACE:src>
+    $<INSTALL_INTERFACE:/include>
+    $<INSTALL_INTERFACE:/src>
 )
 
 install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Config 
@@ -181,4 +181,14 @@ install(DIRECTORY include/ DESTINATION include)
 install(EXPORT ${PROJECT_NAME}Config FILE FluxLuminaConfig.cmake DESTINATION cmake)
 
 
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file(
+    "${PROJECT_NAME}ConfigVersion.cmake"
+    VERSION ${PROJECT_VERSION}
+    COMPATIBILITY AnyNewerVersion
+)
 
+install(FILES
+    "${PROJECT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
+    DESTINATION lib/cmake/${PROJECT_NAME}
+)
