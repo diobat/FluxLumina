@@ -49,7 +49,7 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(glfw)
 target_link_libraries(${PROJECT_NAME} PUBLIC glfw)
-# install(TARGETS glfw EXPORT ${PROJECT_NAME}Config)
+#install(TARGETS glfw EXPORT ${PROJECT_NAME}Config)
 message(STATUS "GLFW -> ${glfw_SOURCE_DIR}")
 
 ######################################## GLAD
@@ -65,7 +65,7 @@ set(GLAD_GENERATOR 		  "c"	        CACHE STRING "Language to generate the bindin
 FetchContent_MakeAvailable(glad)
 
 target_link_libraries(${PROJECT_NAME} PUBLIC glad)
-# install(TARGETS glad EXPORT ${PROJECT_NAME}Config)
+#install(TARGETS glad EXPORT ${PROJECT_NAME}Config)
 message(STATUS "GLAD -> ${glad_SOURCE_DIR}")
 
 ######################################## STB_IMAGE
@@ -130,10 +130,10 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(Boost)
 # SET(BOOST_MODULES Boost::filesystem Boost::date_time Boost::uuid)
-target_link_libraries(${PROJECT_NAME} PUBLIC Boost::filesystem Boost::date_time Boost::uuid)
+target_link_libraries(${PROJECT_NAME} PRIVATE Boost::filesystem Boost::date_time Boost::uuid)
 # target_link_libraries(${PROJECT_NAME} PUBLIC ${BOOST_MODULES})
-# install(EXPORT ${PROJECT_NAME}Config NAMESPACE Boost:: )
-# install(TARGETS filesystem date_time Boost_USE_MULTITHREADED EXPORT ${PROJECT_NAME}Config)
+#install(EXPORT ${PROJECT_NAME}Config NAMESPACE Boost:: )
+#install(TARGETS Boost::filesystem Boost::date_time Boost::uuid Boost_USE_MULTITHREADED EXPORT ${PROJECT_NAME}Config)
 
 message(STATUS "BOOST -> ${Boost_BINARY_DIR}")
 
@@ -150,26 +150,16 @@ target_link_libraries(${PROJECT_NAME} PRIVATE OpenGL::GL)
 
 
 # Define the include DIRs for the consumers of the library
+
 target_include_directories(${PROJECT_NAME} PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    # $<INSTALL_INTERFACE:include>
+    $<INSTALL_INTERFACE:include>
 )
+
 install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Config 
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   INCLUDES DESTINATION include
 )
 install(DIRECTORY include/ DESTINATION include)
-
-install(
-  FILES FluxLumina.hpp GraphicalEngine.hpp
-  DESTINATION include
-)
-
-install(
-  FILES FluxLumina.lib
-  DESTINATION lib
-)
-
 # install(EXPORT ${PROJECT_NAME}Config FILE FluxLuminaConfig.cmake DESTINATION cmake)
-
