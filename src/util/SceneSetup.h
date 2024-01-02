@@ -58,7 +58,7 @@ void scene01_Setup(FluxLumina& engine)
     }
 
     // Point Lights
-    auto light_A = engine.create_LightSource(E_LightType::POINT_LIGHT);
+    auto light_A = engine.create_LightSource(1);
     engine.setColor(light_A, {0.4f, 0.4f, 0.4f});
     engine.setPosition(light_A, {-23.0f, 5.0f, 31.0f});
     engine.setAttenuationFactors(light_A, {1.0f, 0.0000009f, 0.00000032f});
@@ -67,19 +67,19 @@ void scene01_Setup(FluxLumina& engine)
     std::array<float, 3> color = {0.2f, 0.2f, 0.2f};
     float cutoff = 12.5f;
     
-    auto light_B = engine.create_LightSource( E_LightType::SPOT_LIGHT);
+    auto light_B = engine.create_LightSource(2);
     engine.setColor(light_B, color);
     engine.setSpotlightRadius(light_B, cutoff);
     engine.setPosition(light_B, {-23.0f, 10.0f, 31.0f});
     engine.setDirection(light_B, {-20.0f, 2.5f, 20.0f});
 
-    auto light_C = engine.create_LightSource( E_LightType::SPOT_LIGHT);
+    auto light_C = engine.create_LightSource(2);
     engine.setColor(light_C, color);
     engine.setSpotlightRadius(light_C, cutoff);
     engine.setPosition(light_C, {-23.0f, 10.0f, 31.0f});
     engine.setDirection(light_C, {-20.0f, 2.5f, 10.0f});
 
-    auto light_D = engine.create_LightSource( E_LightType::SPOT_LIGHT);
+    auto light_D = engine.create_LightSource(2);
     engine.setColor(light_D, color);
     engine.setSpotlightRadius(light_D, cutoff);
     engine.setPosition(light_D, {-23.0f, 10.0f, 31.0f});
@@ -178,7 +178,7 @@ void scene03_Setup(FluxLumina& engine)
     engine.setPosition(cubeID, {0.0f, 3.0f, -13.0f});
 
     // Lights 
-    auto light_A_ID = engine.create_LightSource(E_LightType::POINT_LIGHT);
+    auto light_A_ID = engine.create_LightSource(1);
     engine.setColor(light_A_ID, {1.0f, 1.0f, 1.0f});
     engine.setPosition(light_A_ID, {1.0f, 1.0f, 0.5f});
     engine.setAttenuationFactors(light_A_ID, {1.0f, 0.0f, 0.040f});
