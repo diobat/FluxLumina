@@ -1,6 +1,6 @@
 #include "rendering/engineModules/LightManager.hpp"
 
-#include "rendering/GraphicalEngine.hpp"
+#include "GraphicalEngine.hpp"
 #include "rendering/shader/ShaderLibrary.hpp"
 #include "rendering/framebuffer/Framebuffer_Manager.hpp"
 #include "rendering/Settings.hpp"

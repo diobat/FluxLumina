@@ -1,6 +1,6 @@
 #include "rendering/strategy/StrategyChain.hpp"
 
-#include "rendering/GraphicalEngine.hpp"
+#include "GraphicalEngine.hpp"
 #include "rendering/Settings.hpp"
 #include "rendering/framebuffer/Framebuffer_Manager.hpp"
 #include "rendering/engineModules/InstancingManager.hpp"

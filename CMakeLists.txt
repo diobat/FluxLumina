@@ -24,10 +24,10 @@ configure_file(src/helpers/RootDir.h.in src/helpers/RootDir.h)
 # Define the include DIRs
 include_directories(
 	"${CMAKE_SOURCE_DIR}/src"
+	"${CMAKE_SOURCE_DIR}/project_includes"
 	"${CMAKE_SOURCE_DIR}/include"
   "${CMAKE_BINARY_DIR}/src"
 )
-
 
 # Define the executable
 add_library(${PROJECT_NAME} ${SOURCE_FILES})

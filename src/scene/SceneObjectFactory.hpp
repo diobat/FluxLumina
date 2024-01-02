@@ -6,7 +6,7 @@
 // First-party includes
 #include "scene/Scene.hpp"
 #include "scene/SceneObject.hpp"
-#include "rendering/GraphicalEngine.hpp"
+#include "GraphicalEngine.hpp"
 #include "scene/ModelObject.hpp"
 #include "scene/Camera.hpp"
 #include "scene/LightSource.hpp"
