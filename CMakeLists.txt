@@ -149,7 +149,7 @@ set(CMAKE_WARN_DEPRECATED ON CACHE BOOL "" FORCE)
 find_package(OpenGL REQUIRED)
 
 # Link the dependency libraries to the target
-target_link_libraries(${PROJECT_NAME} PRIVATE OpenGL::GL)
+target_link_libraries(${PROJECT_NAME} PUBLIC OpenGL::GL)
 
 
 # Define the include DIRs for the consumers of the library
@@ -164,17 +164,16 @@ target_link_libraries(${PROJECT_NAME} PRIVATE OpenGL::GL)
 
 
 target_include_directories(${PROJECT_NAME} PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/project_includes>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/project_includes>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/src>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
     $<INSTALL_INTERFACE:/include>
     $<INSTALL_INTERFACE:/src>
 )
 
 install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Config 
   ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION lib
-  INCLUDES DESTINATION include
+  PUBLIC_HEADER DESTINATION include
 )
 
 install(DIRECTORY include/ DESTINATION include)
