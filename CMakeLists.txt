@@ -111,7 +111,7 @@ message(STATUS "Downloading pre-compiled boost library sources. This may take so
 set(FETCHCONTENT_QUIET TRUE) # Sets the output level of the build process to terminal
 set(DOWNLOAD_EXTRACT_TIMESTAMP TRUE)
 
-set(BOOST_INCLUDE_LIBRARIES date_time filesystem uuid)
+set(BOOST_INCLUDE_LIBRARIES uuid)
 set(BOOST_ENABLE_CMAKE ON)
 set(Boost_NO_SYSTEM_PATHS ON)
 
@@ -130,7 +130,7 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(Boost)
 # SET(BOOST_MODULES Boost::filesystem Boost::date_time Boost::uuid)
-target_link_libraries(${PROJECT_NAME} PUBLIC Boost::filesystem Boost::date_time Boost::uuid)
+target_link_libraries(${PROJECT_NAME} PUBLIC Boost::uuid)
 # target_link_libraries(${PROJECT_NAME} PUBLIC ${BOOST_MODULES})
 #install(EXPORT ${PROJECT_NAME}Config NAMESPACE Boost:: )
 #install(TARGETS Boost::filesystem Boost::date_time Boost::uuid Boost_USE_MULTITHREADED EXPORT ${PROJECT_NAME}Config)
@@ -151,15 +151,15 @@ target_link_libraries(${PROJECT_NAME} PRIVATE OpenGL::GL)
 
 # Define the include DIRs for the consumers of the library
 
-target_include_directories(${PROJECT_NAME} PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    $<INSTALL_INTERFACE:include>
-)
+# target_include_directories(${PROJECT_NAME} PUBLIC
+#     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+#     $<INSTALL_INTERFACE:include>
+# )
 
-install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Config 
-  ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION lib
-  INCLUDES DESTINATION include
-)
-install(DIRECTORY include/ DESTINATION include)
+# install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Config 
+#   ARCHIVE DESTINATION lib
+#   LIBRARY DESTINATION lib
+#   INCLUDES DESTINATION include
+# )
+# install(DIRECTORY include/ DESTINATION include)
 # install(EXPORT ${PROJECT_NAME}Config FILE FluxLuminaConfig.cmake DESTINATION cmake)
