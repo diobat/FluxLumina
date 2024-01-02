@@ -24,13 +24,6 @@ configure_file(src/helpers/RootDir.h.in src/helpers/RootDir.h)
 # Define the executable
 add_library(${PROJECT_NAME} ${SOURCE_FILES})
 
-# Define the include DIRs
-target_include_directories( ${PROJECT_NAME} PRIVATE
-	"${CMAKE_SOURCE_DIR}/src"
-	"${CMAKE_SOURCE_DIR}/project_includes"
-  "${CMAKE_BINARY_DIR}/src"
-)
-
 # target_include_directories( ${PROJECT_NAME} PUBLIC
 #   "${CMAKE_SOURCE_DIR}/include"
 # )
@@ -161,10 +154,21 @@ target_link_libraries(${PROJECT_NAME} PRIVATE OpenGL::GL)
 
 # Define the include DIRs for the consumers of the library
 
+
+# Define the include DIRs
+# target_include_directories( ${PROJECT_NAME} PUBLIC
+# 	"${CMAKE_SOURCE_DIR}/src"
+# 	"${CMAKE_SOURCE_DIR}/project_includes"
+#   "${CMAKE_BINARY_DIR}/src"
+# )
+
+
 target_include_directories(${PROJECT_NAME} PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/project_includes>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
     $<INSTALL_INTERFACE:include>
+    # $<INSTALL_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
 )
 
 install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Config 
