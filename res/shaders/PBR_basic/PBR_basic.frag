@@ -64,15 +64,14 @@ vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness);
 
 void main()
 {
+    vec2 TexUV = fragIn.TexCoords;
     // Normal and view vectors
-    vec3 N = normalize(fragIn.Normal);
+
+    vec3 N = texture(material.normal, TexUV).rgb;
+    N = N * 2.0 - 1.0;   
+    N = normalize(fragIn.TBN * N); 
     vec3 V = normalize(viewPos - fragIn.FragPos);
     vec3 R = reflect(-V, N);
-    vec2 TexUV = fragIn.TexCoords;
-
-    // vec3 N = texture(material.normal, TexUV).rgb;
-    // N = N * 2.0 - 1.0;   
-    // N = normalize(fragIn.TBN * N); 
 
     float roughness = texture(material.roughness, TexUV).g * 0.5;
     float metallic = texture(material.roughness, TexUV).b;
