@@ -12,31 +12,27 @@ cmake_policy(SET CMP0135 NEW) #
 cmake_policy(SET CMP0074 NEW)
 set(Boost_NO_WARN_NEW_VERSIONS 1)
 
+# Configure assets header file
+configure_file(src/helpers/RootDir.h.in src/helpers/RootDir.hpp)
+
 # Add source files
 file(GLOB_RECURSE SOURCE_FILES 
-	${CMAKE_SOURCE_DIR}/src/*.c
-	${CMAKE_SOURCE_DIR}/src/*.cpp
-	${CMAKE_SOURCE_DIR}/res/shaders/*)
+	${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
+)
 
-# Configure assets header file
-configure_file(src/helpers/RootDir.h.in src/helpers/RootDir.h)
-
-# Define the include DIRs
-include_directories(
-	"${CMAKE_SOURCE_DIR}/src"
-	"${CMAKE_SOURCE_DIR}/project_includes"
-	"${CMAKE_SOURCE_DIR}/include"
-  "${CMAKE_BINARY_DIR}/src"
+  # Add header files
+file(GLOB_RECURSE HEADER_FILES 
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/*.hpp
 )
 
 # Define the executable
-add_library(${PROJECT_NAME} ${SOURCE_FILES})
+add_library(${PROJECT_NAME} STATIC ${SOURCE_FILES} ${HEADER_FILES})
 
 # Fetch dependencies remotely
 include(FetchContent)
 
-# Supress dev warnings on subprojects
-set(CMAKE_WARN_DEPRECATED OFF CACHE BOOL "" FORCE)
+# # Supress dev warnings on subprojects
+# set(CMAKE_WARN_DEPRECATED OFF CACHE BOOL "" FORCE)
 
 ######################################## GLFW
 FetchContent_Declare(
@@ -46,6 +42,7 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(glfw)
 target_link_libraries(${PROJECT_NAME} PUBLIC glfw)
+install(TARGETS glfw EXPORT ${PROJECT_NAME}Config)
 message(STATUS "GLFW -> ${glfw_SOURCE_DIR}")
 
 ######################################## GLAD
@@ -61,6 +58,7 @@ set(GLAD_GENERATOR 		  "c"	        CACHE STRING "Language to generate the bindin
 FetchContent_MakeAvailable(glad)
 
 target_link_libraries(${PROJECT_NAME} PUBLIC glad)
+install(TARGETS glad EXPORT ${PROJECT_NAME}Config)
 message(STATUS "GLAD -> ${glad_SOURCE_DIR}")
 
 ######################################## STB_IMAGE
@@ -72,7 +70,9 @@ FetchContent_Declare(
   BUILD_COMMAND 	""
 )
 FetchContent_MakeAvailable(stb)
-target_include_directories(${PROJECT_NAME} PUBLIC "${stb_SOURCE_DIR}")
+target_include_directories(${PROJECT_NAME} PUBLIC 
+$<BUILD_INTERFACE:${stb_SOURCE_DIR}>)
+
 message(STATUS "STB -> ${stb_SOURCE_DIR}")
 
 ######################################## GLM
@@ -84,7 +84,7 @@ FetchContent_Declare(
   BUILD_COMMAND 	""
 )
 FetchContent_MakeAvailable(glm)
-target_include_directories(${PROJECT_NAME} PUBLIC "${glm_SOURCE_DIR}")
+target_link_libraries(${PROJECT_NAME} PUBLIC glm)
 message(STATUS "GLM -> ${glm_SOURCE_DIR}")
 
 ######################################## ASSIMP
@@ -106,7 +106,7 @@ message(STATUS "Downloading pre-compiled boost library sources. This may take so
 set(FETCHCONTENT_QUIET TRUE) # Sets the output level of the build process to terminal
 set(DOWNLOAD_EXTRACT_TIMESTAMP TRUE)
 
-set(BOOST_INCLUDE_LIBRARIES date_time filesystem uuid)
+set(BOOST_INCLUDE_LIBRARIES uuid filesystem)
 set(BOOST_ENABLE_CMAKE ON)
 set(Boost_NO_SYSTEM_PATHS ON)
 
@@ -124,31 +124,61 @@ FetchContent_Declare(
 
 
 FetchContent_MakeAvailable(Boost)
-target_link_libraries(${PROJECT_NAME} PUBLIC Boost::filesystem Boost::date_time Boost::uuid)
+target_link_libraries(${PROJECT_NAME} PUBLIC Boost::uuid Boost::filesystem)
 
+install(TARGETS 
+boost_uuid boost_assert boost_config boost_container_hash boost_core boost_io boost_move boost_numeric_conversion boost_predef boost_static_assert boost_throw_exception boost_tti boost_type_traits boost_winapi boost_describe boost_mp11 boost_random boost_mpl boost_preprocessor boost_conversion boost_function_types boost_array boost_dynamic_bitset boost_integer boost_range boost_utility 
+boost_system boost_smart_ptr boost_detail boost_concept_check boost_iterator boost_optional boost_regex boost_tuple boost_variant2
+boost_fusion boost_typeof boost_functional boost_function boost_bind boost_filesystem boost_atomic boost_align
+EXPORT ${PROJECT_NAME}Config)
 message(STATUS "BOOST -> ${Boost_BINARY_DIR}")
+
 
 ######################################## END OF EXTERNAL DEPENDENCIES
 
-# Restore dev warnings
-set(CMAKE_WARN_DEPRECATED ON CACHE BOOL "" FORCE)
+# # Restore dev warnings
+# set(CMAKE_WARN_DEPRECATED ON CACHE BOOL "" FORCE)
 
 # OpenGL
 find_package(OpenGL REQUIRED)
 
 # Link the dependency libraries to the target
-target_link_libraries(${PROJECT_NAME} PRIVATE opengl32)
-
+target_link_libraries(${PROJECT_NAME} PUBLIC OpenGL::GL)
 
 # Define the include DIRs for the consumers of the library
 target_include_directories(${PROJECT_NAME} PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/project_includes>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    # $<INSTALL_INTERFACE:include>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/src>
+    $<INSTALL_INTERFACE:include>
+    $<INSTALL_INTERFACE:src>
 )
+
+install(DIRECTORY include/ DESTINATION inc)
+#install(EXPORT ${PROJECT_NAME}Config FILE FluxLuminaConfig.cmake DESTINATION cmake)
+
 # install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Config 
 #   ARCHIVE DESTINATION lib
 #   INCLUDES DESTINATION include
 # )
-# install(DIRECTORY include/ DESTINATION include)
-# install(EXPORT ${PROJECT_NAME}Config FILE FluxLuminaConfig.cmake DESTINATION cmake)
+install(TARGETS ${PROJECT_NAME} DESTINATION lib)
 
+# Create and install the CMake configuration files
+# include(CMakePackageConfigHelpers)
+# write_basic_package_version_file(
+#     "${PROJECT_NAME}ConfigVersion.cmake"
+#     VERSION ${PROJECT_VERSION}
+#     COMPATIBILITY AnyNewerVersion
+# )
+
+# install(EXPORT ${PROJECT_NAME}Config
+#     FILE ${PROJECT_NAME}Config.cmake
+#     NAMESPACE FL::
+#     DESTINATION lib/cmake/${PROJECT_NAME}
+# )
+
+# install(FILES
+#     "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
+#     DESTINATION lib/cmake/${PROJECT_NAME}
+# )
