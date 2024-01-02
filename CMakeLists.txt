@@ -103,7 +103,7 @@ message(STATUS "ASSIMP -> ${assimp_SOURCE_DIR}")
 # Boost is different than the others. Due to its size we don't want to build it, we want to download it
 # as a pre-compiled library and link it to our project.
 message(STATUS "Downloading pre-compiled boost library sources. This may take some time...")
-set(FETCHCONTENT_QUIET FALSE) # Prints the output of the build process to terminal
+set(FETCHCONTENT_QUIET TRUE) # Sets the output level of the build process to terminal
 set(DOWNLOAD_EXTRACT_TIMESTAMP TRUE)
 
 set(BOOST_INCLUDE_LIBRARIES date_time filesystem uuid)
@@ -138,3 +138,17 @@ find_package(OpenGL REQUIRED)
 
 # Link the dependency libraries to the target
 target_link_libraries(${PROJECT_NAME} PRIVATE opengl32)
+
+
+# Define the include DIRs for the consumers of the library
+target_include_directories(${PROJECT_NAME} PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    # $<INSTALL_INTERFACE:include>
+)
+# install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Config 
+#   ARCHIVE DESTINATION lib
+#   INCLUDES DESTINATION include
+# )
+# install(DIRECTORY include/ DESTINATION include)
+# install(EXPORT ${PROJECT_NAME}Config FILE FluxLuminaConfig.cmake DESTINATION cmake)
+
