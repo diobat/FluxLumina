@@ -196,7 +196,7 @@ void SceneObjectFactory::load_ModelMeshes(Model& model, const std::string& path)
         const aiScene *scene = importer.ReadFile(ROOT_DIR + path, 
         aiProcess_Triangulate | 
         aiProcess_FlipUVs | 
-        //aiProcess_JoinIdenticalVertices |
+        aiProcess_JoinIdenticalVertices |
         //aiProcess_FixInfacingNormals | 
         aiProcess_CalcTangentSpace);
         // check for errors
