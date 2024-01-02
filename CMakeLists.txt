@@ -161,5 +161,15 @@ install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Config
 )
 install(DIRECTORY include/ DESTINATION include)
 
+install(
+  FILES FluxLumina.hpp GraphicalEngine.hpp
+  DESTINATION include
+)
+
+install(
+  FILES FluxLumina.lib
+  DESTINATION lib
+)
+
 # install(EXPORT ${PROJECT_NAME}Config FILE FluxLuminaConfig.cmake DESTINATION cmake)
 
