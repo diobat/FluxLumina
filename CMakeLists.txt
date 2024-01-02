@@ -130,7 +130,7 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(Boost)
 # SET(BOOST_MODULES Boost::filesystem Boost::date_time Boost::uuid)
-target_link_libraries(${PROJECT_NAME} PRIVATE Boost::filesystem Boost::date_time Boost::uuid)
+target_link_libraries(${PROJECT_NAME} PUBLIC Boost::filesystem Boost::date_time Boost::uuid)
 # target_link_libraries(${PROJECT_NAME} PUBLIC ${BOOST_MODULES})
 #install(EXPORT ${PROJECT_NAME}Config NAMESPACE Boost:: )
 #install(TARGETS Boost::filesystem Boost::date_time Boost::uuid Boost_USE_MULTITHREADED EXPORT ${PROJECT_NAME}Config)
