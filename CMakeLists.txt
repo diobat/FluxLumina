@@ -171,10 +171,10 @@ install(DIRECTORY include/ DESTINATION include)
 install(EXPORT ${PROJECT_NAME}Config FILE FluxLuminaConfig.cmake DESTINATION cmake)
 
 
-install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Config 
-  ARCHIVE DESTINATION lib
-  PUBLIC_HEADER DESTINATION include
-)
+# install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Config 
+#   ARCHIVE DESTINATION lib
+#   PUBLIC_HEADER DESTINATION include
+# )
 
 # Create and install the CMake configuration files
 include(CMakePackageConfigHelpers)
