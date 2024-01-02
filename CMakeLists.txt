@@ -18,15 +18,17 @@ file(GLOB_RECURSE SOURCE_FILES
 	${CMAKE_SOURCE_DIR}/src/*.cpp
 	${CMAKE_SOURCE_DIR}/res/shaders/*)
 
+  # Add header files
+file(GLOB_RECURSE HEADER_FILES 
+  ${CMAKE_SOURCE_DIR}/src/*.h
+  ${CMAKE_SOURCE_DIR}/src/*.hpp
+)
+
 # Configure assets header file
 configure_file(src/helpers/RootDir.h.in src/helpers/RootDir.h)
 
 # Define the executable
-add_library(${PROJECT_NAME} ${SOURCE_FILES})
-
-# target_include_directories( ${PROJECT_NAME} PUBLIC
-#   "${CMAKE_SOURCE_DIR}/include"
-# )
+add_library(${PROJECT_NAME} STATIC ${SOURCE_FILES} ${HEADER_FILES})
 
 # Fetch dependencies remotely
 include(FetchContent)
@@ -72,7 +74,6 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(stb)
 target_include_directories(${PROJECT_NAME} PUBLIC 
 $<BUILD_INTERFACE:${stb_SOURCE_DIR}>)
-# target_link_libraries(${PROJECT_NAME} PUBLIC stb)
 
 message(STATUS "STB -> ${stb_SOURCE_DIR}")
 
@@ -85,7 +86,6 @@ FetchContent_Declare(
   BUILD_COMMAND 	""
 )
 FetchContent_MakeAvailable(glm)
-# target_include_directories(${PROJECT_NAME} PUBLIC "${glm_SOURCE_DIR}")
 target_link_libraries(${PROJECT_NAME} PUBLIC glm)
 message(STATUS "GLM -> ${glm_SOURCE_DIR}")
 
@@ -126,16 +126,13 @@ FetchContent_Declare(
 
 
 FetchContent_MakeAvailable(Boost)
-# SET(BOOST_MODULES Boost::filesystem Boost::date_time Boost::uuid)
 target_link_libraries(${PROJECT_NAME} PUBLIC Boost::uuid Boost::filesystem)
-# target_link_libraries(${PROJECT_NAME} PUBLIC ${BOOST_MODULES})
-#install(EXPORT ${PROJECT_NAME}Config NAMESPACE Boost:: )
+
 install(TARGETS 
 boost_uuid boost_assert boost_config boost_container_hash boost_core boost_io boost_move boost_numeric_conversion boost_predef boost_static_assert boost_throw_exception boost_tti boost_type_traits boost_winapi boost_describe boost_mp11 boost_random boost_mpl boost_preprocessor boost_conversion boost_function_types boost_array boost_dynamic_bitset boost_integer boost_range boost_utility 
 boost_system boost_smart_ptr boost_detail boost_concept_check boost_iterator boost_optional boost_regex boost_tuple boost_variant2
 boost_fusion boost_typeof boost_functional boost_function boost_bind boost_filesystem boost_atomic boost_align
 EXPORT ${PROJECT_NAME}Config)
-
 message(STATUS "BOOST -> ${Boost_BINARY_DIR}")
 
 
@@ -151,9 +148,7 @@ find_package(OpenGL REQUIRED)
 # Link the dependency libraries to the target
 target_link_libraries(${PROJECT_NAME} PUBLIC OpenGL::GL)
 
-
 # Define the include DIRs for the consumers of the library
-
 
 # Define the include DIRs
 # target_include_directories( ${PROJECT_NAME} PUBLIC
@@ -167,19 +162,21 @@ target_include_directories(${PROJECT_NAME} PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/project_includes>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
-    $<INSTALL_INTERFACE:/include>
-    $<INSTALL_INTERFACE:/src>
-)
-
-install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Config 
-  ARCHIVE DESTINATION lib
-  PUBLIC_HEADER DESTINATION include
+    $<INSTALL_INTERFACE:project_includes>
+    $<INSTALL_INTERFACE:include>
+    $<INSTALL_INTERFACE:src>
 )
 
 install(DIRECTORY include/ DESTINATION include)
 install(EXPORT ${PROJECT_NAME}Config FILE FluxLuminaConfig.cmake DESTINATION cmake)
 
 
+install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Config 
+  ARCHIVE DESTINATION lib
+  PUBLIC_HEADER DESTINATION include
+)
+
+# Create and install the CMake configuration files
 include(CMakePackageConfigHelpers)
 write_basic_package_version_file(
     "${PROJECT_NAME}ConfigVersion.cmake"
@@ -187,7 +184,13 @@ write_basic_package_version_file(
     COMPATIBILITY AnyNewerVersion
 )
 
+install(EXPORT ${PROJECT_NAME}Config
+    FILE ${PROJECT_NAME}Config.cmake
+    NAMESPACE FL::
+    DESTINATION lib/cmake/${PROJECT_NAME}
+)
+
 install(FILES
-    "${PROJECT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
     DESTINATION lib/cmake/${PROJECT_NAME}
 )
