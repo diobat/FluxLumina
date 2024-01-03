@@ -149,15 +149,6 @@ find_package(OpenGL REQUIRED)
 target_link_libraries(${PROJECT_NAME} PUBLIC OpenGL::GL)
 
 # Define the include DIRs for the consumers of the library
-
-# Define the include DIRs
-# target_include_directories( ${PROJECT_NAME} PUBLIC
-# 	"${CMAKE_SOURCE_DIR}/src"
-# 	"${CMAKE_SOURCE_DIR}/project_includes"
-#   "${CMAKE_BINARY_DIR}/src"
-# )
-
-
 target_include_directories(${PROJECT_NAME} PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/project_includes>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -173,30 +164,24 @@ install(EXPORT ${PROJECT_NAME}Config FILE FluxLuminaConfig.cmake DESTINATION cma
 
 install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Config 
   ARCHIVE DESTINATION lib
-  PUBLIC_HEADER DESTINATION include
+  INCLUDES DESTINATION include
 )
 
 # Create and install the CMake configuration files
-include(CMakePackageConfigHelpers)
-write_basic_package_version_file(
-    "${PROJECT_NAME}ConfigVersion.cmake"
-    VERSION ${PROJECT_VERSION}
-    COMPATIBILITY AnyNewerVersion
-)
+# include(CMakePackageConfigHelpers)
+# write_basic_package_version_file(
+#     "${PROJECT_NAME}ConfigVersion.cmake"
+#     VERSION ${PROJECT_VERSION}
+#     COMPATIBILITY AnyNewerVersion
+# )
 
-install(EXPORT ${PROJECT_NAME}Config
-    FILE ${PROJECT_NAME}Config.cmake
-    NAMESPACE FL::
-    DESTINATION lib/cmake/${PROJECT_NAME}
-)
+# install(EXPORT ${PROJECT_NAME}Config
+#     FILE ${PROJECT_NAME}Config.cmake
+#     NAMESPACE FL::
+#     DESTINATION lib/cmake/${PROJECT_NAME}
+# )
 
-install(FILES
-    "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
-    DESTINATION lib/cmake/${PROJECT_NAME}
-)
-
-install(FILES FluxLumina.hpp GraphicalEngine.hpp
-        DESTINATION inc)
-
-install(FILES my-api.h ${CMAKE_BINARY_DIR}/Release/FluxLumina.lib
-        DESTINATION lib)
+# install(FILES
+#     "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
+#     DESTINATION lib/cmake/${PROJECT_NAME}
+# )
