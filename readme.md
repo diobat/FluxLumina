@@ -30,13 +30,16 @@ git clone https://github.com/diobat/FluxLumina.git
 cd FluxLumina
 
 # Create a build directory
-mkdir build && cd build
+mkdir build
 
-# Generate the build system
-cmake ..
+# Configure the build
+cmake -S . -B build
 
-# Build the library
-cmake --build .
+# Build debug binaries
+cmake --build build --config Debug
+
+# Build release binaries
+cmake --build build --config Release
 ```
 
 ## Usage
