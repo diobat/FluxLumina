@@ -1,6 +1,6 @@
 # FluxLumina
 
-FluxLumina is an OpenGL-based rendering engine designed for high-performance graphics applications. It offers a range of features to facilitate the creation of visually stunning and efficient 3D renderings.
+FluxLumina is an OpenGL-based rendering engine designed for high-performance graphics applications. It offers a range of features to facilitate the creation of visually stunning and efficient 3D renderings. 
 
 ## Features
 
