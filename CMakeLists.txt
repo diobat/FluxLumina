@@ -162,7 +162,7 @@ install(DIRECTORY include/ DESTINATION include)
 # install(EXPORT ${PROJECT_NAME}Config FILE FluxLuminaConfig.cmake DESTINATION cmake)
 
 
-install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Config 
+install(TARGETS ${PROJECT_NAME}
   ARCHIVE DESTINATION lib
   INCLUDES DESTINATION include
 )
