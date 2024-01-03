@@ -78,7 +78,3 @@ int main()
 ## License
 
 This project is licensed under the MIT License - see the LICENSE.md file for details.
-Acknowledgments
-
-    Mention any other contributors or sources that helped create this project.
-    Any dependencies or third-party resources used.
