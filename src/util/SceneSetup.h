@@ -115,15 +115,6 @@ void scene02_Setup(FluxLumina& engine)
 {
     engine.create_Camera();
 
-    engine.create_Skybox({
-        "res/models/skybox/right.jpg",
-        "res/models/skybox/left.jpg",
-        "res/models/skybox/top.jpg",
-        "res/models/skybox/bottom.jpg",
-        "res/models/skybox/front.jpg",
-        "res/models/skybox/back.jpg"
-        });
-
     // IBL map
     engine.create_IBL("res/models/lightmap/meadow_8k.hdr", true);
 
@@ -154,16 +145,6 @@ void scene03_Setup(FluxLumina& engine)
 {
     // Camera setup
     engine.create_Camera();
-
-    // Skybox setup
-    engine.create_Skybox({
-        "res/models/skybox/right.jpg",
-        "res/models/skybox/left.jpg",
-        "res/models/skybox/top.jpg",
-        "res/models/skybox/bottom.jpg",
-        "res/models/skybox/front.jpg",
-        "res/models/skybox/back.jpg"
-        });
 
     // IBL map
     engine.create_IBL("res/models/lightmap/abandoned_tiled_room_8k.hdr", true);
