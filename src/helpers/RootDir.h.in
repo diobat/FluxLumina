@@ -1,2 +1,3 @@
 #pragma once
 #define ROOT_DIR "@CMAKE_SOURCE_DIR@/"
+#define PROJECT_ROOT_DIR "@CMAKE_CURRENT_SOURCE_DIR@/"

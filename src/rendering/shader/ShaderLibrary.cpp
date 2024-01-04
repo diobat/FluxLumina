@@ -1,5 +1,5 @@
 #include "rendering/shader/ShaderLibrary.hpp"
-#include "helpers/RootDir.h"
+#include "helpers/RootDir.hpp"
 
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
@@ -155,7 +155,7 @@ unsigned int ShaderLibrary::scan(const std::string &foldername)
 {
     unsigned int importedShaderPrograms = 0;
 
-    std::string folderToScan = ROOT_DIR + foldername;
+    std::string folderToScan = PROJECT_ROOT_DIR + foldername;
 
     if(!boost::filesystem::exists(folderToScan))
     {

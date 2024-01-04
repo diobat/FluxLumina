@@ -4,7 +4,7 @@
 #include "rendering/GLFW_Wrapper.hpp"
 
 // First-party includes
-#include "helpers/RootDir.h"
+#include "helpers/RootDir.hpp"
 
 // STL library includes
 #include <array>
