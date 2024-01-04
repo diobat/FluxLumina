@@ -143,11 +143,6 @@ SceneObjectFactory::SceneObjectFactory(Scene* scene, GraphicalEngine* engine)
     _boundScene = scene;
     _boundEngine = engine;
 
-    if(scene != nullptr)
-    {
-        ModelObject& cube = create_Model("res/models/origin_cube.obj", "Basic");
-        cube.setScale(0.3f);
-    }
 }
 
 void SceneObjectFactory::bindScene(Scene* scene)
