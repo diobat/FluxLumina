@@ -31,8 +31,8 @@ add_library(${PROJECT_NAME} STATIC ${SOURCE_FILES} ${HEADER_FILES})
 # Fetch dependencies remotely
 include(FetchContent)
 
-# # Supress dev warnings on subprojects
-# set(CMAKE_WARN_DEPRECATED OFF CACHE BOOL "" FORCE)
+# Supress dev warnings on subprojects
+set(CMAKE_WARN_DEPRECATED OFF CACHE BOOL "" FORCE)
 
 ######################################## GLFW
 FetchContent_Declare(
@@ -43,7 +43,6 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(glfw)
 target_link_libraries(${PROJECT_NAME} PUBLIC glfw)
 install(TARGETS glfw EXPORT ${PROJECT_NAME}Config)
-message(STATUS "GLFW -> ${glfw_SOURCE_DIR}")
 
 ######################################## GLAD
 FetchContent_Declare(
@@ -59,7 +58,6 @@ FetchContent_MakeAvailable(glad)
 
 target_link_libraries(${PROJECT_NAME} PUBLIC glad)
 install(TARGETS glad EXPORT ${PROJECT_NAME}Config)
-message(STATUS "GLAD -> ${glad_SOURCE_DIR}")
 
 ######################################## STB_IMAGE
 FetchContent_Declare(
@@ -73,8 +71,6 @@ FetchContent_MakeAvailable(stb)
 target_include_directories(${PROJECT_NAME} PUBLIC 
 $<BUILD_INTERFACE:${stb_SOURCE_DIR}>)
 
-message(STATUS "STB -> ${stb_SOURCE_DIR}")
-
 ######################################## GLM
 FetchContent_Declare(
   glm
@@ -85,7 +81,6 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(glm)
 target_link_libraries(${PROJECT_NAME} PUBLIC glm)
-message(STATUS "GLM -> ${glm_SOURCE_DIR}")
 
 ######################################## ASSIMP
 FetchContent_Declare(
@@ -97,7 +92,6 @@ set(ASSIMP_NO_EXPORT ON CACHE BOOL "Disable Assimp's export functionality")
 set(ASSIMP_BUILD_ALL_EXPORTERS_BY_DEFAULT OFF CACHE BOOL "Disable Assimp's export functionality")
 FetchContent_MakeAvailable(assimp)
 target_link_libraries(${PROJECT_NAME} PUBLIC assimp)
-message(STATUS "ASSIMP -> ${assimp_SOURCE_DIR}")
 
 ######################################## BOOST
 # Boost is different than the others. Due to its size we don't want to build it, we want to download it
@@ -121,23 +115,17 @@ FetchContent_Declare(
     GIT_PROGRESS TRUE   
     DOWNLOAD_NO_EXTRACT FALSE
 )
-
-
 FetchContent_MakeAvailable(Boost)
 target_link_libraries(${PROJECT_NAME} PUBLIC Boost::uuid Boost::filesystem)
-
 install(TARGETS 
 boost_uuid boost_assert boost_config boost_container_hash boost_core boost_io boost_move boost_numeric_conversion boost_predef boost_static_assert boost_throw_exception boost_tti boost_type_traits boost_winapi boost_describe boost_mp11 boost_random boost_mpl boost_preprocessor boost_conversion boost_function_types boost_array boost_dynamic_bitset boost_integer boost_range boost_utility 
 boost_system boost_smart_ptr boost_detail boost_concept_check boost_iterator boost_optional boost_regex boost_tuple boost_variant2
 boost_fusion boost_typeof boost_functional boost_function boost_bind boost_filesystem boost_atomic boost_align
 EXPORT ${PROJECT_NAME}Config)
-message(STATUS "BOOST -> ${Boost_BINARY_DIR}")
-
 
 ######################################## END OF EXTERNAL DEPENDENCIES
-
-# # Restore dev warnings
-# set(CMAKE_WARN_DEPRECATED ON CACHE BOOL "" FORCE)
+# Restore dev warnings
+set(CMAKE_WARN_DEPRECATED ON CACHE BOOL "" FORCE)
 
 # OpenGL
 find_package(OpenGL REQUIRED)
@@ -156,29 +144,4 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 )
 
 install(DIRECTORY include/ DESTINATION inc)
-#install(EXPORT ${PROJECT_NAME}Config FILE FluxLuminaConfig.cmake DESTINATION cmake)
-
-# install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Config 
-#   ARCHIVE DESTINATION lib
-#   INCLUDES DESTINATION include
-# )
 install(TARGETS ${PROJECT_NAME} DESTINATION lib)
-
-# Create and install the CMake configuration files
-# include(CMakePackageConfigHelpers)
-# write_basic_package_version_file(
-#     "${PROJECT_NAME}ConfigVersion.cmake"
-#     VERSION ${PROJECT_VERSION}
-#     COMPATIBILITY AnyNewerVersion
-# )
-
-# install(EXPORT ${PROJECT_NAME}Config
-#     FILE ${PROJECT_NAME}Config.cmake
-#     NAMESPACE FL::
-#     DESTINATION lib/cmake/${PROJECT_NAME}
-# )
-
-# install(FILES
-#     "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
-#     DESTINATION lib/cmake/${PROJECT_NAME}
-# )
