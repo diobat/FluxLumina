@@ -18,7 +18,9 @@ These instructions will get you a copy of the project up and running on your loc
 - CMake (version 3.23 or higher)
 - OpenGL (version 4.3 or higher)
 
+### Standalone working example
 
+Check out our [template](https://github.com/diobat/FluxLumina-template) for a working setup of FluxLumina
 
 ### Including into your project
 
