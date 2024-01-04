@@ -1,4 +1,4 @@
-#include "rendering/FluxLumina.hpp"
+#include "FluxLumina.hpp"
 #include "rendering/openGLContext.hpp"
 
 // GLFW include

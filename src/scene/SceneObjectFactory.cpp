@@ -2,7 +2,7 @@
 
 #include "rendering/libraries/TextureLibrary.hpp"
 
-#include "helpers/RootDir.h"
+#include "helpers/RootDir.hpp"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
