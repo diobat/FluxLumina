@@ -45,8 +45,8 @@ public:
     void use(const std::string &name);
     void use(const std::shared_ptr<Shader> &shader);
 
-    // Scan for shaders
-    unsigned int scan(const std::string &folderName);
+    // Scan for user-supplied shaders
+    unsigned int userScan(const std::string &folderName);
 
     // Instancing
     void setupSceneMeshes(Scene* scene);
@@ -106,6 +106,8 @@ public:
     void setUniformMat4(const std::string &shader, const std::string &name, const glm::mat4 &mat);
 
 private:
+    // Scan for included shaders
+    unsigned int scan(const std::string &folderName);
     // Filetree Scanning
     unsigned int recursiveScanFolder(const std::string &folderName, unsigned int importedShadersCount = 0);
     // Shaders

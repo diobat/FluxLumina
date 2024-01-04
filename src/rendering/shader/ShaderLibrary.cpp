@@ -12,7 +12,6 @@ ShaderLibrary::ShaderLibrary(const std::string &folderName) :
     _contents(std::make_shared<ShaderLibraryContents>())
 {
     scan(folderName);
-    ;
 }
 
 ShaderLibrary::~ShaderLibrary()
@@ -156,6 +155,24 @@ unsigned int ShaderLibrary::scan(const std::string &foldername)
     unsigned int importedShaderPrograms = 0;
 
     std::string folderToScan = PROJECT_ROOT_DIR + foldername;
+
+    if(!boost::filesystem::exists(folderToScan))
+    {
+        return 0;
+    }
+    else
+    {
+        importedShaderPrograms = recursiveScanFolder(folderToScan, importedShaderPrograms);
+    }
+
+    return importedShaderPrograms;
+}
+
+unsigned int ShaderLibrary::userScan(const std::string &folderName)
+{
+    unsigned int importedShaderPrograms = 0;
+
+    std::string folderToScan = ROOT_DIR + folderName;
 
     if(!boost::filesystem::exists(folderToScan))
     {
