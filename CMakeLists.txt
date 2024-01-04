@@ -90,6 +90,9 @@ FetchContent_Declare(
 )
 set(ASSIMP_NO_EXPORT ON CACHE BOOL "Disable Assimp's export functionality")
 set(ASSIMP_BUILD_ALL_EXPORTERS_BY_DEFAULT OFF CACHE BOOL "Disable Assimp's export functionality")
+set(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT OFF)
+set(ASSIMP_BUILD_OBJ_IMPORTER ON)
+set(ASSIMP_BUILD_GLTF_IMPORTER ON)
 FetchContent_MakeAvailable(assimp)
 target_link_libraries(${PROJECT_NAME} PUBLIC assimp)
 
