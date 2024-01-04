@@ -56,7 +56,6 @@ FetchContent_Declare(
 set(GLAD_PROFILE 		    "core"	    CACHE STRING "OpenGL profile")
 set(GLAD_API            "gl=4.6"    CACHE STRING "API type/version pair")
 set(GLAD_GENERATOR 		  "c"	        CACHE STRING "Language to generate the binding for")
-
 FetchContent_MakeAvailable(glad)
 
 target_link_libraries(${PROJECT_NAME} PUBLIC glad)
@@ -93,9 +92,10 @@ FetchContent_Declare(
 )
 set(ASSIMP_NO_EXPORT ON CACHE BOOL "Disable Assimp's export functionality")
 set(ASSIMP_BUILD_ALL_EXPORTERS_BY_DEFAULT OFF CACHE BOOL "Disable Assimp's export functionality")
-set(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT OFF)
+
 set(ASSIMP_BUILD_OBJ_IMPORTER ON)
 set(ASSIMP_BUILD_GLTF_IMPORTER ON)
+set(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT OFF)
 FetchContent_MakeAvailable(assimp)
 target_link_libraries(${PROJECT_NAME} PUBLIC assimp)
 
