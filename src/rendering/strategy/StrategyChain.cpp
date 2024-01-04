@@ -200,9 +200,13 @@ bool PBSShadingStrategyChain::reserveResources()
     std::tuple<int> cubemapSizeTuple = std::make_tuple(cubemapSize);
     shaderLibrary->getUniformBuffer("IBL_cubemap_size").update(cubemapSizeTuple);
 
-
     // Assign Lightmap to Skybox
     std::shared_ptr<Cubemap> cubemap = _ranFrom->getScene()->getSkybox().getCubemap();
+    if(cubemap == nullptr)  // For the cases there was no skybox in place
+    {
+        cubemap = std::make_shared<Cubemap>();
+        _ranFrom->getScene()->getSkybox().setCubemap(cubemap);
+    }
     cubemap->getTexture()._id = skyboxTextureID;
     cubemap->VAO = shapes::cube::VAO();
 
