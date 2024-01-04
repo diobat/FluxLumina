@@ -1,6 +1,6 @@
 # FluxLumina
 
-FluxLumina is an OpenGL-based rendering engine designed for high-performance graphics applications. It offers a range of features to facilitate the creation of visually stunning and efficient 3D renderings. 
+FluxLumina is an OpenGL-based rendering engine, provided as a static library, designed for high-performance graphics applications. It offers a range of features to facilitate the creation of visually stunning and efficient 3D renderings. 
 
 ## Features
 
@@ -10,7 +10,7 @@ FluxLumina is an OpenGL-based rendering engine designed for high-performance gra
 
 ## Getting Started
 
-These instructions will get you a copy of the project up and running on your local machine for development purposes.
+These instructions will get you a copy of the project up and running on your local machine
 
 ### Prerequisites
 
@@ -18,9 +18,42 @@ These instructions will get you a copy of the project up and running on your loc
 - CMake (version 3.23 or higher)
 - OpenGL (version 4.3 or higher)
 
-### Installing
 
-To install FluxLumina, clone the GitHub repository and build the project using CMake.
+
+### Including into your project
+
+To bring FluxLumina into your project, include it as a dependency in your CMake project and link against it. CMake will fetch the source and build the target for you.
+
+```cmake
+# Fetch dependencies remotely
+include(FetchContent)
+
+FetchContent_Declare(
+  FluxLumina
+  GIT_REPOSITORY 	https://github.com/diobat/FluxLumina.git
+  GIT_TAG        	Release
+)
+FetchContent_MakeAvailable(FluxLumina)
+target_link_libraries(${PROJECT_NAME} PRIVATE FluxLumina)
+```
+
+or, alternatively you can get the prebuilt targets from our [releases page](https://github.com/diobat/FluxLumina/releases) and place them on your lib and include folders.
+
+Afterwards, on your C++ code, simply instantiate the engine and you are good to go
+
+```c++
+#include <FluxLumina.hpp>
+
+int main()
+{
+    FluxLumina graphicalEngine(E_RenderStrategy::ForwardShading);    
+    return 0
+}
+```
+
+### Building the target from source
+
+To build the files from source, clone the GitHub repository and use CMake.
 
 ```bash
 # Clone the repository
@@ -42,29 +75,6 @@ cmake --build build --config Debug
 cmake --build build --config Release
 ```
 
-## Usage
-
-To use FluxLumina in your project, include it as a dependency in your CMake project and link against it.
-
-```cmake
-# Add FluxLumina as a subdirectory
-add_subdirectory(path/to/FluxLumina)
-
-# Link FluxLumina to your project
-target_link_libraries(your_project PRIVATE FluxLumina)
-```
-
-And then on your C++ code simply instantiate the engine
-
-```c++
-#include <FluxLumina.hpp>
-
-int main()
-{
-    FluxLumina graphicalEngine(E_RenderStrategy::ForwardShading);    
-    return 0
-}
-```
 
 ## Dependencies
 
