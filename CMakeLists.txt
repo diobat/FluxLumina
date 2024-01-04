@@ -12,6 +12,9 @@ cmake_policy(SET CMP0135 NEW) #
 cmake_policy(SET CMP0074 NEW)
 set(Boost_NO_WARN_NEW_VERSIONS 1)
 
+# Configure assets header file
+configure_file(src/helpers/RootDir.h.in src/helpers/RootDir.hpp)
+
 # Add source files
 file(GLOB_RECURSE SOURCE_FILES 
 	${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
@@ -22,11 +25,6 @@ file(GLOB_RECURSE HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/src/*.hpp
 )
 
-message(STATUS "SOURCE FILES -> ${SOURCE_FILES}")
-message(STATUS "HEADER FILES -> ${HEADER_FILES}")
-
-# Configure assets header file
-configure_file(src/helpers/RootDir.h.in src/helpers/RootDir.h)
 
 # Define the executable
 add_library(${PROJECT_NAME} STATIC ${SOURCE_FILES} ${HEADER_FILES})
