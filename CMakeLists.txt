@@ -40,6 +40,9 @@ FetchContent_Declare(
   GIT_REPOSITORY 	https://github.com/glfw/glfw.git
   GIT_TAG        	3.3.2
 )
+set(GLFW_BUILD_DOCS OFF)
+set(GLFW_BUILD_TESTS OFF)
+set(GLFW_BUILD_EXAMPLES OFF)
 FetchContent_MakeAvailable(glfw)
 target_link_libraries(${PROJECT_NAME} PUBLIC glfw)
 install(TARGETS glfw EXPORT ${PROJECT_NAME}Config)
