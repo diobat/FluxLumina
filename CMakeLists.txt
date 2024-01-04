@@ -14,15 +14,16 @@ set(Boost_NO_WARN_NEW_VERSIONS 1)
 
 # Add source files
 file(GLOB_RECURSE SOURCE_FILES 
-	${CMAKE_SOURCE_DIR}/src/*.c
-	${CMAKE_SOURCE_DIR}/src/*.cpp
-	${CMAKE_SOURCE_DIR}/res/shaders/*)
+	${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
+)
 
   # Add header files
 file(GLOB_RECURSE HEADER_FILES 
-  ${CMAKE_SOURCE_DIR}/src/*.h
-  ${CMAKE_SOURCE_DIR}/src/*.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/*.hpp
 )
+
+message(STATUS "SOURCE FILES -> ${SOURCE_FILES}")
+message(STATUS "HEADER FILES -> ${HEADER_FILES}")
 
 # Configure assets header file
 configure_file(src/helpers/RootDir.h.in src/helpers/RootDir.h)
@@ -141,7 +142,6 @@ message(STATUS "BOOST -> ${Boost_BINARY_DIR}")
 # # Restore dev warnings
 # set(CMAKE_WARN_DEPRECATED ON CACHE BOOL "" FORCE)
 
-
 # OpenGL
 find_package(OpenGL REQUIRED)
 
@@ -153,12 +153,10 @@ target_include_directories(${PROJECT_NAME} PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/project_includes>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
-    $<INSTALL_INTERFACE:project_includes>
     $<INSTALL_INTERFACE:include>
-    $<INSTALL_INTERFACE:src>
 )
 
-install(DIRECTORY include/ DESTINATION include)
+install(DIRECTORY include/ DESTINATION inc)
 #install(EXPORT ${PROJECT_NAME}Config FILE FluxLuminaConfig.cmake DESTINATION cmake)
 
 # install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Config 
