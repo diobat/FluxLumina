@@ -1,5 +1,5 @@
 // First-party includes
-#include "rendering/FluxLumina.hpp"
+#include "FluxLumina.hpp"
 #include "util/SceneSetup.h"
 
 int main(void)
