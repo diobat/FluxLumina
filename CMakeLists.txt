@@ -25,7 +25,6 @@ file(GLOB_RECURSE HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/src/*.hpp
 )
 
-
 # Define the executable
 add_library(${PROJECT_NAME} STATIC ${SOURCE_FILES} ${HEADER_FILES})
 
@@ -152,6 +151,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
     $<INSTALL_INTERFACE:include>
+    $<INSTALL_INTERFACE:src>
 )
 
 install(DIRECTORY include/ DESTINATION inc)
