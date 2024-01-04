@@ -90,6 +90,7 @@ FetchContent_Declare(
   GIT_REPOSITORY 	https://github.com/assimp/assimp.git
   GIT_TAG        	v5.3.0
 )
+option(ASSIMP_BUILD_TESTS OFF)
 set(ASSIMP_NO_EXPORT ON CACHE BOOL "Disable Assimp's export functionality")
 set(ASSIMP_BUILD_ALL_EXPORTERS_BY_DEFAULT OFF CACHE BOOL "Disable Assimp's export functionality")
 option(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT OFF)
