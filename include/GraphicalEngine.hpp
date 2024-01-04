@@ -21,7 +21,7 @@ class GraphicalEngine
 public:
 	GraphicalEngine();	
 
-	virtual void renderFrame(std::shared_ptr<Scene>) = 0{};
+	virtual void renderFrame(std::shared_ptr<Scene>) = 0;
 
 	void bindScene(std::shared_ptr<Scene> scene);
 	void unbindScene(std::shared_ptr<Scene> scene);
