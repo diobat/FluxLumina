@@ -92,17 +92,16 @@ FetchContent_Declare(
 )
 set(ASSIMP_NO_EXPORT ON CACHE BOOL "Disable Assimp's export functionality")
 set(ASSIMP_BUILD_ALL_EXPORTERS_BY_DEFAULT OFF CACHE BOOL "Disable Assimp's export functionality")
-
+set(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT OFF)
 set(ASSIMP_BUILD_OBJ_IMPORTER ON)
 set(ASSIMP_BUILD_GLTF_IMPORTER ON)
-set(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT OFF)
 FetchContent_MakeAvailable(assimp)
 target_link_libraries(${PROJECT_NAME} PUBLIC assimp)
 
 ######################################## BOOST
 # Boost is different than the others. Due to its size we don't want to build it, we want to download it
 # as a pre-compiled library and link it to our project.
-message(STATUS "Downloading pre-compiled boost library sources. This may take some time...")
+message(STATUS "Downloading pre-compiled boost library sources.")
 set(FETCHCONTENT_QUIET TRUE) # Sets the output level of the build process to terminal
 set(DOWNLOAD_EXTRACT_TIMESTAMP TRUE)
 
