@@ -10,7 +10,7 @@
 #include "rendering/shader/ShaderLibraryContents.hpp"
 #include "rendering/shader/Shader.hpp"
 #include "rendering/shader/UniformBuffer.hpp"
-#include "Scene/Scene.hpp"
+#include "scene/Scene.hpp"
 
 // Third-Party Headers
 #include <glad/glad.h>
