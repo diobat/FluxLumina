@@ -24,7 +24,7 @@ public:
         const std::array<float, 3> &attenuationFactors = {1.0f, 0.0f, 0.0f}
         );
 
-    virtual ~LightSource() = 0{};
+    virtual ~LightSource() = 0;
 
     void setIntensity(float intensity);
     float getIntensity() const;
