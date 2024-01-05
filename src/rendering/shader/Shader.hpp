@@ -2,7 +2,7 @@
 
 // OpenGL Headers
 #include <glad/glad.h>
-#include <glm\glm.hpp>
+#include <glm/glm.hpp>
 
 // STD Headers
 #include <map>

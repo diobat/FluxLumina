@@ -1,4 +1,4 @@
-#include "rendering\MeshLibrary.hpp"
+#include "rendering/MeshLibrary.hpp"
 
 // GLFW include
 #include "rendering/GLFW_Wrapper.hpp"

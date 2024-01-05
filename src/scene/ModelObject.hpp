@@ -1,7 +1,7 @@
 #pragma once
 
 // First-party headers
-#include "scene/sceneObject.hpp"
+#include "scene/SceneObject.hpp"
 #include "resources/Texture.hpp"
 #include "resources/Model.hpp"
 // #include "util/Listener.hpp"
