@@ -13,7 +13,7 @@
 #include "scene/Scene.hpp"
 
 // Third-Party Headers
-#include <glad/glad.h>
+#include <glad/gl.h>
 #include <boost/uuid/uuid.hpp>
 
 class ShaderLibrary
