@@ -86,7 +86,7 @@ GLFWwindow *InitializeOpenGLContext()
     glfwMakeContextCurrent(window);
 
     /* Initialize glad */
-    if (!gladLoadGL(glfwGetProcAddress))
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
         std::cout << "Failed to initialize GLAD" << std::endl;
         return 0;

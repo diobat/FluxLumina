@@ -1,7 +1,7 @@
 #pragma once
 
 // OpenGL Headers
-#include <glad/gl.h>
+#include <glad/glad.h>
 #include <glm/glm.hpp>
 
 // STD Headers

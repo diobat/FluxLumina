@@ -4,7 +4,7 @@
 #include <string>
 
 // Third-party headers
-#include <glad/gl.h>
+#include <glad/glad.h>
 
 enum E_TexureType
 {

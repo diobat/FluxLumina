@@ -48,8 +48,15 @@ target_link_libraries(${PROJECT_NAME} PUBLIC glfw)
 install(TARGETS glfw EXPORT ${PROJECT_NAME}Config)
 
 ######################################## GLAD
-add_library(glad STATIC ${CMAKE_CURRENT_SOURCE_DIR}/project_includes/glad/src/gl.c)
-target_include_directories(glad PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/project_includes/glad/include)
+FetchContent_Declare(
+  glad
+  GIT_REPOSITORY 	https://github.com/Dav1dde/glad.git
+  GIT_TAG 			v0.1.34
+)
+set(GLAD_PROFILE 		    "core"	    CACHE STRING "OpenGL profile")
+set(GLAD_API            "gl=4.6"    CACHE STRING "API type/version pair")
+set(GLAD_GENERATOR 		  "c"	        CACHE STRING "Language to generate the binding for")
+FetchContent_MakeAvailable(glad)
 
 target_link_libraries(${PROJECT_NAME} PUBLIC glad)
 install(TARGETS glad EXPORT ${PROJECT_NAME}Config)
