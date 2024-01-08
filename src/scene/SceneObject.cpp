@@ -1,11 +1,5 @@
 #include "scene/SceneObject.hpp"
 
-namespace
-{
-    const float M_PI = 3.14159265358979323846f;
-    const float DEG_TO_RAD = M_PI / 180.0f;
-}
-
 SceneObject::SceneObject()  :
     _toRender(true),
     _properties(),

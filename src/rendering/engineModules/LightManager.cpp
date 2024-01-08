@@ -443,7 +443,7 @@ void LightLibrary::renderTextureShadowMap(std::shared_ptr<Scene> scene, std::sha
     }
 
     // Activate the proper shader
-    auto& shadowMapperShader = shaders->getShader("Shadowmap");
+    auto shadowMapperShader = shaders->getShader("Shadowmap");
 
     if(shaders->getShader(shaders->getActiveShaderIndex()) != shadowMapperShader)
     {

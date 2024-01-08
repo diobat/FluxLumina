@@ -12,7 +12,7 @@
 #include <iostream>
 
 // First-party includes
-#include <scene/sceneObject.hpp>
+#include <scene/SceneObject.hpp>
 #include <util/Arithmetic.hpp>
 
 enum class relativeDirections : unsigned int

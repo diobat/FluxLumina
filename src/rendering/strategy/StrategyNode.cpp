@@ -410,7 +410,7 @@ void GeometryPassNode::run()
     std::shared_ptr<FBOManager> frameBuffers = _chain->engine()->getFBOManager();
 
     // Activate proper shader program
-    auto& geometryShaderProgram = shaderPrograms->getShader("deferred_geometry");
+    auto geometryShaderProgram = shaderPrograms->getShader("deferred_geometry");
     shaderPrograms->use(geometryShaderProgram);
 
     frameBuffers->renderInstancedMeshes();
@@ -428,7 +428,7 @@ void LightPassNode::run()
     std::shared_ptr<FBOManager> frameBuffers = _chain->engine()->getFBOManager();
 
     // Activate proper shader program
-    auto& lightShaderProgram = shaderPrograms->getShader("deferred_lighting");
+    auto lightShaderProgram = shaderPrograms->getShader("deferred_lighting");
     shaderPrograms->use(lightShaderProgram);
 
     // Enable the default scene FBO
@@ -512,7 +512,7 @@ void LightVolumeNode::run()
     frameBuffers->clearColor();
 
     // Activate proper shader program
-    auto& lightShaderProgram = shaderPrograms->getShader("deferred_light_volumes");
+    auto lightShaderProgram = shaderPrograms->getShader("deferred_light_volumes");
     shaderPrograms->use(lightShaderProgram);
 
     shaderPrograms->setUniformInt("gData.position", 0);
@@ -644,7 +644,7 @@ void SSAONode::run()
     frameBuffers->clearAll();
 
     // Use the correct shader
-    auto& ssaoShaderProgram = shaderPrograms->getShader("deferred_ssao");
+    auto ssaoShaderProgram = shaderPrograms->getShader("deferred_ssao");
     shaderPrograms->use(ssaoShaderProgram);
 
     // Update the Geometry Pass outputs to the uniform slots
