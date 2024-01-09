@@ -6,10 +6,7 @@ sampler2D diffuse;
 };
 
 // Inputs from the vertex shader
-in vec3 objectColor;
-in vec3 Normal;	
 in vec2 TexCoords;
-in vec3 FragPos;
 
 //////////////////////////
 // Uniforms

@@ -66,9 +66,6 @@ int FluxLumina::initialize(E_RenderStrategy strategy)
     // Shader Library initialization
     _shaderPrograms = std::make_shared<ShaderLibrary>("res/shaders/");
 
-    _shaderPrograms->getShader("Basic")->addSupportedFeature(E_ShaderProgramFeatures::E_AUTO_INSTANCING);
-    _shaderPrograms->getShader("transparency")->addSupportedFeature(E_ShaderProgramFeatures::E_TRANSPARENCY);
-
     // Add uniform buffers to the shaders
     _shaderPrograms->createUniformBuffer("mvp_camera");
     _shaderPrograms->createUniformBuffer("viewPosBlock");
@@ -98,7 +95,7 @@ int FluxLumina::initialize(E_RenderStrategy strategy)
             break;
         default:
         case E_RenderStrategy::ForwardShading:
-            _strategyChain = std::make_shared<ForwardShadingStrategyChain>(this);
+            _strategyChain = std::make_shared<ForwardShadingStrategyChain>(this, _shaderPrograms->getShader("Basic"), _shaderPrograms->getShader("transparency"));
             break;
     }
 

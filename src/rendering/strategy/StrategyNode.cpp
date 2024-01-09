@@ -132,33 +132,41 @@ void FramebufferNode::run()
 /////////////////////////// OPAQUES RENDER NODE
 ///////////////////////////////////////////////////////////////////////////////////////////
 
+RenderOpaqueNode::RenderOpaqueNode(const StrategyChain* chain, std::shared_ptr<Shader> instancingShader) : 
+    StrategyNode(chain),
+    _instancingShader(instancingShader)
+{
+    ;
+}
+
 void RenderOpaqueNode::run()
 {
     std::shared_ptr<Scene> scene = _chain->engine()->getScene();
     std::shared_ptr<ShaderLibrary> shaderPrograms = _chain->engine()->getShaderLibrary();
     std::shared_ptr<FBOManager> frameBuffers = _chain->engine()->getFBOManager();
-    //std::shared_ptr<InstancingManager> instancingManager = _chain->engine()->getInstancingManager();
 
-    shaderPrograms->use("Basic");
-    frameBuffers->renderInstancedMeshes();
-
+    if(_instancingShader != nullptr)
+    {
+        shaderPrograms->use(_instancingShader);
+        frameBuffers->renderInstancedMeshes();
+    }
 
     for(auto shader : shaderPrograms->getShaders())
     {
-        std::vector<std::shared_ptr<ModelObject>> objectsForThisShader = scene->getModels(shader->getName());
+        if (shader == _instancingShader)
+        {
+            continue;
+        }
 
-        if(
-            objectsForThisShader.empty() || 
-            shader->isFeatureSupported(E_ShaderProgramFeatures::E_AUTO_INSTANCING) ||   // Instanced Objects were already rendered
-            shader->isFeatureSupported(E_ShaderProgramFeatures::E_TRANSPARENCY)         // And transparent ones will be rendered later
-            )
+        std::vector<std::shared_ptr<ModelObject>> modelsForThisShader = scene->getModels(shader->getName());
+
+        if(modelsForThisShader.empty())
         {
             continue;
         }
 
         shaderPrograms->use(shader);
-
-        for(auto modelObject : objectsForThisShader)
+        for(auto modelObject : modelsForThisShader)
         {
             if(!modelObject->enabled())
             {
@@ -198,36 +206,47 @@ void RenderSkyboxNode::run()
 /////////////////////////// TRANSPARENTS RENDER NODE
 ///////////////////////////////////////////////////////////////////////////////////////////
 
+RenderTransparentNode::RenderTransparentNode(const StrategyChain* chain, std::shared_ptr<Shader> transparencyShader) : 
+    StrategyNode(chain),
+    _transparencyShader(transparencyShader)
+{
+    ;
+}
+
 void RenderTransparentNode::run()
 {
     std::shared_ptr<Scene> scene = _chain->engine()->getScene();
     std::shared_ptr<ShaderLibrary> shaderPrograms = _chain->engine()->getShaderLibrary();
     std::shared_ptr<FBOManager> frameBuffers = _chain->engine()->getFBOManager();
+    std::shared_ptr<Settings> settings = _chain->engine()->getSettings();
 
+    // We want to see transparent objects' faces from both directions
+    auto currentFaceCulling = settings->getFaceCulling();
+    settings->set(E_Settings::FACE_CULLING, E_Setting::OFF);
 
-    for(unsigned int shaderIndex : shaderPrograms->getShaderIndexesPerFeature(E_ShaderProgramFeatures::E_TRANSPARENCY))
+    // Activate shader
+    shaderPrograms->use(_transparencyShader);
+    std::map<float, std::shared_ptr<ModelObject>> sortedTransparentModels;
+    
+    for (auto model : scene->getModels(_transparencyShader->getName()))
     {
-        // Activate shader
-        shaderPrograms->use(shaderIndex);
-        std::map<float, std::shared_ptr<ModelObject>> sortedTransparentModels;
-        
-        for (auto model : scene->getModels(shaderPrograms->getShader(shaderIndex)->getName()))
+        if(model->getModel()->hasTransparency())
         {
-            if(model->getModel()->hasTransparency())
-            {
-                float distance = glm::length(scene->getActiveCamera()->getPosition() - conversion::toVec3(model->getPosition()));
-                sortedTransparentModels[distance] = model;
-            }
-        }
-        // Render all the transparent models (from in decreasing distance to the camera)
-        if(!sortedTransparentModels.empty())
-        {
-            for (std::map<float, std::shared_ptr<ModelObject>>::reverse_iterator it = sortedTransparentModels.rbegin(); it != sortedTransparentModels.rend(); ++it)
-            {
-                frameBuffers->renderModel(*it->second);
-            }
+            float distance = glm::length(scene->getActiveCamera()->getPosition() - conversion::toVec3(model->getPosition()));
+            sortedTransparentModels[distance] = model;
         }
     }
+    // Render all the transparent models (from in decreasing distance to the camera)
+    if(!sortedTransparentModels.empty())
+    {
+        for (std::map<float, std::shared_ptr<ModelObject>>::reverse_iterator it = sortedTransparentModels.rbegin(); it != sortedTransparentModels.rend(); ++it)
+        {
+            frameBuffers->renderModel(*it->second);
+        }
+    }
+
+    // Reset face culling
+    settings->set(E_Settings::FACE_CULLING, currentFaceCulling);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////

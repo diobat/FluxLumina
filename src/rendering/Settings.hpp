@@ -14,6 +14,7 @@ public:
     Settings(GLFWwindow* _window);
 
     void set(E_Settings setting, int value);
+    void set(E_Settings setting, E_Setting value);
 
     E_Setting getShadowGlobal() const;
     E_ShadowQuality_Global getShadowQualityGlobal() const;

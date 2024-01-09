@@ -36,8 +36,6 @@ public:
     std::shared_ptr<Shader> getShader(const std::string &name);
     std::vector<std::shared_ptr<Shader>> getShaders();
     unsigned int getShaderIndex(const std::string &name) const;
-    std::set<unsigned int> getShaderIndexesPerFeature() const;
-    std::set<unsigned int> getShaderIndexesPerFeature(E_ShaderProgramFeatures feature) const;
     unsigned int getActiveShaderIndex() const;
     size_t size() const;
 
