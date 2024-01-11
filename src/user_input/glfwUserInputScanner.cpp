@@ -6,7 +6,7 @@
 //Because openGL runs in C code it has no idea what classes and this-> are.
 //Its much more convoluted to implement callbacks as non-member functions but 
 //I have little choice. 
-namespace UserInput
+namespace
 {
 	bool debugMode = false;
 
@@ -87,8 +87,6 @@ namespace UserInput
 		lastMousePos = {xpos, ypos};
 	}
 }
-
-using namespace UserInput;
 
 glfwKeyboardScanner::glfwKeyboardScanner(GLFWwindow* window) :
 	_window(window)
