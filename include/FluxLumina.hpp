@@ -10,8 +10,7 @@
 // Third party includes
 #include "boost/uuid/uuid.hpp"
 
-
-class GLFWwindow;
+struct GLFWwindow;
 
 enum class E_RenderStrategy : unsigned int
 {
@@ -69,5 +68,4 @@ private:
 
 	// GLFW window
 	GLFWwindow* _window;
-
 };
