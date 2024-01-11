@@ -1,11 +1,24 @@
 #include "scene/SceneObjectFactory.hpp"
 
-#include "rendering/libraries/TextureLibrary.hpp"
-
 #include "helpers/RootDir.hpp"
-
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
+
+// First-party includes
+#include "scene/Scene.hpp"
+#include "scene/SceneObject.hpp"
+#include "GraphicalEngine.hpp"
+#include "scene/ModelObject.hpp"
+#include "scene/Camera.hpp"
+#include "scene/LightSource.hpp"
+#include "resources/Cubemap.hpp"
+#include "rendering/MeshLibrary.hpp"
+#include "rendering/libraries/TextureLibrary.hpp"
+
+//Third-party includes
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////// HELPER FUNCTIONS
@@ -128,10 +141,7 @@ namespace
                 texture._type = E_TexureType::DIFFUSE;
                 break;
         }
-
-        texture._useLinear = true;
     }
-
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////

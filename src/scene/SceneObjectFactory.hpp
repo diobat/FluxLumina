@@ -1,24 +1,34 @@
 #pragma once
 
-// STL library includes
-#include <iostream>
+#include <string>
+#include <vector>
+#include <memory>
 
-// First-party includes
-#include "scene/Scene.hpp"
-#include "scene/SceneObject.hpp"
-#include "GraphicalEngine.hpp"
-#include "scene/ModelObject.hpp"
-#include "scene/Camera.hpp"
-#include "scene/LightSource.hpp"
-#include "resources/Cubemap.hpp"
-#include "rendering/MeshLibrary.hpp"
-
-//Third-party includes
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
+// Assimp includes
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
+
+class Scene;
+class GraphicalEngine;
+class LightSource;
+class Cubemap;
+class Texture;
+class Model;
+class ModelObject;
+class Mesh;
+enum E_LightType;
+
+enum class drawMode
+{
+    POINTS,
+    LINES,
+    LINE_LOOP,
+    LINE_STRIP,
+    TRIANGLES,
+    TRIANGLE_STRIP,
+    TRIANGLE_FAN
+};
 
 /*
     Some texture types are not supported by the formats our engine uses
@@ -46,13 +56,11 @@ public:
     void bindScene(Scene* scene);
     void bindEngine(GraphicalEngine* engine);
 
-    // Importing models
+    // Importing models via assimp
     ModelObject &create_Model(const std::string &modelPath, const std::string& shader = "Basic", bool flipUVs = false, TextureLocations textureLocations = {});
-    void load_ModelMeshes(Model& model, std::string const &path);
-    void processNode(const std::string &path, aiNode* node, const aiScene* scene);
-    std::shared_ptr<Mesh> processMesh(const std::string &path, aiMesh *mesh, const aiScene *scene);
-    std::vector<Texture> loadMaterialTextures(const aiScene* scene, const std::string &path, aiMaterial *mat, aiTextureType type);
-    std::vector<Texture> loadExternalTextures(const std::string &path, const TextureLocations & textures) const;
+
+    // Importing models manually (not recommended)
+
 
     // Creating lights
     std::shared_ptr<LightSource> create_LightSource(E_LightType type);
@@ -67,6 +75,13 @@ public:
     std::shared_ptr<Cubemap> create_IBL(std::string path, bool flipUVs = false);
 
 private:
+
+    void load_ModelMeshes(Model& model, std::string const &path);
+    void processNode(const std::string &path, aiNode* node, const aiScene* scene);
+    std::shared_ptr<Mesh> processMesh(const std::string &path, aiMesh *mesh, const aiScene *scene);
+    std::vector<Texture> loadMaterialTextures(const aiScene* scene, const std::string &path, aiMaterial *mat, aiTextureType type);
+    std::vector<Texture> loadExternalTextures(const std::string &path, const TextureLocations & textures) const;
+
     Scene* _boundScene;
     GraphicalEngine* _boundEngine;
 };
