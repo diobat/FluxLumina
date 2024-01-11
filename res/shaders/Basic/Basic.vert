@@ -47,7 +47,7 @@ out LightSpaceVertexOutput{
 void main()
 {
 	VertexOut.objectColor = aObjectColor;
-	VertexOut.Normal = aNormal;
+	VertexOut.Normal = mat3(instanceMatrix) * aNormal;
 	VertexOut.TexCoords = aTexCoords;
 	VertexOut.FragPos = vec3(instanceMatrix * vec4(aPosition, 1.0f));
 
