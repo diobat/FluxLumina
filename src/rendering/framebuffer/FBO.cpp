@@ -38,6 +38,7 @@ FBO::~FBO()
 {
     reset();
     glDeleteFramebuffers(1, &_id);
+
 }
 
 void FBO::init(const std::array<E_AttachmentTypes, 3>& templateTypes)

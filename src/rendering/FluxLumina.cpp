@@ -75,7 +75,6 @@ int FluxLumina::initialize(E_RenderStrategy strategy)
     std::tuple<glm::vec2> viewPortSize = {
         glm::vec2(_viewportWidth, _viewportHeight)
     };
-
     _shaderPrograms->getUniformBuffer("viewPortBlock").update(viewPortSize);
 
     // Initialize LightManager
@@ -183,6 +182,26 @@ boost::uuids::uuid FluxLumina::create_Model(
         textureLocationStrings[1]
     };
     return _sceneObjectFactory->create_Model(modelPath, shader, flipUVs, textureLocations).id();
+}
+
+boost::uuids::uuid FluxLumina::create_Model(const std::vector<std::array<float, 3>>& vertices,const std::vector<unsigned int>& indices, const std::string& shader)
+{
+
+    std::vector<Vertex> vertexVector;
+    for (const auto& vertex : vertices)
+    {
+        vertexVector.push_back(
+            Vertex({
+            glm::vec3(vertex[0], vertex[1], vertex[2]),         // Position
+            glm::vec3(0.0f, 0.0f, 0.0f),                        // Normal
+            glm::vec2(0.0f, 0.0f),                              // TexCoords
+            glm::vec3(random::gFloat(0.0f, 1.0f), random::gFloat(0.0f, 1.0f), random::gFloat(0.0f, 1.0f)),                        // Color
+            glm::vec3(0.0f, 0.0f, 0.0f)                         // Tangent
+            })
+        );
+    }
+
+    return _sceneObjectFactory->create_Model(vertexVector, indices, shader).id();
 }
 
 void FluxLumina::create_Camera()
