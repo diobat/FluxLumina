@@ -191,6 +191,43 @@ ModelObject &SceneObjectFactory::create_Model(const std::string &modelPath, cons
     return *model_object;
 }
 
+ModelObject &SceneObjectFactory::create_Model(const std::vector<Vertex>& vertexes, const std::vector<unsigned int>& indices, const std::string& shader)
+{
+    std::shared_ptr<ModelObject> model_object = std::make_shared<ModelObject>();
+    Model& model = (*model_object->getModel());
+
+    // Set the shader program
+    model_object->setShaderName(shader);
+   
+    // Calculate the hash of the new mesh
+    std::size_t hash = Math::calculateHash(vertexes, indices);
+
+    // Does it match an existing hash? Place the correspondent mesh in the model and return it
+    if(_boundEngine->getMeshLibrary()->isMeshLoaded(hash))
+    {   
+        model.meshes = _boundEngine->getMeshLibrary()->getMeshes(hash);
+        return *model_object;
+    }
+
+    std::vector<glm::vec3> normals = Math::calculateVertexNormals(vertexes, indices);
+
+    std::vector<Vertex> newVertexes = vertexes;
+    for(unsigned int i = 0; i < newVertexes.size(); i++)
+    {
+        newVertexes[i].Normal = normals[i];
+    }
+
+    std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>(newVertexes, indices);
+
+    _boundEngine->getMeshLibrary()->addMesh(hash, mesh);
+
+    model.meshes.push_back(mesh);
+
+    _boundScene->addModel(model_object);
+
+    return *model_object;
+}
+
 void SceneObjectFactory::load_ModelMeshes(Model& model, const std::string& path)
 {
     // check if model is already loaded

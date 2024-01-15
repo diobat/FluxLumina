@@ -11,6 +11,9 @@
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 
+/* 
+    Internal representation of a Vertex
+*/
 struct Vertex
 {
     // position
@@ -28,21 +31,11 @@ struct Vertex
 class Mesh
 {
 public:
-    /*  Functions  */
-    // constructor
-    Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures, bool hasTransparency = false)    :
-        _vertices(vertices),
-        _indices(indices),
-        _textures(textures),
-        _hasTransparency(hasTransparency)
-    {
-        _id = boost::uuids::random_generator()();
-    }
+    Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const std::vector<Texture>& textures = {}, bool hasTransparency = false);
 
-    void attachTexture(std::vector<Texture> textures)
-    {
-        _textures.insert(_textures.end(), textures.begin(), textures.end());
-    }
+    void attachTexture(std::vector<Texture> textures);
+
+    const std::vector<Vertex>& vertices() const;
 
     // Structural Data
     boost::uuids::uuid _id;
@@ -56,3 +49,4 @@ public:
     // Rendering Data
     unsigned int VAO, VBO, EBO;
 };
+

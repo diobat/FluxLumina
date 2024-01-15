@@ -12,6 +12,21 @@
 #include <boost/uuid/uuid_generators.hpp>
 
 
+/*
+    The engine will use this enum to determine how to draw the model.
+*/
+enum class drawMode
+{
+    POINTS,
+    LINES,
+    LINE_LOOP,
+    LINE_STRIP,
+    TRIANGLES,
+    TRIANGLE_STRIP,
+    TRIANGLE_FAN
+};
+
+
 class ModelObject : public SceneObject, public std::enable_shared_from_this<ModelObject>
 {
 public:
@@ -33,6 +48,8 @@ private:
     // Structural Data
     boost::uuids::uuid _id;
     
+
+
     std::string _assignedShader;
 
     std::shared_ptr<Model> _model;

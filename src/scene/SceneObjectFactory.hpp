@@ -17,18 +17,8 @@ class Texture;
 class Model;
 class ModelObject;
 class Mesh;
+struct Vertex;
 enum E_LightType;
-
-enum class drawMode
-{
-    POINTS,
-    LINES,
-    LINE_LOOP,
-    LINE_STRIP,
-    TRIANGLES,
-    TRIANGLE_STRIP,
-    TRIANGLE_FAN
-};
 
 /*
     Some texture types are not supported by the formats our engine uses
@@ -60,7 +50,7 @@ public:
     ModelObject &create_Model(const std::string &modelPath, const std::string& shader = "Basic", bool flipUVs = false, TextureLocations textureLocations = {});
 
     // Importing models manually (not recommended)
-
+    ModelObject &create_Model(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const std::string& shader);
 
     // Creating lights
     std::shared_ptr<LightSource> create_LightSource(E_LightType type);
@@ -75,7 +65,6 @@ public:
     std::shared_ptr<Cubemap> create_IBL(std::string path, bool flipUVs = false);
 
 private:
-
     void load_ModelMeshes(Model& model, std::string const &path);
     void processNode(const std::string &path, aiNode* node, const aiScene* scene);
     std::shared_ptr<Mesh> processMesh(const std::string &path, aiMesh *mesh, const aiScene *scene);
