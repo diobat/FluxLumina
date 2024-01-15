@@ -37,6 +37,12 @@ public:
 		std::array<std::vector<std::string>, 2> textureLocations = {}
 		);
 
+	boost::uuids::uuid create_Model(
+		const std::vector<std::array<float, 3>>& vertices,
+		const std::vector<unsigned int>& indices,
+		const std::string& shader = "Basic"
+		);
+
 	// Add lightsource to the scene
 	boost::uuids::uuid create_LightSource(unsigned int type);
 

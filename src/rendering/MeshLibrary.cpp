@@ -12,7 +12,17 @@ void MeshLibrary::addMesh(const std::string& name, const std::vector<std::shared
         initializeMesh(mesh);
     }
 
-    _meshes[Math::calculateHash(name)].insert(_meshes[Math::calculateHash(name)].end(), meshes.begin(), meshes.end());
+    _meshes[Math::calculateHash(name)] = meshes;
+}
+
+void MeshLibrary::addMesh(const std::size_t& hash, const std::shared_ptr<Mesh>& mesh)
+{
+    initializeMesh(mesh);
+
+    if(_meshes.find(hash) == _meshes.end())
+    {
+        _meshes[hash] = std::vector<std::shared_ptr<Mesh>>({mesh});
+    }
 }
 
 void MeshLibrary::initializeMesh(const std::shared_ptr<Mesh> mesh)
@@ -55,6 +65,11 @@ std::vector<std::shared_ptr<Mesh>> MeshLibrary::getMeshes(const std::string& nam
     return _meshes[Math::calculateHash(name)];
 }
 
+std::vector<std::shared_ptr<Mesh>> MeshLibrary::getMeshes(const std::size_t& hash)
+{
+    return _meshes[hash];
+}
+
 std::shared_ptr<Mesh> MeshLibrary::getMesh(boost::uuids::uuid id) const
 {
     for (auto& mesh : _meshes)
@@ -78,6 +93,12 @@ const std::vector<Texture>& MeshLibrary::getLoadedTextures()
 bool MeshLibrary::isMeshLoaded(const std::string& name)
 {
     return _meshes.find(Math::calculateHash(name)) != _meshes.end();
+
+}
+
+bool MeshLibrary::isMeshLoaded(const std::size_t& hash)
+{
+    return _meshes.find(hash) != _meshes.end();
 }
 
 void MeshLibrary::addTexture(const Texture& texture)

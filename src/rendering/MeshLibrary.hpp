@@ -17,12 +17,15 @@ public:
 
     // Meshes
     void addMesh(const std::string& name, const std::vector<std::shared_ptr<Mesh>>& mesh);
+    void addMesh(const std::size_t& hash, const std::shared_ptr<Mesh>& mesh);
 
     void initializeMesh(std::shared_ptr<Mesh> mesh);
 
     std::vector<std::shared_ptr<Mesh>> getMeshes(const std::string& name);
+    std::vector<std::shared_ptr<Mesh>> getMeshes(const std::size_t& hash);
     std::shared_ptr<Mesh> getMesh(boost::uuids::uuid id) const;
     bool isMeshLoaded(const std::string& name); 
+    bool isMeshLoaded(const std::size_t& hash);
 
     // Textures
     void addTexture(const Texture& texture);
