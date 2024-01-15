@@ -47,7 +47,7 @@ public:
 	boost::uuids::uuid create_LightSource(unsigned int type);
 
 	// Create camera
-	void create_Camera();
+	void create_Camera(float fov = 70.0f, float translationSpeed = 0.2f, float rotationSpeed = 0.001f);
 
 	// Create skybox
 	void create_Skybox(const std::vector<std::string>& path);

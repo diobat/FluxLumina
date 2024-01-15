@@ -204,9 +204,9 @@ boost::uuids::uuid FluxLumina::create_Model(const std::vector<std::array<float, 
     return _sceneObjectFactory->create_Model(vertexVector, indices, shader).id();
 }
 
-void FluxLumina::create_Camera()
+void FluxLumina::create_Camera(float fov, float translationSpeed, float rotationSpeed)
 {
-    _sceneObjectFactory->create_Camera();
+    _sceneObjectFactory->create_Camera(fov, translationSpeed, rotationSpeed);
 }
 
 boost::uuids::uuid FluxLumina::create_LightSource(unsigned int type)

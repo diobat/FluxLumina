@@ -8,8 +8,6 @@
 //I have little choice. 
 namespace
 {
-	bool debugMode = false;
-
 	GLFWwindow* renderWindow;
 	std::shared_ptr<Scene> boundScene;
 	std::map<int, bool> keyMap;
@@ -33,11 +31,6 @@ namespace
 	void toggleMouseMode()
 	{
 		captureMouse = !captureMouse;
-
-		if(debugMode)
-		{
-			std::cout << "Mouse mode toggled: " << captureMouse << std::endl;
-		}
 
 		if (captureMouse)
 		{
@@ -73,12 +66,6 @@ namespace
 
 		double xPos_delta = xpos - lastMousePos[0];
 		double yPos_delta = ypos - lastMousePos[1];
-
-		if(debugMode)
-		{
-			std::cout << "Horizontal: " << xPos_delta << std::endl;
-			std::cout << "Vertical: " << yPos_delta << std::endl;
-		}
 
 		// Get and update the camera
 		Camera& cam = *boundScene->getActiveCamera();
