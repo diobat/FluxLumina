@@ -4,6 +4,9 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
+#include <exception>
+#include <string>
+
 // First-party includes
 #include "scene/Scene.hpp"
 #include "scene/SceneObject.hpp"
@@ -244,8 +247,7 @@ void SceneObjectFactory::load_ModelMeshes(Model& model, const std::string& path)
         // check for errors
         if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) // if is Not Zero
         {
-            std::cout << "ERROR::ASSIMP:: " << importer.GetErrorString() << std::endl;
-            return;
+            throw std::runtime_error("ERROR::ASSIMP:: " + std::string(importer.GetErrorString()));
         }
         // retrieve the directory path of the filepath
         model.directory = path;
@@ -549,9 +551,9 @@ std::shared_ptr<LightSource> SceneObjectFactory::create_LightSource(E_LightType 
 /////////////////////////// CAMERAS
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-void SceneObjectFactory::create_Camera()
+void SceneObjectFactory::create_Camera(float fov, float translationSpeed, float rotationSpeed)
 {
-    _boundScene->addCamera(std::make_shared<Camera>());
+    _boundScene->addCamera(std::make_shared<Camera>(fov, translationSpeed, rotationSpeed));
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -577,7 +579,7 @@ std::shared_ptr<Cubemap> SceneObjectFactory::create_Skybox(std::vector<std::stri
        
         if(!*texture._pixels)
         {
-            std::cout << "ERROR::CUBEMAP::TEXTURE_LOADING_FAILED " << i << std::endl;
+            throw std::runtime_error("ERROR::CUBEMAP::TEXTURE_LOADING_FAILED " + faces[i]);
         }
     }
     Cubemap cubemap;
@@ -600,7 +602,7 @@ std::shared_ptr<Cubemap> SceneObjectFactory::create_IBL(std::string path, bool f
 
     if(!*texture._pixels)
     {
-        std::cout << "ERROR::CUBEMAP::TEXTURE_LOADING_FAILED  : " + path << std::endl;
+        throw std::runtime_error("ERROR::CUBEMAP::TEXTURE_LOADING_FAILED  : " + path);
     }
 
     _boundEngine->getTextureLibrary()->generate_GL_textureHDR(texture);

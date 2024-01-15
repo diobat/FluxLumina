@@ -8,11 +8,7 @@
 // STD includes
 #include <array>
 
-//Debug includes
-#include <iostream>
-
 // First-party includes
-#include <scene/SceneObject.hpp>
 #include <util/Arithmetic.hpp>
 
 enum class relativeDirections : unsigned int
@@ -28,7 +24,7 @@ enum class relativeDirections : unsigned int
 class Camera
 {
 public:
-	Camera();
+	Camera(float fov = 70.0f, float translationSpeed = 0.2f, float rotationSpeed = 0.001f);
 
 	glm::mat4 recalculateMVP();
 
@@ -48,8 +44,6 @@ public:
 	glm::mat4 getProjectionMatrix() const;
 
 private:
-	bool _debugMode;
-
 	glm::vec3 _position, _direction;
 
 	glm::vec2 _rotation;	// {Horizontal, Vertical} in radians

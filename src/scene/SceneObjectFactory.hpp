@@ -56,7 +56,7 @@ public:
     std::shared_ptr<LightSource> create_LightSource(E_LightType type);
 
     // Creating cameras
-    void create_Camera();
+    void create_Camera(float fov = 70.0f, float translationSpeed = 0.2f, float rotationSpeed = 0.001f);
 
     // Creating cubemaps
     std::shared_ptr<Cubemap> create_Skybox(std::vector<std::string> faces, bool flipUVs = false);
