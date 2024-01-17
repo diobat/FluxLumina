@@ -11,12 +11,12 @@
 #include "rendering/framebuffer/FBO.hpp"
 #include "scene/Scene.hpp"
 
-class GraphicalEngine;  
+class FluxLumina;  
 
 class FBOManager
 {
 public:
-    FBOManager(GraphicalEngine *engine);
+    FBOManager(FluxLumina *engine);
     ~FBOManager();
 
     std::shared_ptr<FBO> addFBO(E_AttachmentTemplate format,int width , int height);
@@ -60,5 +60,5 @@ private:
     bool _forceDefault;
 
     // The engine currently running this manager
-    GraphicalEngine* _ranFrom;
+    FluxLumina* _ranFrom;
 };

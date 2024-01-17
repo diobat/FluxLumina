@@ -1,6 +1,6 @@
 #include "rendering/engineModules/LightManager.hpp"
 
-#include "GraphicalEngine.hpp"
+#include "FluxLumina.hpp"
 #include "rendering/shader/ShaderLibrary.hpp"
 #include "rendering/framebuffer/Framebuffer_Manager.hpp"
 #include "rendering/Settings.hpp"
@@ -175,7 +175,7 @@ void ShadowMap::setDimensions(unsigned int width, unsigned int height)
 
 namespace
 {
-    unsigned int getShadowResolution(GraphicalEngine* engine)
+    unsigned int getShadowResolution(FluxLumina* engine)
     {
         auto setting = engine->getSettings()->getShadowQualityGlobal();
         switch(setting)
@@ -199,14 +199,14 @@ namespace
     }
 }
 
-LightLibrary::LightLibrary(GraphicalEngine* engine) :
+LightLibrary::LightLibrary(FluxLumina* engine) :
     _ranFrom(engine),
     _lightMap(this)
 {
     ;
 }
 
-GraphicalEngine* LightLibrary::engine() const
+FluxLumina* LightLibrary::engine() const
 {
     return _ranFrom;
 }

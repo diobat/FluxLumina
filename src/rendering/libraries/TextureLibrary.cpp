@@ -1,6 +1,6 @@
 #include "rendering/libraries/TextureLibrary.hpp"
 
-#include "GraphicalEngine.hpp"
+#include "FluxLumina.hpp"
 #include "rendering/shader/ShaderLibrary.hpp"
 #include "rendering/Settings.hpp"
 
@@ -8,7 +8,7 @@
 
 #include <stb_image.h>
 
-TextureLibrary::TextureLibrary(GraphicalEngine* engine)
+TextureLibrary::TextureLibrary(FluxLumina* engine)
 {
     _ranFrom = engine;
 }

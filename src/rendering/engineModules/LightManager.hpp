@@ -18,7 +18,7 @@
 #include <boost/uuid/uuid.hpp>
 #include <boost/functional/hash.hpp>
 
-class GraphicalEngine;
+class FluxLumina;
 
 class ShadowMap
 {
@@ -43,9 +43,9 @@ private:
 class LightLibrary
 {
 public:
-	LightLibrary(GraphicalEngine* engine);
+	LightLibrary(FluxLumina* engine);
 
-	GraphicalEngine* engine() const;
+	FluxLumina* engine() const;
 
     bool prepare(const LightContents& lights);
 
@@ -67,5 +67,5 @@ private:
 	LightMap _lightMap;
 
     // The engine currently running this manager
-    GraphicalEngine* _ranFrom;
+    FluxLumina* _ranFrom;
 };	

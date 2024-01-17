@@ -41,10 +41,10 @@ struct TextureLocations
 class SceneObjectFactory
 {
 public:
-    SceneObjectFactory(Scene* scene = nullptr, GraphicalEngine* engine = nullptr);
+    SceneObjectFactory(Scene* scene = nullptr, FluxLumina* engine = nullptr);
 
     void bindScene(Scene* scene);
-    void bindEngine(GraphicalEngine* engine);
+    void bindEngine(FluxLumina* engine);
 
     // Importing models
     ModelObject &create_Model(const std::string &modelPath, const std::string& shader = "Basic", bool flipUVs = false, TextureLocations textureLocations = {});
@@ -68,5 +68,5 @@ public:
 
 private:
     Scene* _boundScene;
-    GraphicalEngine* _boundEngine;
+    FluxLumina* _boundEngine;
 };

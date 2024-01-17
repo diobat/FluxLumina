@@ -1,6 +1,6 @@
 #include "rendering/strategy/StrategyChain.hpp"
 
-#include "GraphicalEngine.hpp"
+#include "FluxLumina.hpp"
 #include "rendering/Settings.hpp"
 #include "rendering/framebuffer/Framebuffer_Manager.hpp"
 #include "rendering/engineModules/InstancingManager.hpp"
@@ -10,7 +10,7 @@
 
 #include "util/VertexShapes.hpp"
 
-StrategyChain::StrategyChain(GraphicalEngine* engine) : 
+StrategyChain::StrategyChain(FluxLumina* engine) : 
     _ranFrom(engine),
     _firstRun(true)
 {
@@ -43,7 +43,7 @@ void StrategyChain::run()
     }
 }
 
-GraphicalEngine* StrategyChain::engine() const
+FluxLumina* StrategyChain::engine() const
 {
     return _ranFrom;
 }
@@ -91,7 +91,7 @@ bool ForwardShadingStrategyChain::reserveResources()
 /////////////////////////// DEFERRED
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-DeferredShadingStrategyChain::DeferredShadingStrategyChain(GraphicalEngine* engine) : 
+DeferredShadingStrategyChain::DeferredShadingStrategyChain(FluxLumina* engine) : 
     StrategyChain(engine)
 {   
     // Setupsa
@@ -146,7 +146,7 @@ bool DeferredShadingStrategyChain::reserveResources()
 /////////////////////////// PHYSICALLY BASED
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-PBSShadingStrategyChain::PBSShadingStrategyChain(GraphicalEngine* engine) : 
+PBSShadingStrategyChain::PBSShadingStrategyChain(FluxLumina* engine) : 
     StrategyChain(engine)
 {   
     // Setups
