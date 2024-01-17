@@ -164,7 +164,6 @@ void FluxLumina::update()
         /* Poll for and process events */
         glfwPollEvents();
 
-        _userInput->tickCallback();
     }
 
     glfwTerminate();

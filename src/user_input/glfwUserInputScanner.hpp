@@ -13,10 +13,8 @@ class glfwKeyboardScanner
 {
 public:
 	glfwKeyboardScanner(GLFWwindow* window);
-	void tickCallback();
 	void interruptCallback(int key);
 	void bindToScene(std::shared_ptr<Scene> scene);
-	void readInputs();
 
 	bool bindKey(int key, std::function<void()> callback);
 	void unbindKey(int key);

@@ -94,25 +94,24 @@ glfwKeyboardScanner::glfwKeyboardScanner(GLFWwindow* window) :
 	glfwSetCursorPosCallback(window, mouseCallback);
 	resetCursorPos();
 
-	// Initialize the default callbackMap
-	// WASD
-	bindKey(GLFW_KEY_W, std::bind(&Scene::moveActiveCamera, *boundScene , static_cast<unsigned int>(relativeDirections::FORWARD)) );
-	bindKey(GLFW_KEY_A, std::bind(&Scene::moveActiveCamera, *boundScene , static_cast<unsigned int>(relativeDirections::LEFT)) );
-	bindKey(GLFW_KEY_S, std::bind(&Scene::moveActiveCamera, *boundScene , static_cast<unsigned int>(relativeDirections::BACKWARD)) );
-	bindKey(GLFW_KEY_D, std::bind(&Scene::moveActiveCamera, *boundScene , static_cast<unsigned int>(relativeDirections::RIGHT)) );
-	bindKey(GLFW_KEY_Q, std::bind(&Scene::moveActiveCamera, *boundScene , static_cast<unsigned int>(relativeDirections::UP)) );
-	bindKey(GLFW_KEY_E, std::bind(&Scene::moveActiveCamera, *boundScene , static_cast<unsigned int>(relativeDirections::DOWN)) );
 
-}
-
-void glfwKeyboardScanner::tickCallback()
-{
-	readInputs();
 }
 
 void glfwKeyboardScanner::bindToScene(std::shared_ptr<Scene> scene)
 {
 	boundScene = scene;
+
+	callbackMap.clear();
+
+	// Initialize the default callbackMap
+	// WASD
+	bindKey(GLFW_KEY_W, std::bind(&Scene::moveActiveCamera, *boundScene , static_cast<unsigned int>(relativeDirections::FORWARD)));
+	bindKey(GLFW_KEY_A, std::bind(&Scene::moveActiveCamera, *boundScene , static_cast<unsigned int>(relativeDirections::LEFT)));
+	bindKey(GLFW_KEY_S, std::bind(&Scene::moveActiveCamera, *boundScene , static_cast<unsigned int>(relativeDirections::BACKWARD)));
+	bindKey(GLFW_KEY_D, std::bind(&Scene::moveActiveCamera, *boundScene , static_cast<unsigned int>(relativeDirections::RIGHT)));
+	bindKey(GLFW_KEY_Q, std::bind(&Scene::moveActiveCamera, *boundScene , static_cast<unsigned int>(relativeDirections::UP)));
+	bindKey(GLFW_KEY_E, std::bind(&Scene::moveActiveCamera, *boundScene , static_cast<unsigned int>(relativeDirections::DOWN)));
+
 }
 
 void glfwKeyboardScanner::interruptCallback(int key)

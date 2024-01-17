@@ -77,7 +77,7 @@ public:
 	void setDirection(boost::uuids::uuid lightID, std::array<float, 3> direction);
 	void setSpotlightRadius(boost::uuids::uuid lightID, float radius);
 
-	
+
 	// Bound scenes management
 	void bindScene(std::shared_ptr<Scene> scene);
 	void unbindScene(std::shared_ptr<Scene> scene);
