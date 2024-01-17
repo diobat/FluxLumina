@@ -90,6 +90,13 @@ std::shared_ptr<Camera> &Scene::getActiveCamera()
 	return _objects.cameras[activeCameraID];
 }
 
+void Scene::moveActiveCamera(unsigned int direction)
+{
+	relativeDirections relDir =  static_cast<relativeDirections>(direction);
+
+	_objects.cameras[activeCameraID]->move(relDir);
+}
+
 AmbientLight &Scene::getAmbientLight()
 {
 	return _ambientLight;

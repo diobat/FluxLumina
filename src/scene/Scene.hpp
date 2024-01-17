@@ -46,6 +46,7 @@ public:
 
 	AmbientLight& getAmbientLight();
 	std::shared_ptr<Camera> &getActiveCamera();
+	void moveActiveCamera(unsigned int direction);
 	Skybox& getSkybox();
 
 	std::shared_ptr<SceneObject> get(const boost::uuids::uuid& id);
