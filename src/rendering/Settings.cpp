@@ -32,7 +32,7 @@ Settings::Settings(GLFWwindow* _window)    :
     
     // Initializer list is not enough because some of these 
     // involve also calling some functions
-    set(E_Settings::SHADOW_GLOBAL, 1);
+    set(E_Settings::SHADOW_GLOBAL, 0);
     set(E_Settings::ANTI_ALIASING_QUALITY, 1);
     set(E_Settings::TRANSPARENCY, 1);
     set(E_Settings::GAMMA_CORRECTION, 0);

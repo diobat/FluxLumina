@@ -1,6 +1,6 @@
 #include "rendering/engineModules/LightMap.hpp"
 
-#include "GraphicalEngine.hpp"
+#include "FluxLumina.hpp"
 #include "rendering/engineModules/LightManager.hpp"
 #include "rendering/framebuffer/Framebuffer_Manager.hpp"
 #include "rendering/shader/ShaderLibrary.hpp"

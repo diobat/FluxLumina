@@ -8,20 +8,20 @@
 // First-party headers
 #include "rendering/strategy/StrategyNode.hpp"
 
-class GraphicalEngine;
+class FluxLumina;
 class Shader;
 
 class StrategyChain
 {
 public:
-    StrategyChain(GraphicalEngine* engine);
+    StrategyChain(FluxLumina* engine);
 
     bool add(std::shared_ptr<StrategyNode> node);
     void clear();
     virtual bool reserveResources() { return true;};
     void run();
 
-    GraphicalEngine* engine() const;
+    FluxLumina* engine() const;
 
     template<typename T>
     std::shared_ptr<T> getNode() const
@@ -41,7 +41,7 @@ protected:
     std::list<std::shared_ptr<StrategyNode>> _nodes;
 
     // The engine currently running this chain
-    GraphicalEngine* _ranFrom;
+    FluxLumina* _ranFrom;
 
 private:
     bool _firstRun;
@@ -50,20 +50,20 @@ private:
 class ForwardShadingStrategyChain : public StrategyChain
 {
 public:
-    ForwardShadingStrategyChain(GraphicalEngine* engine, std::shared_ptr<Shader> instancingShader = nullptr, std::shared_ptr<Shader> transparencyShader = nullptr);
+    ForwardShadingStrategyChain(FluxLumina* engine, std::shared_ptr<Shader> instancingShader = nullptr, std::shared_ptr<Shader> transparencyShader = nullptr);
     bool reserveResources() override;
 };
 
 class DeferredShadingStrategyChain : public StrategyChain
 {
 public:
-    DeferredShadingStrategyChain(GraphicalEngine* engine);
+    DeferredShadingStrategyChain(FluxLumina* engine);
     bool reserveResources() override;
 };
 
 class PBSShadingStrategyChain : public StrategyChain
 {
 public:
-    PBSShadingStrategyChain(GraphicalEngine* engine);
+    PBSShadingStrategyChain(FluxLumina* engine);
     bool reserveResources() override;
 };

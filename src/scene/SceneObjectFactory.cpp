@@ -10,7 +10,7 @@
 // First-party includes
 #include "scene/Scene.hpp"
 #include "scene/SceneObject.hpp"
-#include "GraphicalEngine.hpp"
+#include "FluxLumina.hpp"
 #include "scene/ModelObject.hpp"
 #include "scene/Camera.hpp"
 #include "scene/LightSource.hpp"
@@ -151,7 +151,7 @@ namespace
 /////////////////////////// INITIALIZATION
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-SceneObjectFactory::SceneObjectFactory(Scene* scene, GraphicalEngine* engine)
+SceneObjectFactory::SceneObjectFactory(Scene* scene, FluxLumina* engine)
 {
     _boundScene = scene;
     _boundEngine = engine;
@@ -163,7 +163,7 @@ void SceneObjectFactory::bindScene(Scene* scene)
     _boundScene = scene;
 }
 
-void SceneObjectFactory::bindEngine(GraphicalEngine *engine)
+void SceneObjectFactory::bindEngine(FluxLumina *engine)
 {
     _boundEngine = engine;
 }

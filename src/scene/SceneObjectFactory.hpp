@@ -10,7 +10,7 @@
 #include <assimp/postprocess.h>
 
 class Scene;
-class GraphicalEngine;
+class FluxLumina;
 class LightSource;
 class Cubemap;
 class Texture;
@@ -41,10 +41,10 @@ struct TextureLocations
 class SceneObjectFactory
 {
 public:
-    SceneObjectFactory(Scene* scene = nullptr, GraphicalEngine* engine = nullptr);
+    SceneObjectFactory(Scene* scene = nullptr, FluxLumina* engine = nullptr);
 
     void bindScene(Scene* scene);
-    void bindEngine(GraphicalEngine* engine);
+    void bindEngine(FluxLumina* engine);
 
     // Importing models via assimp
     ModelObject &create_Model(const std::string &modelPath, const std::string& shader = "Basic", bool flipUVs = false, TextureLocations textureLocations = {});
@@ -72,5 +72,5 @@ private:
     std::vector<Texture> loadExternalTextures(const std::string &path, const TextureLocations & textures) const;
 
     Scene* _boundScene;
-    GraphicalEngine* _boundEngine;
+    FluxLumina* _boundEngine;
 };

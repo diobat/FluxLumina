@@ -9,12 +9,12 @@
 #include <memory>
 #include <map>
 
-class GraphicalEngine;
+class FluxLumina;
 
 class TextureLibrary
 {
 public:
-    TextureLibrary(GraphicalEngine* engine);
+    TextureLibrary(FluxLumina* engine);
 
     std::shared_ptr<Texture> generate_GL_texture(Texture &texture);
     std::shared_ptr<TextureHDR> generate_GL_textureHDR(TextureHDR& texture);
@@ -28,5 +28,5 @@ private:
     std::map<std::size_t, std::shared_ptr<TextureHDR>> _texturesHDR;
     
     // The engine currently running this manager
-    GraphicalEngine* _ranFrom;
+    FluxLumina* _ranFrom;
 };

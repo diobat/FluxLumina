@@ -1,13 +1,13 @@
 #include "rendering/framebuffer/Framebuffer_Manager.hpp"
 
-#include "GraphicalEngine.hpp"
+#include "FluxLumina.hpp"
 #include "rendering/Settings.hpp"
 #include "rendering/engineModules/InstancingManager.hpp"
 #include "rendering/libraries/TextureLibrary.hpp"
 #include "rendering/shader/ShaderLibrary.hpp"
 
 
-FBOManager::FBOManager(GraphicalEngine *engine) : 
+FBOManager::FBOManager(FluxLumina *engine) : 
     _ranFrom(engine),
     _currentFBOIndex(-1),
     _forceDefault(false)

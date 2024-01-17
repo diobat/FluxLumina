@@ -1,7 +1,7 @@
 #include "rendering/strategy/StrategyNode.hpp" 
 #include "rendering/strategy/StrategyChain.hpp"
 
-#include "GraphicalEngine.hpp"
+#include "FluxLumina.hpp"
 #include "scene/Scene.hpp"
 
 #include "rendering/shader/ShaderLibrary.hpp"
