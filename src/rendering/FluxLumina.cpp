@@ -184,23 +184,32 @@ boost::uuids::uuid FluxLumina::create_Model(
     return _sceneObjectFactory->create_Model(modelPath, shader, flipUVs, textureLocations).id();
 }
 
-boost::uuids::uuid FluxLumina::create_Model(const std::vector<std::array<float, 3>>& vertices,const std::vector<unsigned int>& indices, const std::string& shader)
+boost::uuids::uuid FluxLumina::create_Model(
+    const std::vector<std::array<float, 3>>& vertices,
+    const std::vector<unsigned int>& indices, 
+    const std::vector<std::array<float, 3>>& colors,
+    const std::string& shader)
 {
 
+    unsigned int size = vertices.size();
+    if (size != colors.size())
+    {
+        throw std::runtime_error("Vertex and color arrays must be of the same size");
+    }
+
     std::vector<Vertex> vertexVector;
-    for (const auto& vertex : vertices)
+    for (unsigned int i(0); i < size; ++i)
     {
         vertexVector.push_back(
             Vertex({
-            glm::vec3(vertex[0], vertex[1], vertex[2]),         // Position
-            glm::vec3(0.0f, 0.0f, 0.0f),                        // Normal
-            glm::vec2(0.0f, 0.0f),                              // TexCoords
-            glm::vec3(random::gFloat(0.0f, 1.0f), random::gFloat(0.0f, 1.0f), random::gFloat(0.0f, 1.0f)),                        // Color
-            glm::vec3(0.0f, 0.0f, 0.0f)                         // Tangent
+            glm::vec3(vertices[i][0], vertices[i][1], vertices[i][2]),          // Position
+            glm::vec3(0.0f, 0.0f, 0.0f),                                        // Normal
+            glm::vec2(0.0f, 0.0f),                                              // TexCoords
+            glm::vec3(colors[i][0], colors[i][1], colors[i][2]),                // Color
+            glm::vec3(0.0f, 0.0f, 0.0f)                                         // Tangent
             })
         );
     }
-
     return _sceneObjectFactory->create_Model(vertexVector, indices, shader).id();
 }
 
