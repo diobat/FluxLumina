@@ -159,6 +159,7 @@ void FluxLumina::update()
 
         renderFrame(_scenes[0]);
        
+        _userInput->executeCurrentInputs();
         /* Swap front and back buffers */
         glfwSwapBuffers(_window);
         /* Poll for and process events */
@@ -289,6 +290,16 @@ void FluxLumina::setSpotlightRadius(boost::uuids::uuid UUID, float radius)
     }
 }
 
+std::shared_ptr<Scene> FluxLumina::getScene(unsigned int sceneIndex) const
+{
+    if(sceneIndex >= _scenes.size())
+    {
+        return nullptr;
+    }
+
+    return _scenes[sceneIndex];
+}
+
 void FluxLumina::bindScene(std::shared_ptr<Scene> scene)
 {
     _scenes.push_back(scene);
@@ -304,13 +315,7 @@ void FluxLumina::unbindScene(std::shared_ptr<Scene> sceneToUnbind)
         _scenes.end());
 }
 
-std::shared_ptr<Scene> FluxLumina::getScene(unsigned int sceneIndex) const
+bool FluxLumina::bindUserInput(int key, std::function<void()> callback)
 {
-    if(sceneIndex >= _scenes.size())
-    {
-        return nullptr;
-    }
-
-    return _scenes[sceneIndex];
+    return _userInput->bindKey(key, callback);
 }
-

@@ -13,7 +13,9 @@ class glfwKeyboardScanner
 {
 public:
 	glfwKeyboardScanner(GLFWwindow* window);
-	void interruptCallback(int key);
+
+	void executeCurrentInputs();
+	void invokeCallback(int key);
 	void bindToScene(std::shared_ptr<Scene> scene);
 
 	bool bindKey(int key, std::function<void()> callback);

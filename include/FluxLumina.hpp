@@ -77,16 +77,18 @@ public:
 	void setDirection(boost::uuids::uuid lightID, std::array<float, 3> direction);
 	void setSpotlightRadius(boost::uuids::uuid lightID, float radius);
 
-
 	// Bound scenes management
+	std::shared_ptr<Scene> getScene(unsigned int sceneIndex = 0) const;
 	void bindScene(std::shared_ptr<Scene> scene);
 	void unbindScene(std::shared_ptr<Scene> scene);
 
 	// Viewport
 	std::array<int, 2> getViewportSize() const { return { _viewportWidth, _viewportHeight }; }
 
+	// User Input
+	bool bindUserInput(int key, std::function<void()> callback);
+
 	// Module getters
-	std::shared_ptr<Scene> getScene(unsigned int sceneIndex = 0) const;
 	std::vector<std::shared_ptr<Scene>> getScenes() const { return _scenes; }
 	std::shared_ptr<SceneObjectFactory> getSceneObjectFactory() { return _sceneObjectFactory; };
 	std::shared_ptr<MeshLibrary> getMeshLibrary() { return _meshLibrary; };
