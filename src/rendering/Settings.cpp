@@ -34,7 +34,7 @@ Settings::Settings(GLFWwindow* _window)    :
     // involve also calling some functions
     set(E_Settings::SHADOW_GLOBAL, 0);
     set(E_Settings::ANTI_ALIASING_QUALITY, 1);
-    set(E_Settings::TRANSPARENCY, 0);
+    set(E_Settings::TRANSPARENCY, 1);
     set(E_Settings::GAMMA_CORRECTION, 0);
     set(E_Settings::FACE_CULLING, 1);
     set(E_Settings::DEPTH_TEST, 1);
@@ -47,6 +47,17 @@ Settings::Settings(GLFWwindow* _window)    :
     set(E_Settings::VSYNC, 1);
     set(E_Settings::POLYGON_LINES, 0);
     set(E_Settings::GRAPHICAL_DEBUG_OUTPUT, 0);
+}
+
+void Settings::set(E_Settings setting, E_Setting value)
+{  
+    int valueInt = static_cast<int>(value);
+
+    if(valueInt == 0 || valueInt == 1)
+    {
+        set(setting, valueInt);
+        return;
+    }
 }
 
 void Settings::set(E_Settings setting, int value)

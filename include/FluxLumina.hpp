@@ -9,8 +9,7 @@
 // Third party includes
 #include "boost/uuid/uuid.hpp"
 
-
-class GLFWwindow;
+struct GLFWwindow;
 
 enum class E_RenderStrategy : unsigned int
 {
@@ -37,11 +36,18 @@ public:
 		std::array<std::vector<std::string>, 2> textureLocations = {}
 		);
 
+	boost::uuids::uuid create_Model(
+		const std::vector<std::array<float, 3>>& vertices,
+		const std::vector<unsigned int>& indices,
+		const std::vector<std::array<float, 3>>& colors,
+		const std::string& shader = "Basic"
+		);
+
 	// Add lightsource to the scene
 	boost::uuids::uuid create_LightSource(unsigned int type);
 
 	// Create camera
-	void create_Camera();
+	void create_Camera(float fov = 70.0f, float translationSpeed = 0.2f, float rotationSpeed = 0.001f);
 
 	// Create skybox
 	void create_Skybox(const std::vector<std::string>& path);
@@ -89,5 +95,4 @@ private:
 
 	// GLFW window
 	GLFWwindow* _window;
-
 };

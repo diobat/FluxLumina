@@ -6,11 +6,11 @@
 #include <unordered_map>
 
 //	First Party includes
-#include "scene\Camera.hpp"
-#include "scene\ModelObject.hpp"
-#include "scene\LightSource.hpp"
-#include "scene\ModelContents.hpp"
-#include "scene\Skybox.hpp"
+#include "scene/Camera.hpp"
+#include "scene/ModelObject.hpp"
+#include "scene/LightSource.hpp"
+#include "scene/ModelContents.hpp"
+#include "scene/Skybox.hpp"
 
 // Third-party headers
 #include <boost/uuid/uuid.hpp>

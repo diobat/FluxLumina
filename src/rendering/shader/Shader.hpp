@@ -2,19 +2,12 @@
 
 // OpenGL Headers
 #include <glad/glad.h>
-#include <glm\glm.hpp>
+#include <glm/glm.hpp>
 
 // STD Headers
 #include <map>
 #include <string>
 #include <set>
-
-enum class E_ShaderProgramFeatures
-{
-    E_AUTO_INSTANCING,
-    E_TRANSPARENCY
-};
-
 
 class Shader
 {
@@ -43,15 +36,10 @@ public:
     const std::string& getName() const;
     void setName(const std::string& name);
 
-    void addSupportedFeature(E_ShaderProgramFeatures feature);
-    bool isFeatureSupported(E_ShaderProgramFeatures feature) const;
-    bool isFeatureless() const;
-
     bool verbose = false;
 
 private:
     std::string _name;
-    std::set<E_ShaderProgramFeatures> _supportedFeatures;
     std::map<std::string, GLint> uniformsLocations;
 
     GLuint program_id;

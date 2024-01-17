@@ -1,7 +1,8 @@
 #include "Camera.hpp"
 
-Camera::Camera() : 
-	_debugMode(false),
+
+
+Camera::Camera(float fov, float translationSpeed, float rotationSpeed) : 
 	_position(0.0f, 0.0f, 1.0f),
 	_rotation(glm::pi<float>() / 2.0f, 0.0f),
 	_direction(0.0f, 0.0f, -1.0f),
@@ -9,9 +10,9 @@ Camera::Camera() :
 	_farPlane(5000.0f),
 	_height(768),
 	_width(1024),
-	_fov(70.0f),
-	_translationSpeed(0.20f),
-	_rotationSpeed(0.001f),
+	_fov(fov),
+	_translationSpeed(translationSpeed),
+	_rotationSpeed(rotationSpeed),
 	_rotation_safety_bars(-glm::pi<float>() / 2.2f, glm::pi<float>() / 2.2f)
 {
 	// Model matrix is the identity
@@ -60,13 +61,7 @@ const glm::vec3 &Camera::getPosition() const
 
 void Camera::setRotation(const std::array<float, 2>& rotation)
 {
-
 	std::array<float, 2> rotation_adjusted_for_speed{ std::remainderf((-rotation[0] * _rotationSpeed), glm::two_pi<float>()) , std::remainder((-rotation[1] * _rotationSpeed), glm::two_pi<float>()) };
-
-	if(_debugMode)
-	{
-		std::cout << "Horizontal: " << rotation_adjusted_for_speed[0] << "    Vertical: " << rotation_adjusted_for_speed[1] << std::endl;
-	}
 
 	_rotation = glm::make_vec2(rotation_adjusted_for_speed.data());
 }
@@ -75,11 +70,6 @@ void Camera::addRotationDelta(const std::array<float, 2>& rotationDelta)
 {
 	glm::vec2 speed_adjusted_rotation = {-rotationDelta[0] * _rotationSpeed, -rotationDelta[1] * _rotationSpeed};
 	_rotation += speed_adjusted_rotation;
-
-	if(_debugMode)
-	{
-		std::cout << "Horizontal: " << _rotation[0] << "    Vertical: " << _rotation[1] << std::endl;
-	}
 
 	truncateRotation();
 }

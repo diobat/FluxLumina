@@ -6,10 +6,8 @@
 //Because openGL runs in C code it has no idea what classes and this-> are.
 //Its much more convoluted to implement callbacks as non-member functions but 
 //I have little choice. 
-namespace UserInput
+namespace
 {
-	bool debugMode = false;
-
 	GLFWwindow* renderWindow;
 	std::shared_ptr<Scene> boundScene;
 	std::map<int, bool> keyMap;
@@ -33,11 +31,6 @@ namespace UserInput
 	void toggleMouseMode()
 	{
 		captureMouse = !captureMouse;
-
-		if(debugMode)
-		{
-			std::cout << "Mouse mode toggled: " << captureMouse << std::endl;
-		}
 
 		if (captureMouse)
 		{
@@ -74,12 +67,6 @@ namespace UserInput
 		double xPos_delta = xpos - lastMousePos[0];
 		double yPos_delta = ypos - lastMousePos[1];
 
-		if(debugMode)
-		{
-			std::cout << "Horizontal: " << xPos_delta << std::endl;
-			std::cout << "Vertical: " << yPos_delta << std::endl;
-		}
-
 		// Get and update the camera
 		Camera& cam = *boundScene->getActiveCamera();
 		cam.addRotationDelta(std::array<float, 2>{static_cast<float>(xPos_delta), static_cast<float>(yPos_delta)});
@@ -87,8 +74,6 @@ namespace UserInput
 		lastMousePos = {xpos, ypos};
 	}
 }
-
-using namespace UserInput;
 
 glfwKeyboardScanner::glfwKeyboardScanner(GLFWwindow* window) :
 	_window(window)

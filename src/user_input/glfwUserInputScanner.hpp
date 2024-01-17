@@ -4,12 +4,10 @@
 #include <memory>
 #include <map>
 
-
 // First-party includes
 #include "scene/Scene.hpp"
 
-
-class GLFWwindow;
+struct GLFWwindow;
 
 class glfwKeyboardScanner
 {

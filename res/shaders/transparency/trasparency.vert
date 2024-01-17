@@ -14,7 +14,11 @@ layout(std140) uniform mvp_camera
 };
 uniform mat4 model;
 
+// Outputs
+out vec2 TexCoords;
+
 void main()
 {
+	TexCoords = aTexCoords;
 	gl_Position = projection * view * model * vec4(aPosition, 1.0f);
 }

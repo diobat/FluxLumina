@@ -1,6 +1,6 @@
 #pragma once
 
-class GLFWwindow;
+struct GLFWwindow;
 
 enum class E_Settings{SHADOW_QUALITY_GLOBAL,SHADOW_GLOBAL, SHADOW_DIRECTIONAL, SHADOW_POINT, SHADOW_SPOT, ANTI_ALIASING_QUALITY, TRANSPARENCY, GAMMA_CORRECTION, FACE_CULLING, DEPTH_TEST, NORMAL_MAPPING, HEIGHT_MAPPING, HIGH_DYNAMIC_RANGE, BLOOM, SSAO, SEAMLESS_CUBEMAP_SAMPLING, VSYNC, POLYGON_LINES, GRAPHICAL_DEBUG_OUTPUT};
 
@@ -14,6 +14,7 @@ public:
     Settings(GLFWwindow* _window);
 
     void set(E_Settings setting, int value);
+    void set(E_Settings setting, E_Setting value);
 
     E_Setting getShadowGlobal() const;
     E_ShadowQuality_Global getShadowQualityGlobal() const;

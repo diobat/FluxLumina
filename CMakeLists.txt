@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.23 FATAL_ERROR)
 
-project(FluxLumina VERSION 0.3.0 LANGUAGES CXX)
+project(FluxLumina VERSION 0.3.0 LANGUAGES CXX C)
 
 # Set the language for the project
 set(CMAKE_CXX_STANDARD 17)

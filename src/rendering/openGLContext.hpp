@@ -94,7 +94,7 @@ GLFWwindow *InitializeOpenGLContext()
 
     // Window Icon
     GLFWimage images[1]; 
-    std::string iconPath = ROOT_DIR + std::string("/res/icon.png");
+    std::string iconPath = PROJECT_ROOT_DIR + std::string("/res/icon.png");
     images[0].pixels = stbi_load(iconPath.c_str(), &images[0].width, &images[0].height, 0, 4); //rgba channels 
     glfwSetWindowIcon(window, 1, images); 
     stbi_image_free(images[0].pixels);

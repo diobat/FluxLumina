@@ -11,6 +11,7 @@
 
 class StrategyChain;
 class FBO;
+class Shader;
 
 class StrategyNode
 {
@@ -62,8 +63,10 @@ public:
 class RenderOpaqueNode : public StrategyNode
 {
 public:
-    RenderOpaqueNode(const StrategyChain* chain) : StrategyNode(chain) {}
+    RenderOpaqueNode(const StrategyChain* chain, std::shared_ptr<Shader> instancingShader = nullptr);
     void run() override;
+private:
+    std::shared_ptr<Shader> _instancingShader;
 };
 
 class RenderSkyboxNode : public StrategyNode
@@ -76,8 +79,10 @@ public:
 class RenderTransparentNode : public StrategyNode
 {
 public:
-    RenderTransparentNode(const StrategyChain* chain) : StrategyNode(chain) {}
+    RenderTransparentNode(const StrategyChain* chain, std::shared_ptr<Shader> transparencyShader = nullptr);
     void run() override;
+private:
+    std::shared_ptr<Shader> _transparencyShader;
 };
 
 class BloomNode : public StrategyNode

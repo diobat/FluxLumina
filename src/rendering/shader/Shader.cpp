@@ -1,6 +1,6 @@
 #include "rendering/shader/Shader.hpp"
 
-#include <glm\gtc\type_ptr.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <fstream>
 #include <string>
 #include <helpers/RootDir.hpp>
@@ -164,21 +164,6 @@ const std::string& Shader::getName() const
 void Shader::setName(const std::string& name)
 {
     _name = name;
-}
-
-void Shader::addSupportedFeature(E_ShaderProgramFeatures feature)
-{
-    _supportedFeatures.insert(feature);
-}
-
-bool Shader::isFeatureSupported(E_ShaderProgramFeatures feature) const
-{
-    return _supportedFeatures.count(feature);
-}
-
-bool Shader::isFeatureless() const
-{
-    return _supportedFeatures.empty();
 }
 
 bool Shader::getUniformLocation(const std::string & uniform_name)

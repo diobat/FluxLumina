@@ -41,7 +41,7 @@ void InstancingManager::setupInstancing(unsigned int shaderIndex, std::shared_pt
 {
     resetInstancingGroups();
 
-    auto &modelObjects = scene->getModels("Basic");
+    auto modelObjects = scene->getModels("Basic");
 
     for (auto& modelObject : modelObjects)
     {

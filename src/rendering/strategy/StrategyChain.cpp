@@ -52,7 +52,7 @@ FluxLumina* StrategyChain::engine() const
 /////////////////////////// FORWARD
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-ForwardShadingStrategyChain::ForwardShadingStrategyChain(GraphicalEngine* engine) : 
+ForwardShadingStrategyChain::ForwardShadingStrategyChain(GraphicalEngine* engine, std::shared_ptr<Shader> instancingShader, std::shared_ptr<Shader> transparencyShader) : 
     StrategyChain(engine)
 {
         // Setups
@@ -62,8 +62,8 @@ ForwardShadingStrategyChain::ForwardShadingStrategyChain(GraphicalEngine* engine
         add(std::make_shared<FramebufferNode>(this));
         // Rendering
         add(std::make_shared<RenderSkyboxNode>(this));
-        add(std::make_shared<RenderOpaqueNode>(this));
-        add(std::make_shared<RenderTransparentNode>(this));
+        add(std::make_shared<RenderOpaqueNode>(this, instancingShader));
+        add(std::make_shared<RenderTransparentNode>(this, transparencyShader));
         // Post-processing
         if(_ranFrom->getSettings()->getBloom() == E_Setting::ON)
         {

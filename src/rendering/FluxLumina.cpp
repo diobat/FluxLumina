@@ -64,9 +64,6 @@ int FluxLumina::initialize(E_RenderStrategy strategy)
     // Shader Library initialization
     _shaderPrograms = std::make_shared<ShaderLibrary>("res/shaders/");
 
-    _shaderPrograms->getShader("Basic")->addSupportedFeature(E_ShaderProgramFeatures::E_AUTO_INSTANCING);
-    _shaderPrograms->getShader("transparency")->addSupportedFeature(E_ShaderProgramFeatures::E_TRANSPARENCY);
-
     // Add uniform buffers to the shaders
     _shaderPrograms->createUniformBuffer("mvp_camera");
     _shaderPrograms->createUniformBuffer("viewPosBlock");
@@ -76,7 +73,6 @@ int FluxLumina::initialize(E_RenderStrategy strategy)
     std::tuple<glm::vec2> viewPortSize = {
         glm::vec2(_viewportWidth, _viewportHeight)
     };
-
     _shaderPrograms->getUniformBuffer("viewPortBlock").update(viewPortSize);
 
     // Initialize LightManager
@@ -96,7 +92,7 @@ int FluxLumina::initialize(E_RenderStrategy strategy)
             break;
         default:
         case E_RenderStrategy::ForwardShading:
-            _strategyChain = std::make_shared<ForwardShadingStrategyChain>(this);
+            _strategyChain = std::make_shared<ForwardShadingStrategyChain>(this, _shaderPrograms->getShader("Basic"), _shaderPrograms->getShader("transparency"));
             break;
     }
 
@@ -186,9 +182,38 @@ boost::uuids::uuid FluxLumina::create_Model(
     return _sceneObjectFactory->create_Model(modelPath, shader, flipUVs, textureLocations).id();
 }
 
-void FluxLumina::create_Camera()
+boost::uuids::uuid FluxLumina::create_Model(
+    const std::vector<std::array<float, 3>>& vertices,
+    const std::vector<unsigned int>& indices, 
+    const std::vector<std::array<float, 3>>& colors,
+    const std::string& shader)
 {
-    _sceneObjectFactory->create_Camera();
+
+    unsigned int size = vertices.size();
+    if (size != colors.size())
+    {
+        throw std::runtime_error("Vertex and color arrays must be of the same size");
+    }
+
+    std::vector<Vertex> vertexVector;
+    for (unsigned int i(0); i < size; ++i)
+    {
+        vertexVector.push_back(
+            Vertex({
+            glm::vec3(vertices[i][0], vertices[i][1], vertices[i][2]),          // Position
+            glm::vec3(0.0f, 0.0f, 0.0f),                                        // Normal
+            glm::vec2(0.0f, 0.0f),                                              // TexCoords
+            glm::vec3(colors[i][0], colors[i][1], colors[i][2]),                // Color
+            glm::vec3(0.0f, 0.0f, 0.0f)                                         // Tangent
+            })
+        );
+    }
+    return _sceneObjectFactory->create_Model(vertexVector, indices, shader).id();
+}
+
+void FluxLumina::create_Camera(float fov, float translationSpeed, float rotationSpeed)
+{
+    _sceneObjectFactory->create_Camera(fov, translationSpeed, rotationSpeed);
 }
 
 boost::uuids::uuid FluxLumina::create_LightSource(unsigned int type)

@@ -1,11 +1,27 @@
 #include "scene/SceneObjectFactory.hpp"
 
-#include "rendering/libraries/TextureLibrary.hpp"
-
 #include "helpers/RootDir.hpp"
-
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
+
+#include <exception>
+#include <string>
+
+// First-party includes
+#include "scene/Scene.hpp"
+#include "scene/SceneObject.hpp"
+#include "GraphicalEngine.hpp"
+#include "scene/ModelObject.hpp"
+#include "scene/Camera.hpp"
+#include "scene/LightSource.hpp"
+#include "resources/Cubemap.hpp"
+#include "rendering/MeshLibrary.hpp"
+#include "rendering/libraries/TextureLibrary.hpp"
+
+//Third-party includes
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////// HELPER FUNCTIONS
@@ -128,10 +144,7 @@ namespace
                 texture._type = E_TexureType::DIFFUSE;
                 break;
         }
-
-        texture._useLinear = true;
     }
-
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -181,6 +194,43 @@ ModelObject &SceneObjectFactory::create_Model(const std::string &modelPath, cons
     return *model_object;
 }
 
+ModelObject &SceneObjectFactory::create_Model(const std::vector<Vertex>& vertexes, const std::vector<unsigned int>& indices, const std::string& shader)
+{
+    std::shared_ptr<ModelObject> model_object = std::make_shared<ModelObject>();
+    Model& model = (*model_object->getModel());
+
+    // Set the shader program
+    model_object->setShaderName(shader);
+   
+    // Calculate the hash of the new mesh
+    std::size_t hash = Math::calculateHash(vertexes, indices);
+
+    // Does it match an existing hash? Place the correspondent mesh in the model and return it
+    if(_boundEngine->getMeshLibrary()->isMeshLoaded(hash))
+    {   
+        model.meshes = _boundEngine->getMeshLibrary()->getMeshes(hash);
+        return *model_object;
+    }
+
+    std::vector<glm::vec3> normals = Math::calculateVertexNormals(vertexes, indices);
+
+    std::vector<Vertex> newVertexes = vertexes;
+    for(unsigned int i = 0; i < newVertexes.size(); i++)
+    {
+        newVertexes[i].Normal = normals[i];
+    }
+
+    std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>(newVertexes, indices);
+
+    _boundEngine->getMeshLibrary()->addMesh(hash, mesh);
+
+    model.meshes.push_back(mesh);
+
+    _boundScene->addModel(model_object);
+
+    return *model_object;
+}
+
 void SceneObjectFactory::load_ModelMeshes(Model& model, const std::string& path)
 {
     // check if model is already loaded
@@ -197,8 +247,7 @@ void SceneObjectFactory::load_ModelMeshes(Model& model, const std::string& path)
         // check for errors
         if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) // if is Not Zero
         {
-            std::cout << "ERROR::ASSIMP:: " << importer.GetErrorString() << std::endl;
-            return;
+            throw std::runtime_error("ERROR::ASSIMP:: " + std::string(importer.GetErrorString()));
         }
         // retrieve the directory path of the filepath
         model.directory = path;
@@ -502,9 +551,9 @@ std::shared_ptr<LightSource> SceneObjectFactory::create_LightSource(E_LightType 
 /////////////////////////// CAMERAS
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-void SceneObjectFactory::create_Camera()
+void SceneObjectFactory::create_Camera(float fov, float translationSpeed, float rotationSpeed)
 {
-    _boundScene->addCamera(std::make_shared<Camera>());
+    _boundScene->addCamera(std::make_shared<Camera>(fov, translationSpeed, rotationSpeed));
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -530,7 +579,7 @@ std::shared_ptr<Cubemap> SceneObjectFactory::create_Skybox(std::vector<std::stri
        
         if(!*texture._pixels)
         {
-            std::cout << "ERROR::CUBEMAP::TEXTURE_LOADING_FAILED " << i << std::endl;
+            throw std::runtime_error("ERROR::CUBEMAP::TEXTURE_LOADING_FAILED " + faces[i]);
         }
     }
     Cubemap cubemap;
@@ -553,7 +602,7 @@ std::shared_ptr<Cubemap> SceneObjectFactory::create_IBL(std::string path, bool f
 
     if(!*texture._pixels)
     {
-        std::cout << "ERROR::CUBEMAP::TEXTURE_LOADING_FAILED  : " + path << std::endl;
+        throw std::runtime_error("ERROR::CUBEMAP::TEXTURE_LOADING_FAILED  : " + path);
     }
 
     _boundEngine->getTextureLibrary()->generate_GL_textureHDR(texture);
