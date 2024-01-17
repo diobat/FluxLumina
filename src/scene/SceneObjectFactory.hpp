@@ -10,7 +10,7 @@
 #include <assimp/postprocess.h>
 
 class Scene;
-class GraphicalEngine;
+class FluxLumina;
 class LightSource;
 class Cubemap;
 class Texture;

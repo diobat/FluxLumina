@@ -8,7 +8,7 @@
 // First-party headers
 #include "rendering/strategy/StrategyNode.hpp"
 
-class GraphicalEngine;
+class FluxLumina;
 class Shader;
 
 class StrategyChain
@@ -50,7 +50,7 @@ private:
 class ForwardShadingStrategyChain : public StrategyChain
 {
 public:
-    ForwardShadingStrategyChain(GraphicalEngine* engine, std::shared_ptr<Shader> instancingShader = nullptr, std::shared_ptr<Shader> transparencyShader = nullptr);
+    ForwardShadingStrategyChain(FluxLumina* engine, std::shared_ptr<Shader> instancingShader = nullptr, std::shared_ptr<Shader> transparencyShader = nullptr);
     bool reserveResources() override;
 };
 

@@ -52,7 +52,7 @@ FluxLumina* StrategyChain::engine() const
 /////////////////////////// FORWARD
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-ForwardShadingStrategyChain::ForwardShadingStrategyChain(GraphicalEngine* engine, std::shared_ptr<Shader> instancingShader, std::shared_ptr<Shader> transparencyShader) : 
+ForwardShadingStrategyChain::ForwardShadingStrategyChain(FluxLumina* engine, std::shared_ptr<Shader> instancingShader, std::shared_ptr<Shader> transparencyShader) : 
     StrategyChain(engine)
 {
         // Setups

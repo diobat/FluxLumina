@@ -9,6 +9,17 @@
 // Third party includes
 #include "boost/uuid/uuid.hpp"
 
+class Scene;
+class SceneObjectFactory;
+class MeshLibrary;
+class TextureLibrary;
+class FBOManager;
+class ShaderLibrary;
+class LightLibrary;
+class InstancingManager;
+class StrategyChain;
+class Settings;
+class glfwKeyboardScanner;
 struct GLFWwindow;
 
 enum class E_RenderStrategy : unsigned int
@@ -93,6 +104,20 @@ private:
 	// Window
 	void resizeWindowCallback(GLFWwindow *window, int width, int height);
 
+	int _viewportWidth, _viewportHeight;
+
+	std::vector<std::shared_ptr<Scene>> _scenes;					// Contains bound scenes
+	std::shared_ptr<SceneObjectFactory> _sceneObjectFactory;		// Creates scene objects
+	std::shared_ptr<MeshLibrary> _meshLibrary;						// Owns all meshes
+	std::shared_ptr<TextureLibrary> _textureLibrary;				// Creates and owns all textures
+	std::shared_ptr<FBOManager> _frameBuffers;						// Creates and owns all framebuffers
+	std::shared_ptr<ShaderLibrary> _shaderPrograms;					// Creates and owns all shaders
+	std::shared_ptr<LightLibrary> _lightLibrary;					// Owns all lights
+	std::shared_ptr<InstancingManager> _instancingManager;			// Manages instancing
+	std::shared_ptr<StrategyChain> _strategyChain;					// Manages rendering strategies
+	std::shared_ptr<Settings> _settings;							// Handles settings
+	std::shared_ptr<glfwKeyboardScanner> _userInput;				// Handles user input
+	
 	// GLFW window
 	GLFWwindow* _window;
 };
