@@ -5,7 +5,8 @@
 #include "rendering/GLFW_Wrapper.hpp"
 
 // First-party includes
-#include "scene/Scene.hpp"
+#include <scene/Scene.hpp>
+
 #include "scene/SceneObjectFactory.hpp"
 #include "rendering/strategy/StrategyChain.hpp"
 #include "rendering/shader/ShaderLibrary.hpp"
@@ -16,6 +17,7 @@
 #include "rendering/libraries/TextureLibrary.hpp"
 #include "rendering/engineModules/LightManager.hpp"
 #include "rendering/engineModules/InstancingManager.hpp"
+
 
 FluxLumina::FluxLumina( E_RenderStrategy strategy)
 {
@@ -287,30 +289,3 @@ void FluxLumina::setSpotlightRadius(boost::uuids::uuid UUID, float radius)
         light->setCutoff(radius);
     }
 }
-
-void FluxLumina::bindScene(std::shared_ptr<Scene> scene)
-{
-    _scenes.push_back(scene);
-    _frameBuffers->parseNewScene(scene);
-}
-
-void FluxLumina::unbindScene(std::shared_ptr<Scene> sceneToUnbind)
-{
-    _scenes.erase(std::remove_if(_scenes.begin(), _scenes.end(), 
-    [sceneToUnbind](std::shared_ptr<Scene> scene) { 
-        return scene == sceneToUnbind; 
-        }),
-        _scenes.end());
-}
-
-std::shared_ptr<Scene> FluxLumina::getScene(unsigned int sceneIndex) const
-{
-    if(sceneIndex >= _scenes.size())
-    {
-        return nullptr;
-    }
-
-    return _scenes[sceneIndex];
-}
-
-

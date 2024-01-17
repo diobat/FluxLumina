@@ -1,5 +1,7 @@
 #include "user_input/glfwUserInputScanner.hpp"
 
+#include <map>
+
 // GLFW includes
 #include "rendering/GLFW_Wrapper.hpp"
 
@@ -12,6 +14,7 @@ namespace
 	std::shared_ptr<Scene> boundScene;
 	std::map<int, bool> keyMap;
 	bool captureMouse = true;
+	glfwKeyboardScanner* scanner;
 
 	std::array<double, 2> lastMousePos = {0.0, 0.0};
 
@@ -48,6 +51,8 @@ namespace
 	{
 		keyMap[key] = action;
 
+		scanner->interruptCallback(key);
+
 		if (key == GLFW_KEY_TAB && action == GLFW_PRESS)
 		{
 			toggleMouseMode();
@@ -80,12 +85,24 @@ glfwKeyboardScanner::glfwKeyboardScanner(GLFWwindow* window) :
 {
 	renderWindow = window;
 
+	scanner = this;
+
 	// Keyboard callbacks
 	glfwSetKeyCallback(_window, keyboardCallback);
 	// Mouse callbacks
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glfwSetCursorPosCallback(window, mouseCallback);
 	resetCursorPos();
+
+	// Initialize the default callbackMap
+	// WASD
+	bindKey(GLFW_KEY_W, std::bind(&Scene::moveActiveCamera, *boundScene , static_cast<unsigned int>(relativeDirections::FORWARD)) );
+	bindKey(GLFW_KEY_A, std::bind(&Scene::moveActiveCamera, *boundScene , static_cast<unsigned int>(relativeDirections::LEFT)) );
+	bindKey(GLFW_KEY_S, std::bind(&Scene::moveActiveCamera, *boundScene , static_cast<unsigned int>(relativeDirections::BACKWARD)) );
+	bindKey(GLFW_KEY_D, std::bind(&Scene::moveActiveCamera, *boundScene , static_cast<unsigned int>(relativeDirections::RIGHT)) );
+	bindKey(GLFW_KEY_Q, std::bind(&Scene::moveActiveCamera, *boundScene , static_cast<unsigned int>(relativeDirections::UP)) );
+	bindKey(GLFW_KEY_E, std::bind(&Scene::moveActiveCamera, *boundScene , static_cast<unsigned int>(relativeDirections::DOWN)) );
+
 }
 
 void glfwKeyboardScanner::tickCallback()
@@ -98,38 +115,31 @@ void glfwKeyboardScanner::bindToScene(std::shared_ptr<Scene> scene)
 	boundScene = scene;
 }
 
-void glfwKeyboardScanner::readInputs()
+void glfwKeyboardScanner::interruptCallback(int key)
 {
-	for (std::pair<int, bool> key : keyMap)
+	auto it = callbackMap.find(key);
+	if (it != callbackMap.end()) 
 	{
-		if (key.second != GLFW_RELEASE)
-		{
-			std::shared_ptr<Camera>& cam = boundScene->getActiveCamera();
-			switch (key.first)
-			{ 
-				case GLFW_KEY_W:
-					cam->move(relativeDirections::FORWARD);
-					break;
-				case GLFW_KEY_A:
-					cam->move(relativeDirections::LEFT);
-					break;
-				case GLFW_KEY_S:
-					cam->move(relativeDirections::BACKWARD);
-					break;
-				case GLFW_KEY_D:
-					cam->move(relativeDirections::RIGHT);
-					break;
-				case GLFW_KEY_Q:
-					cam->move(relativeDirections::UP);
-					break;
-				case GLFW_KEY_E:
-					cam->move(relativeDirections::DOWN);
-					break;
-			}
+		it->second(); // Call the callback function
+	}
+}
 
-		}
+bool glfwKeyboardScanner::bindKey(int key, std::function<void()> callback)
+{
 
+	if (callbackMap.count(key) == 0)
+	{
+		callbackMap[key] = callback;
+		return true;
+	}
 
+	return false;
+}
 
+void glfwKeyboardScanner::unbindKey(int key)
+{
+	if (callbackMap.count(key) != 0)
+	{
+		callbackMap.erase(key);
 	}
 }

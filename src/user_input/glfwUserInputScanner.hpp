@@ -2,7 +2,7 @@
 
 // STD library includes
 #include <memory>
-#include <map>
+#include <unordered_map>
 
 // First-party includes
 #include "scene/Scene.hpp"
@@ -14,12 +14,17 @@ class glfwKeyboardScanner
 public:
 	glfwKeyboardScanner(GLFWwindow* window);
 	void tickCallback();
+	void interruptCallback(int key);
 	void bindToScene(std::shared_ptr<Scene> scene);
 	void readInputs();
 
+	bool bindKey(int key, std::function<void()> callback);
+	void unbindKey(int key);
+
 private:
 	GLFWwindow* _window;
-	std::shared_ptr<Scene> _scene;
+
+	std::unordered_map<int, std::function<void()>> callbackMap;
 };
 
 
