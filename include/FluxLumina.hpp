@@ -5,6 +5,7 @@
 #include <array>
 #include <vector>
 #include <memory>
+#include <functional>
 
 // Third party includes
 #include "boost/uuid/uuid.hpp"
