@@ -89,6 +89,9 @@ public:
 	// User Input
 	bool bindUserInput(int key, std::function<void()> callback);
 
+	// Update callbacks
+	void addUpdateCallback(std::function<void()> callback);
+
 	// Module getters
 	std::vector<std::shared_ptr<Scene>> getScenes() const { return _scenes; }
 	std::shared_ptr<SceneObjectFactory> getSceneObjectFactory() { return _sceneObjectFactory; };
@@ -106,6 +109,10 @@ private:
 	void renderFrame(std::shared_ptr<Scene> scene);
 	// Window
 	void resizeWindowCallback(GLFWwindow *window, int width, int height);
+
+	// Update callbacks
+	std::vector<std::function<void()>> _updateCallbacks;
+	unsigned int invokeCallbacks();
 
 	int _viewportWidth, _viewportHeight;
 
