@@ -19,12 +19,12 @@
 #include "rendering/engineModules/InstancingManager.hpp"
 
 
-FluxLumina::FluxLumina( E_RenderStrategy strategy)
+FluxLumina::FluxLumina( E_RenderStrategy strategy, const std::string& shaderPath)
 {
-    initialize(strategy);
+    initialize(strategy, shaderPath);
 }
 
-int FluxLumina::initialize(E_RenderStrategy strategy)
+int FluxLumina::initialize(E_RenderStrategy strategy, const std::string& shaderPath)
 {
     _scenes.clear();
     _scenes.emplace_back(std::make_shared<Scene>());
@@ -65,6 +65,7 @@ int FluxLumina::initialize(E_RenderStrategy strategy)
 
     // Shader Library initialization
     _shaderPrograms = std::make_shared<ShaderLibrary>("res/shaders/");
+    _shaderPrograms->userScan(shaderPath);
 
     // Add uniform buffers to the shaders
     _shaderPrograms->createUniformBuffer("mvp_camera");
@@ -81,7 +82,7 @@ int FluxLumina::initialize(E_RenderStrategy strategy)
     _lightLibrary = std::make_shared<LightLibrary>(this);
 
     // Initialize Instancing Manager
-    _instancingManager = std::make_shared<InstancingManager>();
+    _instancingManager = std::make_shared<InstancingManager>(this);
 
     // Initialize Rendering strategy
     switch (strategy)
@@ -94,7 +95,7 @@ int FluxLumina::initialize(E_RenderStrategy strategy)
             break;
         default:
         case E_RenderStrategy::ForwardShading:
-            _strategyChain = std::make_shared<ForwardShadingStrategyChain>(this, _shaderPrograms->getShader("Basic"), _shaderPrograms->getShader("transparency"));
+            _strategyChain = std::make_shared<ForwardShadingStrategyChain>(this, _shaderPrograms->getShader("map"), _shaderPrograms->getShader("transparency"));
             break;
     }
 
@@ -210,7 +211,8 @@ boost::uuids::uuid FluxLumina::create_Model(
             })
         );
     }
-    return _sceneObjectFactory->create_Model(vertexVector, indices, shader).id();
+    boost::uuids::uuid objectID = _sceneObjectFactory->create_Model(vertexVector, indices, shader).id();
+    return objectID;
 }
 
 void FluxLumina::create_Camera(float fov, float translationSpeed, float rotationSpeed)
