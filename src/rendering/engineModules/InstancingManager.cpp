@@ -1,4 +1,5 @@
 #include "rendering/engineModules/InstancingManager.hpp"
+#include "FluxLumina.hpp"
 
 // GLM - Math is a gateway science
 #define  GLM_FORCE_RADIANS
@@ -37,11 +38,28 @@ InstancingGroup::~InstancingGroup()
 /////////////////////////// INSTANCING MANAGER
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-void InstancingManager::setupInstancing(unsigned int shaderIndex, std::shared_ptr<Scene> scene)
+InstancingManager::InstancingManager(FluxLumina* engine) : 
+    _ranFrom(engine)
 {
+    ;
+}
+
+void InstancingManager::setupInstancing(std::shared_ptr<Scene> scene, std::shared_ptr<Shader> shader)
+{
+    std::shared_ptr<ShaderLibrary> shaderLibrary = _ranFrom->getShaderLibrary();
+
     resetInstancingGroups();
 
-    auto modelObjects = scene->getModels("Basic");
+    // Get all the models, or only the ones that use the specified shader
+    std::vector<std::shared_ptr<ModelObject>> modelObjects;
+    if(shader == nullptr)
+    {
+        modelObjects = scene->getModels();
+    }
+    else
+    {
+        modelObjects = scene->getModels(shader->getName());
+    }
 
     for (auto& modelObject : modelObjects)
     {

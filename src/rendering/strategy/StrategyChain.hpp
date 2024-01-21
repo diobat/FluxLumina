@@ -50,8 +50,11 @@ private:
 class ForwardShadingStrategyChain : public StrategyChain
 {
 public:
-    ForwardShadingStrategyChain(FluxLumina* engine, std::shared_ptr<Shader> instancingShader = nullptr, std::shared_ptr<Shader> transparencyShader = nullptr);
+    ForwardShadingStrategyChain(FluxLumina* engine, std::shared_ptr<Shader> transparencyShader = nullptr);
     bool reserveResources() override;
+private:
+    std::shared_ptr<Shader> _instancingShader;
+    std::shared_ptr<Shader> _transparencyShader;
 };
 
 class DeferredShadingStrategyChain : public StrategyChain

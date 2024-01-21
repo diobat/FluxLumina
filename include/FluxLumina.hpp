@@ -33,9 +33,9 @@ enum class E_RenderStrategy : unsigned int
 class FluxLumina
 {
 public:
-	FluxLumina(E_RenderStrategy strategy);
+	FluxLumina(E_RenderStrategy strategy, const std::string& shaderPath = "");
 
-	int initialize(E_RenderStrategy strategy);
+	int initialize(E_RenderStrategy strategy, const std::string& shaderPath);
 
 	// Update the engine internal state, and render a frame. 
 	void update();	// This is an indefinitely blocking call.
