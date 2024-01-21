@@ -95,7 +95,7 @@ int FluxLumina::initialize(E_RenderStrategy strategy, const std::string& shaderP
             break;
         default:
         case E_RenderStrategy::ForwardShading:
-            _strategyChain = std::make_shared<ForwardShadingStrategyChain>(this, _shaderPrograms->getShader("map"), _shaderPrograms->getShader("transparency"));
+            _strategyChain = std::make_shared<ForwardShadingStrategyChain>(this, _shaderPrograms->getShader("transparency"));
             break;
     }
 

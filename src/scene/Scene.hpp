@@ -11,6 +11,7 @@
 #include "scene/LightSource.hpp"
 #include "scene/ModelContents.hpp"
 #include "scene/Skybox.hpp"
+#include "rendering/shader/Shader.hpp"
 
 // Third-party headers
 #include <boost/uuid/uuid.hpp>
@@ -39,6 +40,7 @@ public:
 	void addLightSource(std::shared_ptr<LightSource> lightSourceToAdd);
 
 	const SceneContents &getAllObjects() const;
+	const std::vector<std::shared_ptr<Shader>> &getAllObjectShaders() const;
 	const std::vector<std::shared_ptr<Camera>> &getAllCameras() const;
 	const std::vector<std::shared_ptr<ModelObject>> &getModels() const;
 	std::vector<std::shared_ptr<ModelObject>> getModels(const std::string& shader) const;
