@@ -65,6 +65,8 @@ const SceneContents &Scene::getAllObjects() const
 	return _objects;
 }
 
+
+
 const std::vector<std::shared_ptr<Camera>> &Scene::getAllCameras() const
 {
 	return _objects.cameras;

@@ -52,18 +52,19 @@ FluxLumina* StrategyChain::engine() const
 /////////////////////////// FORWARD
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-ForwardShadingStrategyChain::ForwardShadingStrategyChain(FluxLumina* engine, std::shared_ptr<Shader> instancingShader, std::shared_ptr<Shader> transparencyShader) : 
-    StrategyChain(engine)
+ForwardShadingStrategyChain::ForwardShadingStrategyChain(FluxLumina* engine, std::shared_ptr<Shader> transparencyShader) : 
+    StrategyChain(engine),
+    _transparencyShader(transparencyShader)
 {
         // Setups
         add(std::make_shared<CameraSetupNode>(this));
         add(std::make_shared<ShadowsSetupNode>(this));
-        add(std::make_shared<LightsSetupNode>(this, "Basic"));
+        add(std::make_shared<LightsSetupNode>(this, "map"));
         add(std::make_shared<FramebufferNode>(this));
         // Rendering
         add(std::make_shared<RenderSkyboxNode>(this));
-        add(std::make_shared<RenderOpaqueNode>(this, instancingShader));
-        add(std::make_shared<RenderTransparentNode>(this, transparencyShader));
+        add(std::make_shared<RenderOpaqueNode>(this, _instancingShader));
+        //add(std::make_shared<RenderTransparentNode>(this, _transparencyShader));
         // Post-processing
         if(_ranFrom->getSettings()->getBloom() == E_Setting::ON)
         {
@@ -82,7 +83,7 @@ bool ForwardShadingStrategyChain::reserveResources()
     std::shared_ptr<InstancingManager> instancingManager = _ranFrom->getInstancingManager();
     std::shared_ptr<ShaderLibrary> shaderLibrary = _ranFrom->getShaderLibrary();
 
-    instancingManager->setupInstancing(shaderLibrary->getShader("Basic")->getProgramId(), _ranFrom->getScene(0));
+    instancingManager->setupInstancing(_ranFrom->getScene(0));
 
     return true;
 }

@@ -7,6 +7,7 @@
 #include "resources/Mesh.hpp"
 #include "scene/ModelObject.hpp"
 #include "scene/Scene.hpp"
+#include "rendering/shader/Shader.hpp"
 
 // STD library includes
 #include <map>
@@ -15,6 +16,7 @@
 // Third-party headers
 #include <boost/uuid/uuid.hpp>
 
+class FluxLumina;
 
 class InstancingGroup
 {
@@ -22,7 +24,7 @@ public:
     ~InstancingGroup();
     std::vector<std::weak_ptr<ModelObject>> modelObjects;
     std::shared_ptr<Mesh> mesh;
-    const std::vector<glm::mat4>& transforms();
+const std::vector<glm::mat4>& transforms();
     unsigned int VBO;
     std::vector<glm::mat4> _transforms;
 };
@@ -30,7 +32,8 @@ public:
 class InstancingManager
 {
 public:
-    void setupInstancing(unsigned int shaderIndex, std::shared_ptr<Scene> scene);
+    InstancingManager(FluxLumina* engine);
+    void setupInstancing(std::shared_ptr<Scene> scene, std::shared_ptr<Shader> shader = nullptr);
     const std::unordered_map<std::shared_ptr<Mesh>, InstancingGroup>& getInstancingGroups() const;
     void resetInstancingGroups();
 
@@ -39,4 +42,6 @@ private:
 
     // Mesh uuid -> InstancingGroup
     std::unordered_map<std::shared_ptr<Mesh>, InstancingGroup> _instancingGroups;
+
+    FluxLumina* _ranFrom;
 };
