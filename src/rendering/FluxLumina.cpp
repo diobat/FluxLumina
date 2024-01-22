@@ -161,6 +161,8 @@ void FluxLumina::update()
         renderFrame(_scenes[0]);
        
         _userInput->executeCurrentInputs();
+        invokeCallbacks();
+        
         /* Swap front and back buffers */
         glfwSwapBuffers(_window);
         /* Poll for and process events */
@@ -361,4 +363,18 @@ void FluxLumina::unbindScene(std::shared_ptr<Scene> sceneToUnbind)
 bool FluxLumina::bindUserInput(int key, std::function<void()> callback)
 {
     return _userInput->bindKey(key, callback);
+}
+
+void FluxLumina::addUpdateCallback(std::function<void()> callback)
+{
+    _updateCallbacks.push_back(callback);
+}
+
+unsigned int FluxLumina::invokeCallbacks()
+{
+    for (auto& callback : _updateCallbacks)
+    {
+        callback();
+    }
+    return _updateCallbacks.size();
 }
