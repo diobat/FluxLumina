@@ -1,5 +1,6 @@
 #include "Scene.hpp"
 
+#include <set>
 #include <stdexcept>
 #include <boost/uuid/uuid_io.hpp>
 
@@ -65,7 +66,18 @@ const SceneContents &Scene::getAllObjects() const
 	return _objects;
 }
 
+// Returns a list of all the names of the shaders used by the models in the scene
+std::vector<std::string> Scene::getAllObjectShaders() const
+{
+	std::set<std::string> shaders;
 
+	for (auto &model : _objects.models.getModels())
+	{
+		shaders.insert(model->getShaderName());
+	}
+
+	return std::vector<std::string>(shaders.begin(), shaders.end());
+}
 
 const std::vector<std::shared_ptr<Camera>> &Scene::getAllCameras() const
 {
@@ -75,6 +87,21 @@ const std::vector<std::shared_ptr<Camera>> &Scene::getAllCameras() const
 const std::vector<std::shared_ptr<ModelObject>> &Scene::getModels() const
 {
 	return _objects.models.getModels();
+}
+
+std::vector<std::shared_ptr<ModelObject>> Scene::getVisibleModels() const
+{
+	std::vector<std::shared_ptr<ModelObject>> visibleModels;
+
+	for (auto &model : _objects.models.getModels())
+	{
+		if (model->isEnabled())
+		{
+			visibleModels.push_back(model);
+		}
+	}
+
+	return visibleModels;
 }
 
 std::vector<std::shared_ptr<ModelObject>> Scene::getModels(const std::string& shader) const

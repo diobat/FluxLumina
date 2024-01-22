@@ -44,12 +44,11 @@ public:
 
     const boost::uuids::uuid& uuid() const;
 
+    void setVisible(bool visible);
+    bool isVisible() const;
+
 private:
-    // Structural Data
     boost::uuids::uuid _id;
-    
-
-
     std::string _assignedShader;
 
     std::shared_ptr<Model> _model;

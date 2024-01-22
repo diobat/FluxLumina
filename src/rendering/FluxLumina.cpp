@@ -252,6 +252,47 @@ void FluxLumina::setScale(boost::uuids::uuid UUID, float scale)
     _scenes[0]->get(UUID)->setScale(scale);
 }
 
+void FluxLumina::setEnabled(boost::uuids::uuid UUID, bool enabled)
+{
+    _scenes[0]->get(UUID)->enable(enabled);
+}
+
+void FluxLumina::setCameraPosition(std::array<float, 3> position)
+{
+    std::shared_ptr<Camera> camera = _scenes[0]->getActiveCamera();
+
+    if (camera != nullptr)
+    {
+        camera->setPosition(position);
+    }
+}
+
+std::array<float, 3> FluxLumina::getCameraPosition() const
+{
+    std::shared_ptr<Camera> camera = _scenes[0]->getActiveCamera();
+
+    if (camera != nullptr)
+    {
+        glm::vec3 pos = camera->getPosition();
+        std::array<float, 3> position({pos[0], pos[1], pos[2]});
+        return position;
+    }
+
+    return {0.0f, 0.0f, 0.0f};
+}
+
+void FluxLumina::setCameraRotation(std::array<float, 2> rotation)
+{
+    std::shared_ptr<Camera> camera = _scenes[0]->getActiveCamera();
+
+    if (camera != nullptr)
+    {
+        camera->setRotation(rotation);
+    }
+}
+
+
+
 void FluxLumina::setColor(boost::uuids::uuid UUID, std::array<float, 3> color)
 {
     std::shared_ptr<LightSource> light = std::dynamic_pointer_cast<LightSource>(_scenes[0]->get(UUID));

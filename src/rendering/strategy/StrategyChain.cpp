@@ -59,12 +59,12 @@ ForwardShadingStrategyChain::ForwardShadingStrategyChain(FluxLumina* engine, std
         // Setups
         add(std::make_shared<CameraSetupNode>(this));
         add(std::make_shared<ShadowsSetupNode>(this));
-        add(std::make_shared<LightsSetupNode>(this, "map"));
+        add(std::make_shared<LightsSetupNode>(this));
         add(std::make_shared<FramebufferNode>(this));
         // Rendering
         add(std::make_shared<RenderSkyboxNode>(this));
-        add(std::make_shared<RenderOpaqueNode>(this, _instancingShader));
-        //add(std::make_shared<RenderTransparentNode>(this, _transparencyShader));
+        add(std::make_shared<RenderOpaqueNodeInstanced>(this));
+        //add(std::make_shared<RenderTransparentNode>(this));
         // Post-processing
         if(_ranFrom->getSettings()->getBloom() == E_Setting::ON)
         {
@@ -97,7 +97,7 @@ DeferredShadingStrategyChain::DeferredShadingStrategyChain(FluxLumina* engine) :
 {   
     // Setupsa
     add(std::make_shared<CameraSetupNode>(this));
-    add(std::make_shared<LightsSetupNode>(this, "deferred_light_volumes"));
+    add(std::make_shared<LightsSetupNode>(this));
     add(std::make_shared<FramebufferNode>(this));
 
     // Rendering
@@ -152,7 +152,7 @@ PBSShadingStrategyChain::PBSShadingStrategyChain(FluxLumina* engine) :
 {   
     // Setups
     add(std::make_shared<CameraSetupNode>(this));
-    add(std::make_shared<LightsSetupNode>(this, "PBR_basic"));
+    add(std::make_shared<LightsSetupNode>(this));
     add(std::make_shared<PBS_IBLSetupNode>(this, "PBR_basic"));
     add(std::make_shared<FramebufferNode>(this));
 

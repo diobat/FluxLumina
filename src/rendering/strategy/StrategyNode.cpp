@@ -88,9 +88,8 @@ void ShadowsSetupNode::run()
 /////////////////////////// LIGHTS NODE
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-LightsSetupNode::LightsSetupNode(const StrategyChain* chain, const std::string& shader) : 
-    StrategyNode(chain),
-    _ShaderName(shader)
+LightsSetupNode::LightsSetupNode(const StrategyChain* chain) : 
+    StrategyNode(chain)
 {
     ;
 }
@@ -101,8 +100,11 @@ void LightsSetupNode::run()
     std::shared_ptr<LightLibrary> lightLibrary = _chain->engine()->getLightLibrary();
     std::shared_ptr<ShaderLibrary> shaderPrograms = _chain->engine()->getShaderLibrary();
 
-    shaderPrograms->use(_ShaderName);
-    lightLibrary->prepare(scene->getAllLights());
+    for(auto shader : scene->getAllObjectShaders())
+    {
+        shaderPrograms->use(shader);
+        lightLibrary->prepare(scene->getAllLights());
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -132,9 +134,8 @@ void FramebufferNode::run()
 /////////////////////////// OPAQUES RENDER NODE
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-RenderOpaqueNode::RenderOpaqueNode(const StrategyChain* chain, std::shared_ptr<Shader> instancingShader) : 
-    StrategyNode(chain),
-    _instancingShader(instancingShader)
+RenderOpaqueNode::RenderOpaqueNode(const StrategyChain* chain) : 
+    StrategyNode(chain)
 {
     ;
 }
@@ -145,19 +146,8 @@ void RenderOpaqueNode::run()
     std::shared_ptr<ShaderLibrary> shaderPrograms = _chain->engine()->getShaderLibrary();
     std::shared_ptr<FBOManager> frameBuffers = _chain->engine()->getFBOManager();
 
-    if(_instancingShader != nullptr)
-    {
-        shaderPrograms->use(_instancingShader);
-        frameBuffers->renderInstancedMeshes();
-    }
-
     for(auto shader : shaderPrograms->getShaders())
     {
-        if (shader == _instancingShader)
-        {
-            continue;
-        }
-
         std::vector<std::shared_ptr<ModelObject>> modelsForThisShader = scene->getModels(shader->getName());
 
         if(modelsForThisShader.empty())
@@ -168,7 +158,7 @@ void RenderOpaqueNode::run()
         shaderPrograms->use(shader);
         for(auto modelObject : modelsForThisShader)
         {
-            if(!modelObject->enabled())
+            if(!modelObject->isEnabled())
             {
                 continue;
             }
@@ -176,6 +166,34 @@ void RenderOpaqueNode::run()
         }
     }
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////// OPAQUES RENDER NODE INSTANCED
+///////////////////////////////////////////////////////////////////////////////////////////
+
+RenderOpaqueNodeInstanced::RenderOpaqueNodeInstanced(const StrategyChain* chain) : 
+    StrategyNode(chain)
+{
+    ;
+}
+
+void RenderOpaqueNodeInstanced::run()
+{
+    std::shared_ptr<Scene> scene = _chain->engine()->getScene();
+    std::shared_ptr<ShaderLibrary> shaderPrograms = _chain->engine()->getShaderLibrary();
+    std::shared_ptr<FBOManager> frameBuffers = _chain->engine()->getFBOManager();
+    std::shared_ptr<InstancingManager> instancingManager = _chain->engine()->getInstancingManager();
+
+    for(auto shader : scene->getAllObjectShaders())
+    {
+        std::shared_ptr<Shader> thisShader = shaderPrograms->getShader(shader);
+
+        instancingManager->setupInstancing(scene, thisShader);
+        shaderPrograms->use(thisShader);
+        frameBuffers->renderInstancedMeshes();
+    }
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////// SKYBOX RENDER NODE

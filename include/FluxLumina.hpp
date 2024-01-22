@@ -71,6 +71,12 @@ public:
 	void setPosition(boost::uuids::uuid modelID, std::array<float, 3> position);
 	void setRotation(boost::uuids::uuid modelID, std::array<float, 3> rotation);
 	void setScale(boost::uuids::uuid modelID, float scale);
+	void setEnabled(boost::uuids::uuid modelID, bool enabled);
+
+	// Values for a camera
+	void setCameraPosition(std::array<float, 3> position);
+	std::array<float, 3> getCameraPosition() const;
+	void setCameraRotation(std::array<float, 2> rotation);
 
 	// Sets values for a LightSource
 	void setColor(boost::uuids::uuid lightID, std::array<float, 3> color);
