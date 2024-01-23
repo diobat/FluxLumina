@@ -151,23 +151,33 @@ void FluxLumina::update()
 
     while (!glfwWindowShouldClose(_window))
     {
+
+
         /* Update game time value */
         newTime  = static_cast<float>(glfwGetTime());
         deltaTime = newTime - gameTime - startTime;
         gameTime = newTime - startTime;
+
+        invokeCallbacks();
+
+        std::lock_guard<std::mutex> lock(_mutex);
+
+        /* Make the window's context current */
+        glfwMakeContextCurrent(_window);
 
         openGLContext::updateFPSCounter(deltaTime);
 
         renderFrame(_scenes[0]);
        
         _userInput->executeCurrentInputs();
-        invokeCallbacks();
-        
+
         /* Swap front and back buffers */
         glfwSwapBuffers(_window);
         /* Poll for and process events */
         glfwPollEvents();
 
+        /* Make the window's context uncurrent */
+        glfwMakeContextCurrent(nullptr);
     }
 
     glfwTerminate();

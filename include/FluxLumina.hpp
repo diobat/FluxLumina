@@ -6,6 +6,7 @@
 #include <vector>
 #include <memory>
 #include <functional>
+#include <mutex>
 
 // Third party includes
 #include "boost/uuid/uuid.hpp"
@@ -109,6 +110,8 @@ public:
 	std::shared_ptr<InstancingManager> getInstancingManager() { return _instancingManager; }
 	std::shared_ptr<StrategyChain> getStrategyChain() { return _strategyChain; }
 	std::shared_ptr<Settings> getSettings() const { return _settings; }
+	std::mutex& getMutex() { return _mutex; }
+	GLFWwindow* getWindow() { return _window; }
 
 private:
 	// Render a frame by applying the loaded trategy
@@ -134,6 +137,9 @@ private:
 	std::shared_ptr<Settings> _settings;							// Handles settings
 	std::shared_ptr<glfwKeyboardScanner> _userInput;				// Handles user input
 	
+	// Multithreading
+	std::mutex _mutex;
+
 	// GLFW window
 	GLFWwindow* _window;
 };

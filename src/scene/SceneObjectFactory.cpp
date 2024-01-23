@@ -6,6 +6,10 @@
 
 #include <exception>
 #include <string>
+#include <mutex>
+
+// GLFW include
+#include "rendering/GLFW_Wrapper.hpp"
 
 // First-party includes
 #include "scene/Scene.hpp"
@@ -22,6 +26,9 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+//Debug 
+#include <chrono>
+#include <iostream>
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////// HELPER FUNCTIONS
@@ -222,10 +229,13 @@ ModelObject &SceneObjectFactory::create_Model(const std::vector<Vertex>& vertexe
 
     std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>(newVertexes, indices);
 
+    std::unique_lock<std::mutex> meshInsertionLock(_boundEngine->getMutex());
+    glfwMakeContextCurrent(_boundEngine->getWindow());
     _boundEngine->getMeshLibrary()->addMesh(hash, mesh);
+    glfwMakeContextCurrent(nullptr);
+    meshInsertionLock.unlock();
 
     model.meshes.push_back(mesh);
-
     _boundScene->addModel(model_object);
 
     return *model_object;
@@ -460,7 +470,6 @@ std::vector<Texture> SceneObjectFactory::loadExternalTextures(const std::string 
 {
     std::vector<Texture> materialTextures;
     const auto& loadedTextures = _boundEngine->getMeshLibrary()->getLoadedTextures();
-
 
     // First load HEIGHT maps
     for(unsigned int i = 0; i < textures.heightMaps.size(); i++)
