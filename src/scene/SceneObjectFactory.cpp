@@ -225,14 +225,6 @@ ModelObject &SceneObjectFactory::create_Model(const std::vector<Vertex>& vertexe
     }
     else
     {
-        std::vector<glm::vec3> normals = Math::calculateVertexNormals(vertexes, indices);
-        // std::vector<Vertex> newVertexes = vertexes;
-        // for(unsigned int i = 0; i < newVertexes.size(); i++)
-        // {
-        //     newVertexes[i].Normal = normals[i];
-        // }
-
-        // mesh = std::make_shared<Mesh>(newVertexes, indices);
         mesh = std::make_shared<Mesh>(vertexes, indices);
 
         myLock.lock();
