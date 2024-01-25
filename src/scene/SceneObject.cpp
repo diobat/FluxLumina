@@ -43,7 +43,12 @@ void SceneObject::rotate(float x, float y, float z)
     _properties.rotation.rotate(x, y, z);
 }
 
-bool SceneObject::enabled() const
+void SceneObject::enable(bool enable)
+{
+    _toRender = enable;
+}
+
+bool SceneObject::isEnabled() const
 {
     return _toRender;
 }

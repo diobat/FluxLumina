@@ -6,7 +6,7 @@ ModelObject::ModelObject()  :
     _modelMatrixProvider(_properties),
     _id(boost::uuids::random_generator()())
 {
-
+    ;
 }
 
 void ModelObject::setModel(const std::shared_ptr<Model> &model)

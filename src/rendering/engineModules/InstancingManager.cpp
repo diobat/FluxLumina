@@ -63,7 +63,7 @@ void InstancingManager::setupInstancing(std::shared_ptr<Scene> scene, std::share
 
     for (auto& modelObject : modelObjects)
     {
-        if(!modelObject->enabled())
+        if(!modelObject->isEnabled())
         {
             continue;
         }

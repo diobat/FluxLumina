@@ -27,7 +27,8 @@ public:
 
     void rotate(float x, float y, float z);
 
-    bool enabled() const;
+    void enable(bool enable);
+    bool isEnabled() const;
 
     boost::uuids::uuid id() const;
 

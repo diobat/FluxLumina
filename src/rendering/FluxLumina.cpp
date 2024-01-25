@@ -151,23 +151,33 @@ void FluxLumina::update()
 
     while (!glfwWindowShouldClose(_window))
     {
+
+
         /* Update game time value */
         newTime  = static_cast<float>(glfwGetTime());
         deltaTime = newTime - gameTime - startTime;
         gameTime = newTime - startTime;
+
+        invokeCallbacks();
+
+        std::lock_guard<std::mutex> lock(_mutex);
+
+        /* Make the window's context current */
+        glfwMakeContextCurrent(_window);
 
         openGLContext::updateFPSCounter(deltaTime);
 
         renderFrame(_scenes[0]);
        
         _userInput->executeCurrentInputs();
-        invokeCallbacks();
-        
+
         /* Swap front and back buffers */
         glfwSwapBuffers(_window);
         /* Poll for and process events */
         glfwPollEvents();
 
+        /* Make the window's context uncurrent */
+        glfwMakeContextCurrent(nullptr);
     }
 
     glfwTerminate();
@@ -189,6 +199,7 @@ boost::uuids::uuid FluxLumina::create_Model(
 
 boost::uuids::uuid FluxLumina::create_Model(
     const std::vector<std::array<float, 3>>& vertices,
+    const std::vector<std::array<float, 3>>& normals,
     const std::vector<unsigned int>& indices, 
     const std::vector<std::array<float, 3>>& colors,
     const std::string& shader)
@@ -206,7 +217,7 @@ boost::uuids::uuid FluxLumina::create_Model(
         vertexVector.push_back(
             Vertex({
             glm::vec3(vertices[i][0], vertices[i][1], vertices[i][2]),          // Position
-            glm::vec3(0.0f, 0.0f, 0.0f),                                        // Normal
+            glm::vec3(normals[i][0], normals[i][1], normals[i][2]),             // Normal
             glm::vec2(0.0f, 0.0f),                                              // TexCoords
             glm::vec3(colors[i][0], colors[i][1], colors[i][2]),                // Color
             glm::vec3(0.0f, 0.0f, 0.0f)                                         // Tangent
@@ -253,6 +264,47 @@ void FluxLumina::setScale(boost::uuids::uuid UUID, float scale)
 {
     _scenes[0]->get(UUID)->setScale(scale);
 }
+
+void FluxLumina::setEnabled(boost::uuids::uuid UUID, bool enabled)
+{
+    _scenes[0]->get(UUID)->enable(enabled);
+}
+
+void FluxLumina::setCameraPosition(std::array<float, 3> position)
+{
+    std::shared_ptr<Camera> camera = _scenes[0]->getActiveCamera();
+
+    if (camera != nullptr)
+    {
+        camera->setPosition(position);
+    }
+}
+
+std::array<float, 3> FluxLumina::getCameraPosition() const
+{
+    std::shared_ptr<Camera> camera = _scenes[0]->getActiveCamera();
+
+    if (camera != nullptr)
+    {
+        glm::vec3 pos = camera->getPosition();
+        std::array<float, 3> position({pos[0], pos[1], pos[2]});
+        return position;
+    }
+
+    return {0.0f, 0.0f, 0.0f};
+}
+
+void FluxLumina::setCameraRotation(std::array<float, 2> rotation)
+{
+    std::shared_ptr<Camera> camera = _scenes[0]->getActiveCamera();
+
+    if (camera != nullptr)
+    {
+        camera->setRotation(rotation);
+    }
+}
+
+
 
 void FluxLumina::setColor(boost::uuids::uuid UUID, std::array<float, 3> color)
 {

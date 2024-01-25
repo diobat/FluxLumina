@@ -47,10 +47,8 @@ public:
 class LightsSetupNode : public StrategyNode
 {
 public:
-    LightsSetupNode(const StrategyChain* chain, const std::string& shader);
+    LightsSetupNode(const StrategyChain* chain);
     void run() override;
-private:
-    std::string _ShaderName;
 };
 
 class FramebufferNode : public StrategyNode
@@ -63,10 +61,15 @@ public:
 class RenderOpaqueNode : public StrategyNode
 {
 public:
-    RenderOpaqueNode(const StrategyChain* chain, std::shared_ptr<Shader> instancingShader = nullptr);
+    RenderOpaqueNode(const StrategyChain* chain);
     void run() override;
-private:
-    std::shared_ptr<Shader> _instancingShader;
+};
+
+class RenderOpaqueNodeInstanced : public StrategyNode
+{
+public:
+    RenderOpaqueNodeInstanced(const StrategyChain* chain);
+    void run() override;
 };
 
 class RenderSkyboxNode : public StrategyNode

@@ -98,6 +98,7 @@ bool MeshLibrary::isMeshLoaded(const std::string& name)
 
 bool MeshLibrary::isMeshLoaded(const std::size_t& hash)
 {
+    
     return _meshes.find(hash) != _meshes.end();
 }
 

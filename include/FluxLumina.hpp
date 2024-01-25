@@ -6,6 +6,7 @@
 #include <vector>
 #include <memory>
 #include <functional>
+#include <mutex>
 
 // Third party includes
 #include "boost/uuid/uuid.hpp"
@@ -50,6 +51,7 @@ public:
 
 	boost::uuids::uuid create_Model(
 		const std::vector<std::array<float, 3>>& vertices,
+		const std::vector<std::array<float, 3>>& normals,
 		const std::vector<unsigned int>& indices,
 		const std::vector<std::array<float, 3>>& colors,
 		const std::string& shader = "Basic"
@@ -71,6 +73,12 @@ public:
 	void setPosition(boost::uuids::uuid modelID, std::array<float, 3> position);
 	void setRotation(boost::uuids::uuid modelID, std::array<float, 3> rotation);
 	void setScale(boost::uuids::uuid modelID, float scale);
+	void setEnabled(boost::uuids::uuid modelID, bool enabled);
+
+	// Values for a camera
+	void setCameraPosition(std::array<float, 3> position);
+	std::array<float, 3> getCameraPosition() const;
+	void setCameraRotation(std::array<float, 2> rotation);
 
 	// Sets values for a LightSource
 	void setColor(boost::uuids::uuid lightID, std::array<float, 3> color);
@@ -103,6 +111,8 @@ public:
 	std::shared_ptr<InstancingManager> getInstancingManager() { return _instancingManager; }
 	std::shared_ptr<StrategyChain> getStrategyChain() { return _strategyChain; }
 	std::shared_ptr<Settings> getSettings() const { return _settings; }
+	std::mutex& getMutex() { return _mutex; }
+	GLFWwindow* getWindow() { return _window; }
 
 private:
 	// Render a frame by applying the loaded trategy
@@ -128,6 +138,9 @@ private:
 	std::shared_ptr<Settings> _settings;							// Handles settings
 	std::shared_ptr<glfwKeyboardScanner> _userInput;				// Handles user input
 	
+	// Multithreading
+	std::mutex _mutex;
+
 	// GLFW window
 	GLFWwindow* _window;
 };
