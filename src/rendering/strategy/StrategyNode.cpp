@@ -206,8 +206,7 @@ void RenderSkyboxNode::run()
     std::shared_ptr<FBOManager> frameBuffers = _chain->engine()->getFBOManager();
 
     //Draw Skybox if it exists
-    // if (scene->getSkybox().getCubemap() != nullptr)
-    if(1)
+    if (scene->getSkybox().getCubemap() != nullptr)
     {
         auto view = scene->getActiveCamera()->getViewMatrix(); // remove translation from the view matrix
         auto projection = scene->getActiveCamera()->getProjectionMatrix();
