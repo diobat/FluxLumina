@@ -80,11 +80,6 @@ ForwardShadingStrategyChain::ForwardShadingStrategyChain(FluxLumina* engine, std
 
 bool ForwardShadingStrategyChain::reserveResources()
 {
-    std::shared_ptr<InstancingManager> instancingManager = _ranFrom->getInstancingManager();
-    std::shared_ptr<ShaderLibrary> shaderLibrary = _ranFrom->getShaderLibrary();
-
-    instancingManager->setupInstancing(_ranFrom->getScene(0));
-
     return true;
 }
 

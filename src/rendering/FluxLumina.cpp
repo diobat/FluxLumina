@@ -199,6 +199,7 @@ boost::uuids::uuid FluxLumina::create_Model(
 
 boost::uuids::uuid FluxLumina::create_Model(
     const std::vector<std::array<float, 3>>& vertices,
+    const std::vector<std::array<float, 3>>& normals,
     const std::vector<unsigned int>& indices, 
     const std::vector<std::array<float, 3>>& colors,
     const std::string& shader)
@@ -216,7 +217,7 @@ boost::uuids::uuid FluxLumina::create_Model(
         vertexVector.push_back(
             Vertex({
             glm::vec3(vertices[i][0], vertices[i][1], vertices[i][2]),          // Position
-            glm::vec3(0.0f, 0.0f, 0.0f),                                        // Normal
+            glm::vec3(normals[i][0], normals[i][1], normals[i][2]),             // Normal
             glm::vec2(0.0f, 0.0f),                                              // TexCoords
             glm::vec3(colors[i][0], colors[i][1], colors[i][2]),                // Color
             glm::vec3(0.0f, 0.0f, 0.0f)                                         // Tangent

@@ -51,6 +51,7 @@ public:
 
 	boost::uuids::uuid create_Model(
 		const std::vector<std::array<float, 3>>& vertices,
+		const std::vector<std::array<float, 3>>& normals,
 		const std::vector<unsigned int>& indices,
 		const std::vector<std::array<float, 3>>& colors,
 		const std::string& shader = "Basic"
