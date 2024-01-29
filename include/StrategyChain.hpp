@@ -6,7 +6,7 @@
 #include <tuple>
 
 // First-party headers
-#include "rendering/strategy/StrategyNode.hpp"
+#include "StrategyNode.hpp"
 
 class FluxLumina;
 class Shader;

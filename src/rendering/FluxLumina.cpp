@@ -8,7 +8,7 @@
 #include <scene/Scene.hpp>
 
 #include "scene/SceneObjectFactory.hpp"
-#include "rendering/strategy/StrategyChain.hpp"
+#include "StrategyChain.hpp"
 #include "rendering/shader/ShaderLibrary.hpp"
 #include "user_input/glfwUserInputScanner.hpp"
 #include "rendering/framebuffer/Framebuffer_Manager.hpp"
@@ -374,6 +374,29 @@ void FluxLumina::unbindScene(std::shared_ptr<Scene> sceneToUnbind)
 bool FluxLumina::bindUserInput(int key, std::function<void()> callback)
 {
     return _userInput->bindKey(key, callback);
+}
+
+void FluxLumina::setRenderingStrategy(E_RenderStrategy strategy)
+{
+    switch (strategy)
+    {
+        case E_RenderStrategy::DeferredShading:
+            setRenderingStrategy(DeferredShadingStrategyChain(this));
+            break;
+        case E_RenderStrategy::PBSShading:
+            setRenderingStrategy(PBSShadingStrategyChain(this));
+            break;
+        default:
+        case E_RenderStrategy::ForwardShading:
+            setRenderingStrategy(ForwardShadingStrategyChain(this, _shaderPrograms->getShader("transparency")));
+            break;
+    }
+
+}
+
+void FluxLumina::setRenderingStrategy(StrategyChain strategyObject)
+{
+    _strategyChain = std::make_shared<StrategyChain>(strategyObject);
 }
 
 void FluxLumina::addUpdateCallback(std::function<void()> callback)

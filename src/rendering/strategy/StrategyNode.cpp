@@ -1,5 +1,5 @@
-#include "rendering/strategy/StrategyNode.hpp" 
-#include "rendering/strategy/StrategyChain.hpp"
+#include "StrategyNode.hpp" 
+#include "StrategyChain.hpp"
 
 #include "FluxLumina.hpp"
 #include "scene/Scene.hpp"

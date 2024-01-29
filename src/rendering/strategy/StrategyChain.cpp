@@ -1,4 +1,4 @@
-#include "rendering/strategy/StrategyChain.hpp"
+#include "StrategyChain.hpp"
 
 #include "FluxLumina.hpp"
 #include "rendering/Settings.hpp"
