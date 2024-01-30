@@ -170,6 +170,8 @@ unsigned int ShaderLibrary::recursiveScanFolder(const std::string& folderName, u
     std::string tessellationControlShaderFilename = "";
     std::string tessellationEvaluationShaderFilename = "";
 
+    std::vector<std::string> computeShaderFilenames;
+
     // Iterate through the entire folder content
     for(auto& item : boost::filesystem::directory_iterator(folderName))
     {
@@ -226,6 +228,11 @@ unsigned int ShaderLibrary::recursiveScanFolder(const std::string& folderName, u
                 }
                 tessellationEvaluationShaderFilename = folderName + "/" + filename + ".tese";
             }
+            else if (extension == ".comp")
+            {
+                // Multiple compute shaders are allowed so no need for a check here
+                computeShaderFilenames.emplace_back(folderName + "/" + filename + ".comp");
+            }
             else
             {
                 continue;
@@ -233,20 +240,34 @@ unsigned int ShaderLibrary::recursiveScanFolder(const std::string& folderName, u
         }
     }
 
+    std::shared_ptr<Shader> shader;
+
+    // Each shader program requires minimum a vertex and a fragment shader
     if(vertexShaderFilename == "" || fragmentShaderFilename == "")
     {
-        return importedShaderPrograms; // No vertex or fragment shader found for shader program name
+        return importedShaderPrograms; 
     }
-    // After iteration we have all the filenames, so we can create the shader program
-    std::shared_ptr<Shader> shader = std::make_shared<Shader>(vertexShaderFilename,
-                                                            fragmentShaderFilename,
-                                                            geometryShaderFilename,
-                                                            tessellationControlShaderFilename,
-                                                            tessellationEvaluationShaderFilename);
-    shader->setName(shaderProgramName);
+    else
+    {
+        // After iteration we have all the filenames, so we can create the shader program
+        shader = std::make_shared<Shader>(  vertexShaderFilename,
+                                            fragmentShaderFilename,
+                                            geometryShaderFilename,
+                                            tessellationControlShaderFilename,
+                                            tessellationEvaluationShaderFilename);
+        shader->setName(shaderProgramName);
+        _shaders.emplace_back(shader);
+        ++importedShaderPrograms;
+    }
 
-    _shaders.emplace_back(shader);
-    ++importedShaderPrograms;
+    // Add the compute shaders to the shader program
+    for(auto& computeShaderFilename : computeShaderFilenames)
+    {
+        shader = std::make_shared<Shader>(computeShaderFilename);
+        shader->setName(computeShaderFilename);
+        _shaders.emplace_back(shader);
+        ++importedShaderPrograms;
+    }
 
     return importedShaderPrograms;
 }
