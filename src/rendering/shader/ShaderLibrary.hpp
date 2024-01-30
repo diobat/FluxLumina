@@ -46,9 +46,6 @@ public:
     // Scan for user-supplied shaders
     unsigned int userScan(const std::string &folderName);
 
-    // Instancing
-    void setupSceneMeshes(Scene* scene);
-
     // Uniform setters
     UniformBuffer& createUniformBuffer(const std::string& uniformName);
     UniformBuffer& getUniformBuffer(const std::string& uniformName);
