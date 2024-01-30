@@ -18,6 +18,8 @@ public:
            const std::string & tessellationControlShaderFilename    = "",
            const std::string & tessellationEvaluationShaderFilename = "");
 
+    Shader(const std::string & computeShaderFilename);
+
     virtual ~Shader();
 
     void setUniform1f       (const std::string & uniformName, float value);

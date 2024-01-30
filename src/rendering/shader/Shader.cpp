@@ -110,6 +110,58 @@ Shader::Shader(const std::string & vertexShaderFilename,
     link();
 }
 
+Shader::Shader(const std::string& computeShaderFilename)    :
+    program_id(0),
+    isLinked(false),
+    _name("")
+{
+    const std::string shaderCode = loadFile(computeShaderFilename);
+    const char* shaderCodePtr[1] = {shaderCode.c_str()};
+
+    GLuint shaderObject = glCreateShader(GL_COMPUTE_SHADER);
+    glShaderSource(shaderObject, 1, shaderCodePtr, nullptr);
+    glCompileShader(shaderObject);
+
+    GLint result;
+    glGetShaderiv(shaderObject, GL_COMPILE_STATUS, &result);
+
+    if (result == GL_FALSE)
+    {
+        fprintf(stderr, "%s compilation failed!\n", computeShaderFilename.c_str());
+
+        GLint logLen;
+        glGetShaderiv(shaderObject, GL_INFO_LOG_LENGTH, &logLen);
+
+        if (logLen > 0)
+        {
+            char * log = (char *)malloc(logLen);
+
+            GLsizei written;
+            glGetShaderInfoLog(shaderObject, logLen, &written, log);
+
+            fprintf(stderr, "Compute Shader log: \n%s", log);
+            free(log);
+        }
+    }
+
+    // Create program
+    program_id = glCreateProgram();
+
+    if (program_id == 0)
+    {
+        fprintf(stderr, "Error while creating program object.\n");
+        printf("Press any key to continue...\n");
+        getchar();
+        return;
+    }
+    
+    glAttachShader(program_id, shaderObject);
+    glDeleteShader(shaderObject);
+    link();
+}
+
+
+
 Shader::~Shader()
 {
     if (program_id != 0)
