@@ -100,6 +100,18 @@ public:
 	// Update callbacks
 	void addUpdateCallback(std::function<void()> callback);
 
+	// Shader Storage Buffer functions
+	template <typename T>
+	boost::uuids::uuid createSSBO(const std::string& name, unsigned int size);
+
+	boost::uuids::uuid getSSBO(const std::string& name);
+
+	template <typename T> 
+	const std::vector<T>& getSSBOData(const std::string& name) const;
+
+	// Compute shader functions
+	void dispatchComputeShader(const std::string& shaderName, unsigned int numGroupsX, unsigned int numGroupsY, unsigned int numGroupsZ);
+
 	// Module getters
 	std::vector<std::shared_ptr<Scene>> getScenes() const { return _scenes; }
 	std::shared_ptr<SceneObjectFactory> getSceneObjectFactory() { return _sceneObjectFactory; };

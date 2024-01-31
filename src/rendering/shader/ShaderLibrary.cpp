@@ -243,11 +243,7 @@ unsigned int ShaderLibrary::recursiveScanFolder(const std::string& folderName, u
     std::shared_ptr<Shader> shader;
 
     // Each shader program requires minimum a vertex and a fragment shader
-    if(vertexShaderFilename == "" || fragmentShaderFilename == "")
-    {
-        return importedShaderPrograms; 
-    }
-    else
+    if(vertexShaderFilename != "" && fragmentShaderFilename != "")
     {
         // After iteration we have all the filenames, so we can create the shader program
         shader = std::make_shared<Shader>(  vertexShaderFilename,
@@ -264,7 +260,7 @@ unsigned int ShaderLibrary::recursiveScanFolder(const std::string& folderName, u
     for(auto& computeShaderFilename : computeShaderFilenames)
     {
         shader = std::make_shared<Shader>(computeShaderFilename);
-        shader->setName(computeShaderFilename);
+        shader->setName(shaderProgramName);
         _shaders.emplace_back(shader);
         ++importedShaderPrograms;
     }
@@ -516,4 +512,84 @@ void ShaderLibrary::deleteUniformBuffer(const std::string& uniformName)
         }
     }
     throw std::runtime_error("Uniform buffer with name " + uniformName + " not found.");
+}
+
+
+///////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////// SHADER STORAGE BUFFERS
+///////////////////////////////////////////////////////////////////////////////////////////
+
+template <typename T>
+std::shared_ptr<ShaderStorageBufferBase> ShaderLibrary::createShaderStorageBuffer(const std::string& handle, unsigned int size)
+{
+    std::shared_ptr<ShaderStorageBufferBase> buffer = std::make_shared<ShaderStorageBuffer<T>>(this, handle, size);
+    _shaderStorageBuffers.emplace_back(buffer);
+
+    std::shared_ptr<ShaderStorageBuffer<T>> typedBuffer = std::static_pointer_cast<ShaderStorageBuffer<T>>(buffer);
+    typedBuffer->bindAllComputeShaders(handle);
+
+    return buffer;
+}
+template std::shared_ptr<ShaderStorageBufferBase> ShaderLibrary::createShaderStorageBuffer<float>(const std::string& handle, unsigned int size);
+template std::shared_ptr<ShaderStorageBufferBase> ShaderLibrary::createShaderStorageBuffer<int>(const std::string& handle, unsigned int size);
+template std::shared_ptr<ShaderStorageBufferBase> ShaderLibrary::createShaderStorageBuffer<unsigned int>(const std::string& handle, unsigned int size);
+
+std::shared_ptr<ShaderStorageBufferBase> ShaderLibrary::getShaderStorageBuffer(const std::string& handle)
+{
+    for(auto& buffer : _shaderStorageBuffers)
+    {
+        if(buffer->handle() == handle)
+        {
+            return buffer;
+        }
+    }
+    throw std::runtime_error("Shader storage buffer with name " + handle + " not found.");
+}
+
+void ShaderLibrary::deleteShaderStorageBuffer(const std::string& handle)
+{
+    for(unsigned int i = 0; i < _shaderStorageBuffers.size(); ++i)
+    {
+        if(_shaderStorageBuffers[i]->handle() == handle)
+        {
+            _shaderStorageBuffers[i]->removeBindingPoint();
+            unsigned int SSBO = _shaderStorageBuffers[i]->id();
+            glDeleteBuffers(1, &SSBO);
+
+            _shaderStorageBuffers.erase(_shaderStorageBuffers.begin() + i);
+            return;
+        }
+    }
+    throw std::runtime_error("Shader storage buffer with name " + handle + " not found.");
+}
+
+template <typename T>
+const std::vector<T>& ShaderLibrary::getShaderStorageBufferData(const std::string& handle) const
+{
+    for(auto& buffer : _shaderStorageBuffers)
+    {
+        if(buffer->handle() == handle)
+        {
+            std::shared_ptr<ShaderStorageBuffer<T>> typedBuffer = std::static_pointer_cast<ShaderStorageBuffer<T>>(buffer);
+            return typedBuffer->data();
+        }
+    }
+    throw std::runtime_error("Shader storage buffer with name " + handle + " not found.");
+}
+template const std::vector<float>& ShaderLibrary::getShaderStorageBufferData<float>(const std::string& handle) const;
+template const std::vector<int>& ShaderLibrary::getShaderStorageBufferData<int>(const std::string& handle) const;
+template const std::vector<unsigned int>& ShaderLibrary::getShaderStorageBufferData<unsigned int>(const std::string& handle) const;
+
+
+///////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////// COMPUTE SHADERS
+///////////////////////////////////////////////////////////////////////////////////////////
+
+void ShaderLibrary::dispatchComputeShader(const std::string& shaderName, unsigned int numGroupsX, unsigned int numGroupsY, unsigned int numGroupsZ)
+{
+    unsigned int shaderIndex = getShaderIndex(shaderName);
+    glUseProgram(_shaders[shaderIndex]->getProgramId());
+    glDispatchCompute(numGroupsX, numGroupsY, numGroupsZ);
+
+    glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 }

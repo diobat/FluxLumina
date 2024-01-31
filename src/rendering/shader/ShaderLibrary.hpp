@@ -10,6 +10,7 @@
 #include "rendering/shader/ShaderLibraryContents.hpp"
 #include "rendering/shader/Shader.hpp"
 #include "rendering/shader/UniformBuffer.hpp"
+#include "rendering/shader/ShaderStorageBuffer.hpp"
 #include "scene/Scene.hpp"
 
 // Third-Party Headers
@@ -50,6 +51,17 @@ public:
     UniformBuffer& createUniformBuffer(const std::string& uniformName);
     UniformBuffer& getUniformBuffer(const std::string& uniformName);
     void deleteUniformBuffer(const std::string& uniformName);
+
+    // Shader Storage Buffer functions
+    template <typename T>
+    std::shared_ptr<ShaderStorageBufferBase> createShaderStorageBuffer(const std::string& handle, unsigned int size);
+    std::shared_ptr<ShaderStorageBufferBase> getShaderStorageBuffer(const std::string& handle);
+    template <typename T>
+    const std::vector<T>& getShaderStorageBufferData(const std::string& handle) const;
+    void deleteShaderStorageBuffer(const std::string& handle);
+
+    // Compute Shader functions
+    void dispatchComputeShader(const std::string& shaderName, unsigned int numGroupsX, unsigned int numGroupsY, unsigned int numGroupsZ);
 
     // Specialized uniform setters
     void setUniformBool(const std::string& name, bool value);
@@ -112,5 +124,8 @@ private:
 
     // Uniform Buffers
     std::vector<UniformBuffer> _uniformBuffers;
+
+    // Shader Storage Buffers
+    std::vector<std::shared_ptr<ShaderStorageBufferBase>> _shaderStorageBuffers;
 
 };

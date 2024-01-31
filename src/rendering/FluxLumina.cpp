@@ -389,3 +389,36 @@ unsigned int FluxLumina::invokeCallbacks()
     }
     return _updateCallbacks.size();
 }
+
+
+// Shader Storage Buffer functions
+template <typename T>
+boost::uuids::uuid FluxLumina::createSSBO(const std::string& name, unsigned int size)
+{
+    return _shaderPrograms->createShaderStorageBuffer<T>(name, size)->uuid();
+}
+template boost::uuids::uuid FluxLumina::createSSBO<float>(const std::string& name, unsigned int size);
+template boost::uuids::uuid FluxLumina::createSSBO<int>(const std::string& name, unsigned int size);
+template boost::uuids::uuid FluxLumina::createSSBO<unsigned int>(const std::string& name, unsigned int size);
+
+
+boost::uuids::uuid FluxLumina::getSSBO(const std::string& name)
+{
+    return _shaderPrograms->getShaderStorageBuffer(name)->uuid();
+}
+
+template <typename T>
+const std::vector<T>& FluxLumina::getSSBOData(const std::string& name) const
+{
+    const std::vector<T>& result =  _shaderPrograms->getShaderStorageBufferData<T>(name);
+    return result;
+}
+template const std::vector<float>& FluxLumina::getSSBOData<float>(const std::string& name) const;
+template const std::vector<int>& FluxLumina::getSSBOData<int>(const std::string& name) const;
+template const std::vector<unsigned int>& FluxLumina::getSSBOData<unsigned int>(const std::string& name) const;
+
+// Compute shader functions
+void FluxLumina::dispatchComputeShader(const std::string& shaderName, unsigned int numGroupsX, unsigned int numGroupsY, unsigned int numGroupsZ)
+{
+    _shaderPrograms->dispatchComputeShader(shaderName, numGroupsX, numGroupsY, numGroupsZ);
+}   
