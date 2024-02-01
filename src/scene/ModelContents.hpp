@@ -15,6 +15,7 @@ public:
     bool removeModel(std::shared_ptr<ModelObject> modelToRemove);
     const std::vector<std::shared_ptr<ModelObject>> &getModels() const;
     std::vector<std::shared_ptr<ModelObject>> getModels(const std::string& shader) const;
+    std::shared_ptr<ModelObject> getModel(const boost::uuids::uuid& id);
 
 
 private:

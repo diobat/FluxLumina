@@ -45,6 +45,7 @@ public:
 	const std::vector<std::shared_ptr<ModelObject>> &getModels() const;
 	std::vector<std::shared_ptr<ModelObject>> getVisibleModels() const;
 	std::vector<std::shared_ptr<ModelObject>> getModels(const std::string& shader) const;
+	std::shared_ptr<ModelObject> getModel(const boost::uuids::uuid& id);
 	const LightContents &getAllLights() const;
 
 	AmbientLight& getAmbientLight();

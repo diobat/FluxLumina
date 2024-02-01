@@ -57,6 +57,15 @@ public:
 		const std::string& shader = "Basic"
 		);
 
+	void edit_Mesh(
+		boost::uuids::uuid modelID,
+		const std::vector<std::array<float, 3>>& vertices,
+		const std::vector<std::array<float, 3>>& normals,
+		const std::vector<unsigned int>& indices,
+		const std::vector<std::array<float, 3>>& colors
+		);
+
+
 	// Add lightsource to the scene
 	boost::uuids::uuid create_LightSource(unsigned int type);
 

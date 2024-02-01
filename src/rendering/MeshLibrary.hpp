@@ -19,7 +19,7 @@ public:
     void addMesh(const std::string& name, const std::vector<std::shared_ptr<Mesh>>& mesh);
     void addMesh(const std::size_t& hash, const std::shared_ptr<Mesh>& mesh);
 
-    void updateMesh(const std::string& name, std::shared_ptr<Mesh> mesh);
+    void updateMesh(boost::uuids::uuid meshID, std::shared_ptr<Mesh> newMesh);
 
     void initializeMesh(std::shared_ptr<Mesh> mesh);
 

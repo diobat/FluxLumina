@@ -42,3 +42,16 @@ std::vector<std::shared_ptr<ModelObject>> ModelContents::getModels(const std::st
 
     return models;
 }
+
+std::shared_ptr<ModelObject> ModelContents::getModel(const boost::uuids::uuid& id)
+{
+    for(auto &model : _models)
+    {
+        if(model->uuid() == id)
+        {
+            return model;
+        }
+    }
+
+    throw std::runtime_error("ModelContents::getModel() - Model not found");
+}

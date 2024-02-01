@@ -25,9 +25,28 @@ void MeshLibrary::addMesh(const std::size_t& hash, const std::shared_ptr<Mesh>& 
     }
 }
 
-void MeshLibrary::updateMesh(const std::string& name, std::shared_ptr<Mesh> meshes)
+void MeshLibrary::updateMesh(boost::uuids::uuid meshID, std::shared_ptr<Mesh> newMesh)
 {
-    ;
+
+    for(auto& meshVector : _meshes)
+    {
+        for(auto& mesh : meshVector.second)
+        {
+            if(mesh->_id == meshID)
+            {
+                mesh->_vertices = newMesh->_vertices;
+                mesh->_indices = newMesh->_indices;
+                mesh->_textures = newMesh->_textures;
+                mesh->_hasTransparency = newMesh->_hasTransparency;
+
+                glBindBuffer(GL_ARRAY_BUFFER, mesh->VBO);
+                glBufferData(GL_ARRAY_BUFFER, mesh->_vertices.size() * sizeof(Vertex), &mesh->_vertices[0], GL_STATIC_DRAW);
+                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->EBO);
+                glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh->_indices.size() * sizeof(unsigned int), &mesh->_indices[0], GL_STATIC_DRAW);
+                return;
+            }
+        }
+    }
 }
 
 void MeshLibrary::initializeMesh(const std::shared_ptr<Mesh> mesh)

@@ -228,6 +228,45 @@ boost::uuids::uuid FluxLumina::create_Model(
     return objectID;
 }
 
+void FluxLumina::edit_Mesh(
+    boost::uuids::uuid modelID,
+    const std::vector<std::array<float, 3>>& vertices,
+    const std::vector<std::array<float, 3>>& normals,
+    const std::vector<unsigned int>& indices,
+    const std::vector<std::array<float, 3>>& colors
+    )
+{
+    if (vertices.size() != colors.size() || vertices.size() != normals.size())
+    {
+        return;
+    }
+
+    std::shared_ptr<ModelObject> modelObject = _scenes[0]->getModel(modelID);
+    if(modelObject->getModel()->meshes.size() != 1)
+    {
+        return;
+    }
+    std::shared_ptr<Mesh> mesh = modelObject->getModel()->meshes[0];
+
+    std::vector<Vertex> vertexVector;
+    for (unsigned int i(0); i < vertices.size() ; ++i)
+    {
+        vertexVector.push_back(
+            Vertex({
+            glm::vec3(vertices[i][0], vertices[i][1], vertices[i][2]),          // Position
+            glm::vec3(normals[i][0], normals[i][1], normals[i][2]),             // Normal
+            glm::vec2(0.0f, 0.0f),                                              // TexCoords
+            glm::vec3(colors[i][0], colors[i][1], colors[i][2]),                // Color
+            glm::vec3(0.0f, 0.0f, 0.0f)                                         // Tangent
+            })
+        );
+    }
+
+    std::shared_ptr<Mesh> newMesh = std::make_shared<Mesh>(vertices, indices, std::vector<Texture>(), false);
+
+    _meshLibrary->updateMesh(mesh->_id, newMesh);
+}
+
 void FluxLumina::create_Camera(float fov, float translationSpeed, float rotationSpeed)
 {
     _sceneObjectFactory->create_Camera(fov, translationSpeed, rotationSpeed);

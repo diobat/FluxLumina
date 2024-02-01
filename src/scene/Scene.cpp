@@ -109,6 +109,11 @@ std::vector<std::shared_ptr<ModelObject>> Scene::getModels(const std::string& sh
 	return _objects.models.getModels(shader);
 }
 
+std::shared_ptr<ModelObject> Scene::getModel(const boost::uuids::uuid &id)
+{
+	return _objects.models.getModel(id);
+}
+
 const LightContents &Scene::getAllLights() const
 {
 	return _objects.lights;
