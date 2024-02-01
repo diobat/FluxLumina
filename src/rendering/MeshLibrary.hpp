@@ -19,6 +19,8 @@ public:
     void addMesh(const std::string& name, const std::vector<std::shared_ptr<Mesh>>& mesh);
     void addMesh(const std::size_t& hash, const std::shared_ptr<Mesh>& mesh);
 
+    void updateMesh(const std::string& name, std::shared_ptr<Mesh> mesh);
+
     void initializeMesh(std::shared_ptr<Mesh> mesh);
 
     std::vector<std::shared_ptr<Mesh>> getMeshes(const std::string& name);

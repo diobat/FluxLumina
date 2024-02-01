@@ -25,6 +25,11 @@ void MeshLibrary::addMesh(const std::size_t& hash, const std::shared_ptr<Mesh>& 
     }
 }
 
+void MeshLibrary::updateMesh(const std::string& name, std::shared_ptr<Mesh> meshes)
+{
+    ;
+}
+
 void MeshLibrary::initializeMesh(const std::shared_ptr<Mesh> mesh)
 {
     // create buffers/arrays
