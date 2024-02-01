@@ -1,5 +1,9 @@
 # FluxLumina
 
+<p align= "center"><img width="471" alt="mask - Copy" src="https://github.com/diobat/FluxLumina/assets/25584192/8df8c429-21ac-4bd0-a1b1-2d4dd1398d2c"></p>
+
+<p align= "center"><img width="1299" alt="6spheres_cropped" src="https://github.com/diobat/FluxLumina/assets/25584192/98215721-4af7-46e7-8527-a11b16e036e9"></p>
+
 FluxLumina is an OpenGL-based rendering engine, provided as a static library, designed for high-performance graphics applications. It offers a range of features to facilitate the creation of visually stunning and efficient 3D renderings. 
 
 ## Features
